@@ -1,0 +1,8 @@
+.*.env
+.git
+*.json
+*.csv
+*.rdb
+**/*.pyc
+contents/
+logs/
