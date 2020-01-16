@@ -83,7 +83,7 @@ DATABASES = {
         'USER': get_env_variable('MILLER_DATABASE_USER'),
         'PASSWORD': get_env_variable('MILLER_DATABASE_PASSWORD'),
         'HOST': get_env_variable('MILLER_DATABASE_HOST', 'localhost'),
-        'PORT': get_env_variable('MILLER_DATABASE_PORT', '5432'),
+        'PORT': get_env_variable('MILLER_DATABASE_PORT', '54320'),
     }
 }
 
