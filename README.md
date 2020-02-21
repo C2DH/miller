@@ -65,3 +65,7 @@ Finally, run migration and check that the system is working properly:
 Using pipenv:
 
     ENV=development pipenv run ./manage.py runserver
+
+With celery tasks:
+
+    ENV=development pipenv run celery -A miller worker -l info
