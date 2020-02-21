@@ -1,6 +1,5 @@
 import os
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 
@@ -8,6 +7,7 @@ from . import Document
 from . import Author
 from . import Tag
 from ..utils import get_user_path
+from ..fields import UTF8JSONField
 
 def get_owner_path(instance, filename, safeOrigin=False):
     root, ext = os.path.splitext(filename)
@@ -48,7 +48,7 @@ class Story(models.Model):
     title     = models.CharField(max_length=500)
     slug      = models.CharField(max_length=140, unique=True, blank=True, db_index=True) # force the unicity of the slug (story lookup from the short_url)
     abstract  = models.CharField(max_length=2000, blank=True, null=True)
-    data      = JSONField(verbose_name=u'metadata contents', help_text='JSON format', default=dict, blank=True)
+    data      = UTF8JSONField(verbose_name=u'metadata contents', help_text='JSON format', default=dict, blank=True)
 
     date               = models.DateTimeField(db_index=True, blank=True, null=True) # date displayed (metadata)
     date_created       = models.DateTimeField(auto_now_add=True)
@@ -86,3 +86,7 @@ class Story(models.Model):
 
     # add huge search field
     search_vector = SearchVectorField(null=True, blank=True)
+
+
+    def __str__(self):
+        return self.slug
