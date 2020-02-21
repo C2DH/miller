@@ -10,7 +10,6 @@ autopep8 = "*"
 [packages]
 django = "*"
 djangorestframework = "*"
-psycopg2 = "*"
 psycopg2-binary = "*"
 jsonschema = "*"
 short-url = "*"
