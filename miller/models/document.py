@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-
+from ..fields import UTF8JSONField
 
 class Document(models.Model):
   BIBLIOGRAPHIC_REFERENCE = 'bibtex'
