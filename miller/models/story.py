@@ -2,12 +2,16 @@ import os
 from django.contrib.auth.models import User
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from . import Document
 from . import Author
 from . import Tag
 from ..utils import get_user_path
 from ..fields import UTF8JSONField
+
+from ..tasks import populate_search_vectors
 
 def get_owner_path(instance, filename, safeOrigin=False):
     root, ext = os.path.splitext(filename)
@@ -90,3 +94,7 @@ class Story(models.Model):
 
     def __str__(self):
         return self.slug
+
+@receiver(post_save, sender=Story)
+def story_populate_search_vectors(sender, instance, **kwargs):
+    populate_search_vectors.delay(story_id=instance.pk)
