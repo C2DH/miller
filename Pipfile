@@ -13,6 +13,9 @@ djangorestframework = "*"
 psycopg2-binary = "*"
 jsonschema = "*"
 short-url = "*"
+pyyaml = "*"
+celery = "*"
+redis = "*"
 
 [requires]
 python_version = "3.8"

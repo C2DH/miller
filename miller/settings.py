@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'rest_framework',
     'miller',
 ]
 
@@ -131,3 +131,12 @@ STATIC_URL = '/static/'
 MILLER_DOCUMENT_TYPE_CHOICES = tuple()
 # Additional category choices for Tag Model: must be a tuple
 MILLER_TAG_CATEGORY_CHOICES = tuple()
+
+
+# Celery
+REDIS_HOST=get_env_variable('REDIS_HOST', 'localhost')
+REDIS_PORT=get_env_variable('REDIS_PORT', '63790')
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/4'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/5'
+CELERYD_PREFETCH_MULTIPLIER = 2
+CELERYD_CONCURRENCY = 2
