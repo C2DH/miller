@@ -1,0 +1,13 @@
+version: '3.7'
+services:
+  postgresdb:
+    image: postgres:12-alpine
+    ports:
+      - "54320:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      #- ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./postgres-data:/var/lib/postgresql/data
