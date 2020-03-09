@@ -131,7 +131,9 @@ STATIC_URL = '/static/'
 MILLER_DOCUMENT_TYPE_CHOICES = tuple()
 # Additional category choices for Tag Model: must be a tuple
 MILLER_TAG_CATEGORY_CHOICES = tuple()
-
+# search vectors fileds in JSON data, with weight
+MILLER_VECTORS_MULTILANGUAGE_FIELDS = (('title', 'A'), ('description', 'B'))
+MILLER_VECTORS_INITIAL_FIELDS = (('title', 'A', 'simple'),) # ('slug', 'A', 'simple'))
 
 # Celery
 REDIS_HOST=get_env_variable('REDIS_HOST', 'localhost')
