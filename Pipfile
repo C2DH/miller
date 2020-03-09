@@ -16,6 +16,8 @@ short-url = "*"
 pyyaml = "*"
 celery = "*"
 redis = "*"
+watchdog = "*"
+argh = "*"
 
 [requires]
 python_version = "3.8"
