@@ -19,3 +19,45 @@ services:
     volumes:
       # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres-data:/var/lib/postgresql/data
+  celery:
+    build: ../ # miller directory
+    # image: c2dhunilu/miller-v2:${MILLER_TAG}
+    restart: always
+    environment:
+       MILLER_DATABASE_NAME: ${POSTGRES_DB}
+       MILLER_DATABASE_USER: ${POSTGRES_USER}
+       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+       REDIS_HOST: redis
+       REDIS_PORT: 6379
+       MILLER_DATABASE_HOST: postgresdb
+       MILLER_DATABASE_PORT: 5432
+    depends_on:
+      - redis
+      - postgresdb
+    # volumes:
+    #  - ./config/impresso-user-admin.env:/impresso-user-admin/.docker.env
+    entrypoint: celery -A miller worker -l info
+    # entrypoint: watchmedo auto-restart --directory="/miller" --pattern="*.py" --recursive celery -A miller worker -l info
+    volumes:
+      - ../:/miller
+  miller:
+    build: ../ # miller directory
+    # image: c2dhunilu/miller-v2:${MILLER_TAG}
+    restart: always
+    environment:
+       MILLER_DATABASE_NAME: ${POSTGRES_DB}
+       MILLER_DATABASE_USER: ${POSTGRES_USER}
+       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+       REDIS_HOST: redis
+       REDIS_PORT: 6379
+       MILLER_DATABASE_HOST: postgresdb
+       MILLER_DATABASE_PORT: 5432
+    depends_on:
+      - redis
+      - postgresdb
+    #  - celery
+    entrypoint: python ./manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8008:8000"
+    volumes:
+      - ../:/miller
