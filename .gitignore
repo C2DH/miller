@@ -1,5 +1,8 @@
 .*.env
 .env
 docker/.env
+docker/*.sql
+docker/redis-data
 *.sqlite3
-docker/postgres-data/*
+docker/postgres-data
+__pycache__

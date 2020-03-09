@@ -91,6 +91,11 @@ class Story(models.Model):
     # add huge search field
     search_vector = SearchVectorField(null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = "stories"
+
+    def populate_search_vectors(self):
+        populate_search_vectors.delay(story_id=self.pk)
 
     def __str__(self):
         return self.slug
