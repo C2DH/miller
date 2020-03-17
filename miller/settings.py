@@ -134,6 +134,8 @@ MILLER_TAG_CATEGORY_CHOICES = tuple()
 # search vectors fileds in JSON data, with weight
 MILLER_VECTORS_MULTILANGUAGE_FIELDS = (('title', 'A'), ('description', 'B'))
 MILLER_VECTORS_INITIAL_FIELDS = (('title', 'A', 'simple'),) # ('slug', 'A', 'simple'))
+# JSON Schema
+MILLER_SCHEMA_ROOT =get_env_variable('MILLER_SCHEMA_ROOT', '/schema')
 
 # Celery
 REDIS_HOST=get_env_variable('REDIS_HOST', 'localhost')
@@ -142,3 +144,5 @@ CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/4'
 CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/5'
 CELERYD_PREFETCH_MULTIPLIER = 2
 CELERYD_CONCURRENCY = 2
+
+print('loading settings: {0}'.format(MILLER_SCHEMA_ROOT))
