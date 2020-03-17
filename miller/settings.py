@@ -120,11 +120,28 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
-
-STATIC_URL = '/static/'
+# logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'formatters': {
+        'verbose': {
+            # 'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '{levelname} {asctime} - {name:s} L{lineno:d}: {message}',
+            'style': '{',
+        },
+    },
+}
 
 # MILLER
 # Additional type choices for Document Model: must be a tuple
@@ -135,8 +152,8 @@ MILLER_TAG_CATEGORY_CHOICES = tuple()
 MILLER_VECTORS_MULTILANGUAGE_FIELDS = (('title', 'A'), ('description', 'B'))
 MILLER_VECTORS_INITIAL_FIELDS = (('title', 'A', 'simple'),) # ('slug', 'A', 'simple'))
 # JSON Schema
-MILLER_SCHEMA_ROOT =get_env_variable('MILLER_SCHEMA_ROOT', '/schema')
-
+MILLER_SCHEMA_ROOT = get_env_variable('MILLER_SCHEMA_ROOT', '/schema')
+MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable('MILLER_SCHEMA_ENABLE_VALIDATION', True)
 # Celery
 REDIS_HOST=get_env_variable('REDIS_HOST', 'localhost')
 REDIS_PORT=get_env_variable('REDIS_PORT', '63790')
@@ -145,4 +162,11 @@ CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/5'
 CELERYD_PREFETCH_MULTIPLIER = 2
 CELERYD_CONCURRENCY = 2
 
-print('loading settings: {0}'.format(MILLER_SCHEMA_ROOT))
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    # ...
+    ('schema', MILLER_SCHEMA_ROOT),
+]
