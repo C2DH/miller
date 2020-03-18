@@ -40,6 +40,7 @@ services:
     # entrypoint: watchmedo auto-restart --directory="/miller" --pattern="*.py" --recursive celery -A miller worker -l info
     volumes:
       - ../:/miller
+      - ./schema:/schema
   miller:
     build: ../ # miller directory
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
@@ -61,3 +62,4 @@ services:
       - "8008:8000"
     volumes:
       - ../:/miller
+      - ./schema:/schema

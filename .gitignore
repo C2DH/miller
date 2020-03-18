@@ -3,6 +3,8 @@
 docker/.env
 docker/*.sql
 docker/redis-data
+docker/schema
 *.sqlite3
 docker/postgres-data
 __pycache__
+.DS_Store

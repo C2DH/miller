@@ -27,7 +27,10 @@ RUN apk add --no-cache --virtual .build-deps \
 RUN pipenv install --system --deploy --ignore-pipfile
 RUN apk del --no-cache .build-deps
 RUN mkdir -p logs
-COPY . .
+COPY miller ./miller
+COPY manage.py .
 
+ENV MILLER_GIT_BRANCH=${GIT_BRANCH}
+ENV MILLER_GIT_REVISION=${GIT_REVISION}
 ENV MAGICK_HOME /usr
 ENTRYPOINT python ./miller/manage.py runserver
