@@ -178,4 +178,4 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_URL = get_env_variable('MEDIA_URL', '/media/')
-MEDIA_ROOT = get_env_variable('MEDIA_ROOT', '/static')
+MEDIA_ROOT = get_env_variable('MEDIA_ROOT', '/media')
