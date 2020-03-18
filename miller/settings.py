@@ -154,6 +154,11 @@ MILLER_VECTORS_INITIAL_FIELDS = (('title', 'A', 'simple'),) # ('slug', 'A', 'sim
 # JSON Schema
 MILLER_SCHEMA_ROOT = get_env_variable('MILLER_SCHEMA_ROOT', '/schema')
 MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable('MILLER_SCHEMA_ENABLE_VALIDATION', True)
+# Current version
+MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
+MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', 'nd')
+
+
 # Celery
 REDIS_HOST=get_env_variable('REDIS_HOST', 'localhost')
 REDIS_PORT=get_env_variable('REDIS_PORT', '63790')
@@ -165,8 +170,12 @@ CELERYD_CONCURRENCY = 2
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = get_env_variable('STATIC_URL', '/static/')
+STATIC_ROOT = get_env_variable('STATIC_ROOT', '/static')
 STATICFILES_DIRS = [
     # ...
     ('schema', MILLER_SCHEMA_ROOT),
 ]
+
+MEDIA_URL = get_env_variable('MEDIA_URL', '/media/')
+MEDIA_ROOT = get_env_variable('MEDIA_ROOT', '/static')
