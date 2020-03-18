@@ -46,6 +46,7 @@ services:
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
+       STATIC_URL: ${STATIC_URL}
        MILLER_DATABASE_NAME: ${POSTGRES_DB}
        MILLER_DATABASE_USER: ${POSTGRES_USER}
        MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
@@ -56,8 +57,8 @@ services:
     depends_on:
       - redis
       - postgresdb
-    #  - celery
     entrypoint: python ./manage.py runserver 0.0.0.0:8000
+    # command: python ./manage.py runserver 0.0.0.0:8000
     ports:
       - "8008:8000"
     volumes:
