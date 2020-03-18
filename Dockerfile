@@ -1,6 +1,9 @@
 FROM python:3.8.0-alpine
 WORKDIR /miller
 
+ARG GIT_BRANCH
+ARG GIT_REVISION
+
 RUN pip install -U pipenv
 
 COPY Pipfile .
@@ -33,4 +36,4 @@ COPY manage.py .
 ENV MILLER_GIT_BRANCH=${GIT_BRANCH}
 ENV MILLER_GIT_REVISION=${GIT_REVISION}
 ENV MAGICK_HOME /usr
-ENTRYPOINT python ./miller/manage.py runserver
+ENTRYPOINT python ./manage.py runserver
