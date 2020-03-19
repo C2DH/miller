@@ -49,10 +49,10 @@ class Document(models.Model):
     (ENTITY, 'entity: see data type property'), # use the type field inside data JsonField.
     ) + settings.MILLER_DOCUMENT_TYPE_CHOICES
 
-    type       = models.CharField(max_length=24, choices=TYPE_CHOICES)
+    type       = models.CharField(max_length=24, choices=TYPE_CHOICES, null=True)
     short_url  = models.CharField(max_length=22, db_index=True, unique=True, blank=True)
 
-    title      = models.CharField(max_length=500)
+    title      = models.CharField(max_length=500, blank=True)
     slug       = models.CharField(max_length=150, unique=True, blank=True, db_index=True)
 
     # contents   = models.TextField(null=True, blank=True, default=json.dumps(DEFAULT_OEMBED, indent=1)) # OEMBED (JSON) metadata field, in different languages if available.
@@ -62,7 +62,7 @@ class Document(models.Model):
     copyrights = models.TextField(null=True, blank=True,  default='')
 
     url        = models.URLField(max_length=500, null=True, blank=True)
-    owner      = models.ForeignKey(User, on_delete=models.CASCADE); # at least the first author, the one who owns the file.
+    owner      = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True); # at least the first author, the one who owns the file.
     attachment = models.FileField(upload_to=attachment_file_name, null=True, blank=True, max_length=200)
     snapshot   = models.FileField(upload_to=snapshot_attachment_file_name, null=True, blank=True, max_length=200)
     mimetype   = models.CharField(max_length=127, blank=True, default='')
