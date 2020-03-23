@@ -60,6 +60,7 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = ('id','slug','title','type')
     list_filter = ('type', DataTypeListFilter, DataProviderListFilter)
     form = DataAdminForm
+    change_form_template = 'miller/document/document_change_form.html'
 
 
 
