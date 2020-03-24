@@ -6,8 +6,9 @@
   <script type="text/JavaScript" src="{% static 'js/edit_json_field.js' %}"></script>
   <script type="text/javascript">
     (function($) {
-      new EditJSONField('.field-data', {
-        schema: "{% static 'schema/document/payload.json' %}"
+      new EditJSONField($('.field-data').parent(), {
+        schema: "{% static 'schema/document/payload.json' %}"/*,
+        jsonField: $('.field-data .readonly')*/
       });
     })(django.jQuery)
   </script>
