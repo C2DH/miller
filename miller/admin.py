@@ -68,6 +68,8 @@ class DocumentAdmin(admin.ModelAdmin):
     form = DataAdminForm
     change_form_template = 'miller/document/document_change_form.html'
 
+    class Media:
+        css = {'all': ('css/edit_json_field.css',)}
 
 
 admin.site.register(Story, StoryAdmin)

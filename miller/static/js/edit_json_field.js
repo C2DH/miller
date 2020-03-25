@@ -1,5 +1,11 @@
 (function($) {
 
+  /** Field type */
+  var STRING_TYPE = 'string';
+  var INTEGER_TYPE = 'integer';
+  var BOOLEAN_TYPE = 'boolean';
+  var OBJECT_TYPE = 'object';
+
   /** Selectors */
   var DEFAULT_JSON_FIELD_SELECTOR = 'textarea';
 
@@ -12,6 +18,9 @@
   var LABEL_TAG = 'label';
 
   /** HTML */
+  var FIELDS_CONTAINER_HTML = '\
+    <div class="json-fields"></div>\
+  ';
   var FIELD_CONTAINER_HTML  = '\
     <div class="form-row">\
       <div>\
@@ -19,9 +28,14 @@
       </div>\
     </div>\
   ';
-  var INPUT_FIELD_HTML = '\
-    <input type="text" class="vTextField" maxlength="500"></input>\
+  var INPUT_TEXT_FIELD_HTML = '\
+    <input type="text" class="vTextField" maxlength="127"></input>\
   ';
+  var INPUT_INTEGER_FIELD_HTML = '\
+    <input type="text"></input>\
+  ';
+  var SELECT_FIELD_HTML = '<select></select>';
+  var SELECT_OPTION_HTML = '<option></option>';
   var HELP_TEXT_HTML = '\
     <div class="help"></div>\
   ';
@@ -101,11 +115,12 @@
     this.field_id_pfx = this.jsonField.attr('id') + '_';
 
     //  Get JSON data
-    this.jsonData = $.parseJSON(this.jsonField.text());
+    this.jsonData = $.parseJSON(this.jsonField.text()) || {};
 
-    for(var fieldId in this.schema.properties) {
-      this._addField(fieldId, this.schema.properties[fieldId]);
-    }
+    //  Create fields
+    this.rootEl.append(
+      this._addFields(this.schema, this.jsonData)
+    );
 
     this._updateJSONData();
   }
@@ -114,15 +129,43 @@
   /**
    * Add a field to edit the JSON property identified by the fieldId parameter
    *
-   * @param fieldId   id of the json property to edit
-   * @param fieldProperties   properties of the json property to edit
+   * @param schema  Section of the schema which contains the properties of the fields to create
+   * @param jsonData  Section of the JSON Data which contains the properties to store the values of the fields to create
    *
+   * @return  The jQuery element that matches the container of the new fields
+
+   * @author  fre
+   * @since   March 25, 2020
+   */
+  App.prototype._addFields = function(schema, jsonData) {
+
+    var container = $(FIELDS_CONTAINER_HTML);
+
+    for(var fieldId in schema.properties) {
+      container.append(
+        this._addField(fieldId, schema.properties[fieldId], jsonData)
+      );
+    }
+
+    return container;
+  }
+
+
+  /**
+   * Add a field to edit the JSON property identified by the fieldId parameter
+   *
+   * @param fieldId   id of the json property to edit
+   * @param fieldProperties   properties from the schema of the field to create
+   * @param jsonData  Section of the JSON Data which contains the property to store the value of the field to create
+   *
+   * @return  The jQuery element that matches the new field
+
    * @author  fre
    * @since   March 24, 2020
    */
-  App.prototype._addField = function(fieldId, fieldProperties) {
+  App.prototype._addField = function(fieldId, fieldProperties, jsonData) {
 
-    this.jsonData[fieldId] = this.jsonData[fieldId] || "";
+    jsonData[fieldId] = jsonData[fieldId] || fieldProperties.default;
 
     //  Add the field container with the label
     var field = $(FIELD_CONTAINER_HTML);
@@ -132,21 +175,86 @@
       .text(fieldProperties.title);
 
     //  Add the input field
-    var inputField = $(INPUT_FIELD_HTML);
-    inputField
-      .attr(ID, this.field_id_pfx + fieldId)
-      .attr(NAME, fieldId)
-      .val(this.jsonData[fieldId])
-      .insertAfter(label);
+    var formField;
+    if(fieldProperties.type == OBJECT_TYPE)
+      formField = this._addFields(fieldProperties, jsonData[fieldId]);
+    else if(fieldProperties.enum)
+      formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData[fieldId]);
+    else if(fieldProperties.type == BOOLEAN_TYPE)
+      formField = this._addSelectField(fieldId, [false, true], jsonData[fieldId]);
+    else
+      formField = this._addInputField(fieldId, fieldProperties.type, jsonData[fieldId]);
+
+    formField.insertAfter(label);
 
     //  Addd the help text
     if(fieldProperties.description)
       $(HELP_TEXT_HTML)
         .text(fieldProperties.description)
-        .insertAfter(inputField)
+        .insertAfter(formField)
 
-    this.rootEl.append(field);
+    return field;
 
+  }
+
+
+  /**
+   * Add an input field to edit the JSON property identified by the fieldId parameter
+   *
+   * @param fieldId   id of the json property to edit
+   * @param type  type of the property to edit
+   * @param value current value of the property
+   *
+   * @return  The jQuery element that matches the new field
+
+   * @author  fre
+   * @since   March 25, 2020
+   */
+  App.prototype._addInputField = function(fieldId, type, value) {
+
+    var inputField;
+    switch(type) {
+    case STRING_TYPE: inputField = $(INPUT_TEXT_FIELD_HTML); break;
+    case INTEGER_TYPE: inputField = $(INPUT_INTEGER_FIELD_HTML); break;
+    default: inputField = $(INPUT_TEXT_FIELD_HTML);
+    }
+
+    inputField
+      .attr(ID, this.field_id_pfx + fieldId)
+      .attr(NAME, fieldId)
+      .val(String(value));
+
+    return inputField;
+  }
+
+
+  /**
+   * Add a select field to edit the JSON property identified by the fieldId parameter
+   *
+   * @param fieldId id of the json property to edit
+   * @param options array which contains the list of options for the select field
+   * @param value current value of the property
+   *
+   * @return  The jQuery element that matches the new field
+
+   * @author  fre
+   * @since   March 25, 2020
+   */
+  App.prototype._addSelectField = function(fieldId, options, value) {
+
+    var selectField = $(SELECT_FIELD_HTML);
+    for(var i = 0; i < options.length; i++) {
+      selectField.append(
+        $(SELECT_OPTION_HTML).text(options[i])
+      );
+    }
+
+    selectField
+      .attr(ID, this.field_id_pfx + fieldId)
+      .attr(NAME, fieldId)
+      .val(String(value));
+
+      return selectField;
   }
 
 
@@ -157,7 +265,7 @@
    * @since   March 24, 2020
    */
   App.prototype._updateJSONData = function() {
-    this.jsonField.text(JSON.stringify(this.jsonData));
+    this.jsonField.text(JSON.stringify(this.jsonData, null, ' '));
   }
 
 
