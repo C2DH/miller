@@ -13,6 +13,7 @@
   var ID = 'id';
   var NAME = 'name';
   var FOR = 'for';
+  var JSON_DATA = 'json';
 
   /** HTML tags */
   var LABEL_TAG = 'label';
@@ -95,6 +96,35 @@
 	}
 
 
+  /**
+	 * Custom event implementation  for delegation
+	 * Allow to keep the context of the class instance
+	 *
+	 * @param	type		event type
+	 * @param	handler		handler method of the event
+	 * @param	el			Object, element, jquery object or selector that matches the element which get the event.
+	 * @param	filter		Selector used to filter descendants elements
+	 * @param	data		Optional. Data to be passed to the handler
+	 *
+	 * @author	fre
+	 * @since	March 25, 2020
+	 */
+	App.prototype.delegate = function(type, handler, el, filter, data) {
+
+		$(el).on(type, filter, {context: this, data: data}, function(e) {
+
+			var context 		= e.data.context;
+
+			e.target 			= $(e.target);
+			e.delegateTarget 	= $(e.delegateTarget);
+			e.currentTarget 	= $(e.currentTarget);
+			e.data				= e.data.data;
+
+			handler.apply(context, arguments);
+		});
+	};
+
+
   //	--------------------------------------------------------------------------------
 	//	--------------------------------------------------------------------------------
 	//	Private functions
@@ -118,9 +148,11 @@
     this.jsonData = $.parseJSON(this.jsonField.text()) || {};
 
     //  Create fields
-    this.rootEl.append(
-      this._addFields(this.schema, this.jsonData)
-    );
+    var fields = this._addFields(this.schema, this.jsonData);
+    this.rootEl.append(fields);
+
+    //  Initialize the event to synchronize fields with the JSON data
+    this.delegate('change keyup', this._formField_changeHandler, fields, 'input, select');
 
     this._updateJSONData();
   }
@@ -179,11 +211,11 @@
     if(fieldProperties.type == OBJECT_TYPE)
       formField = this._addFields(fieldProperties, jsonData[fieldId]);
     else if(fieldProperties.enum)
-      formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData[fieldId]);
+      formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData);
     else if(fieldProperties.type == BOOLEAN_TYPE)
-      formField = this._addSelectField(fieldId, [false, true], jsonData[fieldId]);
+      formField = this._addSelectField(fieldId, [false, true], jsonData);
     else
-      formField = this._addInputField(fieldId, fieldProperties.type, jsonData[fieldId]);
+      formField = this._addInputField(fieldId, fieldProperties.type, jsonData);
 
     formField.insertAfter(label);
 
@@ -203,14 +235,14 @@
    *
    * @param fieldId   id of the json property to edit
    * @param type  type of the property to edit
-   * @param value current value of the property
+   * @param jsonData  Section of the JSON Data which contains the property to store the value of the field to create
    *
    * @return  The jQuery element that matches the new field
 
    * @author  fre
    * @since   March 25, 2020
    */
-  App.prototype._addInputField = function(fieldId, type, value) {
+  App.prototype._addInputField = function(fieldId, type, jsonData) {
 
     var inputField;
     switch(type) {
@@ -222,7 +254,8 @@
     inputField
       .attr(ID, this.field_id_pfx + fieldId)
       .attr(NAME, fieldId)
-      .val(String(value));
+      .val(String(jsonData[fieldId]))
+      .data(JSON_DATA, jsonData);
 
     return inputField;
   }
@@ -240,7 +273,7 @@
    * @author  fre
    * @since   March 25, 2020
    */
-  App.prototype._addSelectField = function(fieldId, options, value) {
+  App.prototype._addSelectField = function(fieldId, options, jsonData) {
 
     var selectField = $(SELECT_FIELD_HTML);
     for(var i = 0; i < options.length; i++) {
@@ -252,7 +285,8 @@
     selectField
       .attr(ID, this.field_id_pfx + fieldId)
       .attr(NAME, fieldId)
-      .val(String(value));
+      .val(String(jsonData[fieldId]))
+      .data(JSON_DATA, jsonData);
 
       return selectField;
   }
@@ -266,6 +300,29 @@
    */
   App.prototype._updateJSONData = function() {
     this.jsonField.text(JSON.stringify(this.jsonData, null, ' '));
+  }
+
+
+  //	--------------------------------------------------------------------------------
+	//	--------------------------------------------------------------------------------
+	//	Events
+	//	--------------------------------------------------------------------------------
+	//	--------------------------------------------------------------------------------
+
+  /**
+   * Event dispatched when a input or select field has changed
+   *
+   * @param	e	object which contains event data
+   *
+   * @author  fre
+   * @since	March 25, 2020
+   */
+  App.prototype._formField_changeHandler = function(e) {
+
+    var field = e.target;
+
+    field.data(JSON_DATA)[field.attr(NAME)] = field.val();
+    this._updateJSONData();
   }
 
 
