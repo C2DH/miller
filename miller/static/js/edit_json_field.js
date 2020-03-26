@@ -253,7 +253,7 @@
 
     inputField
       .attr(ID, this.field_id_pfx + fieldId)
-      .attr(NAME, fieldId)
+      .data(NAME, fieldId)
       .val(String(jsonData[fieldId]))
       .data(JSON_DATA, jsonData);
 
@@ -284,7 +284,7 @@
 
     selectField
       .attr(ID, this.field_id_pfx + fieldId)
-      .attr(NAME, fieldId)
+      .data(NAME, fieldId)
       .val(String(jsonData[fieldId]))
       .data(JSON_DATA, jsonData);
 
@@ -321,7 +321,7 @@
 
     var field = e.target;
 
-    field.data(JSON_DATA)[field.attr(NAME)] = field.val();
+    field.data(JSON_DATA)[field.data(NAME)] = field.val();
     this._updateJSONData();
   }
 
