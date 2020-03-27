@@ -20,7 +20,11 @@
   var ID = 'id';
   var NAME = 'name';
   var FOR = 'for';
+  var INTEGER = 'integer';
+  var READONLY = 'readonly';
   var JSON_DATA = 'json';
+  var OPTIONS_DATA = 'options';
+  var PATTERN_DATA = 'pattern';
 
   /** Classes */
   var REQUIRED = 'required';
@@ -33,7 +37,10 @@
 
   /** Messages */
   var ERROR_MESSAGES = {
-    required: 'This field is required'
+    required: 'This field is required.',
+    options: 'The value is not one of the options.',
+    integer: 'The value is not an integer.',
+    pattern: 'This value doesi not match the pattern.'
   };
 
   /** HTML */
@@ -52,7 +59,7 @@
     <input type="text" class="field vTextField" maxlength="127"></input>\
   ';
   var INPUT_INTEGER_FIELD_HTML = '\
-    <input type="text" class="field"></input>\
+    <input type="text" class="field" integer="integer"></input>\
   ';
   var SELECT_FIELD_HTML = '<select class="field"></select>';
   var SELECT_OPTION_HTML = '<option></option>';
@@ -76,8 +83,6 @@
       console.error("No schema file specified!")
       return;
     }
-
-    console.log(config.validate);
 
     //  Default configuration values
     this.config     = {
@@ -199,6 +204,9 @@
     //  Get JSON data
     this.jsonData = $.parseJSON(this.jsonField.text()) || {};
 
+    //  Set the json field on read-only
+    this.jsonField.attr(READONLY, '');
+
     //  Create fields
     var fields = this._addFields(this.schema, this.jsonData);
     this.rootEl.append(fields);
@@ -279,9 +287,10 @@
     else if(fieldProperties.enum)
       formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData, required);
     else if(fieldProperties.type == BOOLEAN_TYPE)
-      formField = this._addSelectField(fieldId, [false, true], jsonData, required);
+      formField = this._addSelectField(fieldId, [String(false), String(true)], jsonData, required);
     else
-      formField = this._addInputField(fieldId, fieldProperties.type, jsonData, required);
+      formField = this._addInputField(fieldId, fieldProperties.type, jsonData, required)
+        .data(PATTERN_DATA, fieldProperties.pattern);
 
     formField.insertAfter(label);
 
@@ -357,6 +366,7 @@
       .attr(ID, this.field_id_pfx + fieldId)
       .data(NAME, fieldId)
       .val(String(jsonData[fieldId]))
+      .data(OPTIONS_DATA, options)
       .data(JSON_DATA, jsonData);
 
     if(required)
@@ -378,16 +388,43 @@
 
     var fieldRow = field.parents(FORM_ROW_SELECTOR).first();
     var errorList = fieldRow.children(ERROR_LIST_SELECTOR);
+    var value = field.val();
 
     //  Remove all error messages
     fieldRow.removeClass(ERRORS);
     errorList.empty();
 
     //  Check required fields
-    if(field.val() == '' && field.attr(REQUIRED)) {
+    if(value == '' && field.attr(REQUIRED)) {
       fieldRow.addClass(ERRORS);
       $(LIST_ITEM_HTML)
         .text(ERROR_MESSAGES[REQUIRED])
+        .appendTo(errorList);
+    }
+
+    //  Check select field with options
+    var options = field.data(OPTIONS_DATA);
+    if(options && options.indexOf(value) == -1) {
+      fieldRow.addClass(ERRORS);
+      $(LIST_ITEM_HTML)
+        .text(ERROR_MESSAGES[OPTIONS_DATA])
+        .appendTo(errorList);
+    }
+
+    //  Check integer type
+    if(field.attr(INTEGER) && !($.isNumeric(value) && Math.floor(value) == value)) {
+      fieldRow.addClass(ERRORS);
+      $(LIST_ITEM_HTML)
+        .text(ERROR_MESSAGES[INTEGER])
+        .appendTo(errorList);
+    }
+
+    //  Check pattern (for date field)
+    var pattern = field.data(PATTERN_DATA);
+    if(pattern && !value.match(pattern)) {
+      fieldRow.addClass(ERRORS);
+      $(LIST_ITEM_HTML)
+        .text(ERROR_MESSAGES[PATTERN_DATA])
         .appendTo(errorList);
     }
 
@@ -424,10 +461,11 @@
     var field = e.target;
     var fieldId = field.data(NAME);
 
-    field.data(JSON_DATA)[fieldId] = field.val();
+    field.data(JSON_DATA)[field.data(NAME)] = field.attr(INTEGER) ? parseInt(field.val()) || 0 : field.val();
+
     this._updateJSONData();
 
-    if(this.config.validate && this.config.validateOnChange)
+    if(this.config.validateOnChange)
       this._validateField(field);
 
 }
@@ -445,7 +483,7 @@
 
     var field = e.target;
 
-    field.data(JSON_DATA)[field.data(NAME)] = field.val();
+    field.data(JSON_DATA)[field.data(NAME)] = field.attr(INTEGER) ? parseInt(field.val()) || 0 : field.val();
     this._updateJSONData();
   }
 
