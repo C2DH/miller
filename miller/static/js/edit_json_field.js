@@ -1,5 +1,9 @@
 (function($) {
 
+  /** Events */
+  var CHANGE_EVENT = 'change';
+  var KEY_UP_EVENT = 'keyup';
+
   /** Field type */
   var STRING_TYPE = 'string';
   var INTEGER_TYPE = 'integer';
@@ -8,6 +12,9 @@
 
   /** Selectors */
   var DEFAULT_JSON_FIELD_SELECTOR = 'textarea';
+  var FORM_ROW_SELECTOR = '.form-row';
+  var FIELD_SELECTOR = '.field';
+  var ERROR_LIST_SELECTOR = '.errorlist';
 
   /** Attributes */
   var ID = 'id';
@@ -15,8 +22,19 @@
   var FOR = 'for';
   var JSON_DATA = 'json';
 
+  /** Classes */
+  var REQUIRED = 'required';
+  var ERRORS = 'errors';
+
   /** HTML tags */
   var LABEL_TAG = 'label';
+  var INPUT_TAG = 'input';
+  var SELECT_TAG = 'select';
+
+  /** Messages */
+  var ERROR_MESSAGES = {
+    required: 'This field is required'
+  };
 
   /** HTML */
   var FIELDS_CONTAINER_HTML = '\
@@ -24,22 +42,25 @@
   ';
   var FIELD_CONTAINER_HTML  = '\
     <div class="form-row">\
+      <ul class="errorlist"></ul>\
       <div>\
         <label></label>\
       </div>\
     </div>\
   ';
   var INPUT_TEXT_FIELD_HTML = '\
-    <input type="text" class="vTextField" maxlength="127"></input>\
+    <input type="text" class="field vTextField" maxlength="127"></input>\
   ';
   var INPUT_INTEGER_FIELD_HTML = '\
-    <input type="text"></input>\
+    <input type="text" class="field"></input>\
   ';
-  var SELECT_FIELD_HTML = '<select></select>';
+  var SELECT_FIELD_HTML = '<select class="field"></select>';
   var SELECT_OPTION_HTML = '<option></option>';
   var HELP_TEXT_HTML = '\
     <div class="help"></div>\
   ';
+  var ERROR_LIST_HTML = '<ul class="errorlist"></ul>';
+  var LIST_ITEM_HTML = '<li></li>';
 
 
   /**
@@ -56,7 +77,15 @@
       return;
     }
 
-    this.config     = config || {};
+    console.log(config.validate);
+
+    //  Default configuration values
+    this.config     = {
+      validate: false,
+      validateOnChange: true
+    };
+    $.extend(this.config, config);
+
     this.rootEl     = $(rootEl);
     if(this.rootEl.length == 0) {
       console.error("No root element specified!")
@@ -75,6 +104,30 @@
         console.error("Failed to load schema: " + config.schema);
       })
 
+  }
+
+
+  //	--------------------------------------------------------------------------------
+	//	--------------------------------------------------------------------------------
+	//	Public functions
+	//	--------------------------------------------------------------------------------
+	//	--------------------------------------------------------------------------------
+
+  /**
+   * Validate all fields
+	 *
+	 * @author	fre
+	 * @since	March 27, 2020
+   */
+  App.prototype.validateAllFields = function() {
+
+      this.rootEl.find(FIELD_SELECTOR).each(
+        this.bind(
+          function(i, field) {
+            this._validateField($(field));
+          }
+        )
+      );
   }
 
 
@@ -124,7 +177,6 @@
 		});
 	};
 
-
   //	--------------------------------------------------------------------------------
 	//	--------------------------------------------------------------------------------
 	//	Private functions
@@ -151,10 +203,15 @@
     var fields = this._addFields(this.schema, this.jsonData);
     this.rootEl.append(fields);
 
-    //  Initialize the event to synchronize fields with the JSON data
-    this.delegate('change keyup', this._formField_changeHandler, fields, 'input, select');
+    //  Initialize events to synchronize fields with the JSON data
+    this.delegate(CHANGE_EVENT, this._formField_changeHandler, fields, INPUT_TAG + ', ' + SELECT_TAG);
+    this.delegate(KEY_UP_EVENT, this._formField_keyUpHandler, fields, INPUT_TAG);
 
     this._updateJSONData();
+
+    if(this.config.validate)
+      this.validateAllFields();
+
   }
 
 
@@ -175,7 +232,12 @@
 
     for(var fieldId in schema.properties) {
       container.append(
-        this._addField(fieldId, schema.properties[fieldId], jsonData)
+        this._addField(
+          fieldId,
+          schema.properties[fieldId],
+          jsonData,
+          schema.required.indexOf(fieldId) != -1
+        )
       );
     }
 
@@ -189,13 +251,14 @@
    * @param fieldId   id of the json property to edit
    * @param fieldProperties   properties from the schema of the field to create
    * @param jsonData  Section of the JSON Data which contains the property to store the value of the field to create
+   * @param required  boolean value which determines whether the field is required
    *
    * @return  The jQuery element that matches the new field
 
    * @author  fre
    * @since   March 24, 2020
    */
-  App.prototype._addField = function(fieldId, fieldProperties, jsonData) {
+  App.prototype._addField = function(fieldId, fieldProperties, jsonData, required) {
 
     jsonData[fieldId] = jsonData[fieldId] || fieldProperties.default;
 
@@ -206,16 +269,19 @@
       .attr(FOR, this.field_id_pfx + fieldId)
       .text(fieldProperties.title);
 
+    if(required)
+      label.addClass(REQUIRED);
+
     //  Add the input field
     var formField;
     if(fieldProperties.type == OBJECT_TYPE)
       formField = this._addFields(fieldProperties, jsonData[fieldId]);
     else if(fieldProperties.enum)
-      formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData);
+      formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData, required);
     else if(fieldProperties.type == BOOLEAN_TYPE)
-      formField = this._addSelectField(fieldId, [false, true], jsonData);
+      formField = this._addSelectField(fieldId, [false, true], jsonData, required);
     else
-      formField = this._addInputField(fieldId, fieldProperties.type, jsonData);
+      formField = this._addInputField(fieldId, fieldProperties.type, jsonData, required);
 
     formField.insertAfter(label);
 
@@ -236,13 +302,14 @@
    * @param fieldId   id of the json property to edit
    * @param type  type of the property to edit
    * @param jsonData  Section of the JSON Data which contains the property to store the value of the field to create
+   * @param required  boolean value which determines whether the field is required
    *
    * @return  The jQuery element that matches the new field
 
    * @author  fre
    * @since   March 25, 2020
    */
-  App.prototype._addInputField = function(fieldId, type, jsonData) {
+  App.prototype._addInputField = function(fieldId, type, jsonData, required) {
 
     var inputField;
     switch(type) {
@@ -257,6 +324,9 @@
       .val(String(jsonData[fieldId]))
       .data(JSON_DATA, jsonData);
 
+    if(required)
+      inputField.attr(REQUIRED, '');
+
     return inputField;
   }
 
@@ -267,13 +337,14 @@
    * @param fieldId id of the json property to edit
    * @param options array which contains the list of options for the select field
    * @param value current value of the property
+   * @param required  boolean value which determines whether the field is required
    *
    * @return  The jQuery element that matches the new field
 
    * @author  fre
    * @since   March 25, 2020
    */
-  App.prototype._addSelectField = function(fieldId, options, jsonData) {
+  App.prototype._addSelectField = function(fieldId, options, jsonData, required) {
 
     var selectField = $(SELECT_FIELD_HTML);
     for(var i = 0; i < options.length; i++) {
@@ -288,7 +359,38 @@
       .val(String(jsonData[fieldId]))
       .data(JSON_DATA, jsonData);
 
-      return selectField;
+    if(required)
+      selectField.attr(REQUIRED, '');
+
+    return selectField;
+  }
+
+
+  /**
+   * Validate the specified field
+   *
+   * @param field field to Validate
+   *
+   * @author  fre
+   * @since March 26, 2020
+   */
+  App.prototype._validateField = function(field) {
+
+    var fieldRow = field.parents(FORM_ROW_SELECTOR).first();
+    var errorList = fieldRow.children(ERROR_LIST_SELECTOR);
+
+    //  Remove all error messages
+    fieldRow.removeClass(ERRORS);
+    errorList.empty();
+
+    //  Check required fields
+    if(field.val() == '' && field.attr(REQUIRED)) {
+      fieldRow.addClass(ERRORS);
+      $(LIST_ITEM_HTML)
+        .text(ERROR_MESSAGES[REQUIRED])
+        .appendTo(errorList);
+    }
+
   }
 
 
@@ -318,6 +420,28 @@
    * @since	March 25, 2020
    */
   App.prototype._formField_changeHandler = function(e) {
+
+    var field = e.target;
+    var fieldId = field.data(NAME);
+
+    field.data(JSON_DATA)[fieldId] = field.val();
+    this._updateJSONData();
+
+    if(this.config.validate && this.config.validateOnChange)
+      this._validateField(field);
+
+}
+
+
+  /**
+   * Event dispatched when a key is released on an input field
+   *
+   * @param	e	object which contains event data
+   *
+   * @author  fre
+   * @since	March 26, 2020
+   */
+  App.prototype._formField_keyUpHandler = function(e) {
 
     var field = e.target;
 
