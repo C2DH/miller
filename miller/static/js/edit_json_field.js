@@ -22,6 +22,7 @@
   var FOR = 'for';
   var INTEGER = 'integer';
   var READONLY = 'readonly';
+  var MAXLENGTH = 'maxlength';
   var JSON_DATA = 'json';
   var OPTIONS_DATA = 'options';
   var PATTERN_DATA = 'pattern';
@@ -29,11 +30,13 @@
   /** Classes */
   var REQUIRED = 'required';
   var ERRORS = 'errors';
+  var V_LARGE_TEXTFIELD = 'vLargeTextField';
 
   /** HTML tags */
   var LABEL_TAG = 'label';
   var INPUT_TAG = 'input';
   var SELECT_TAG = 'select';
+  var TEXTAREA_TAG = 'textarea';
 
   /** Messages */
   var ERROR_MESSAGES = {
@@ -55,8 +58,11 @@
       </div>\
     </div>\
   ';
+  var TEXTAREA_FIELD_HTML = '\
+    <textarea cols="40" rows="10" class="field vLargeTextField"></textarea>\
+  ';
   var INPUT_TEXT_FIELD_HTML = '\
-    <input type="text" class="field vTextField" maxlength="127"></input>\
+    <input type="text" class="field vTextField"></input>\
   ';
   var INPUT_INTEGER_FIELD_HTML = '\
     <input type="text" class="field" integer="integer"></input>\
@@ -169,7 +175,7 @@
 	 */
 	App.prototype.delegate = function(type, handler, el, filter, data) {
 
-		$(el).on(type, filter, {context: this, data: data}, function(e) {
+		$(el).on(type, $.isArray(filter) ? filter.join() : filter, {context: this, data: data}, function(e) {
 
 			var context 		= e.data.context;
 
@@ -212,8 +218,8 @@
     this.rootEl.append(fields);
 
     //  Initialize events to synchronize fields with the JSON data
-    this.delegate(CHANGE_EVENT, this._formField_changeHandler, fields, INPUT_TAG + ', ' + SELECT_TAG);
-    this.delegate(KEY_UP_EVENT, this._formField_keyUpHandler, fields, INPUT_TAG);
+    this.delegate(CHANGE_EVENT, this._formField_changeHandler, fields, FIELD_SELECTOR);
+    this.delegate(KEY_UP_EVENT, this._formField_keyUpHandler, fields, [INPUT_TAG, TEXTAREA_TAG]);
 
     this._updateJSONData();
 
@@ -289,7 +295,7 @@
     else if(fieldProperties.type == BOOLEAN_TYPE)
       formField = this._addSelectField(fieldId, [String(false), String(true)], jsonData, required);
     else
-      formField = this._addInputField(fieldId, fieldProperties.type, jsonData, required)
+      formField = this._addInputField(fieldId, fieldProperties.type, jsonData, required, fieldProperties.maxLength)
         .data(PATTERN_DATA, fieldProperties.pattern);
 
     formField.insertAfter(label);
@@ -318,13 +324,20 @@
    * @author  fre
    * @since   March 25, 2020
    */
-  App.prototype._addInputField = function(fieldId, type, jsonData, required) {
+  App.prototype._addInputField = function(fieldId, type, jsonData, required, maxLength) {
 
     var inputField;
-    switch(type) {
-    case STRING_TYPE: inputField = $(INPUT_TEXT_FIELD_HTML); break;
-    case INTEGER_TYPE: inputField = $(INPUT_INTEGER_FIELD_HTML); break;
-    default: inputField = $(INPUT_TEXT_FIELD_HTML);
+
+    //  For string properties without maxLength defined, a textarea is used as input field
+    if(!maxLength)
+      inputField = $(TEXTAREA_FIELD_HTML);
+
+    else {
+      switch(type) {
+        case STRING_TYPE: inputField = $(INPUT_TEXT_FIELD_HTML); break;
+        case INTEGER_TYPE: inputField = $(INPUT_INTEGER_FIELD_HTML); break;
+        default: inputField = $(INPUT_TEXT_FIELD_HTML);
+      }
     }
 
     inputField
@@ -333,8 +346,16 @@
       .val(String(jsonData[fieldId]))
       .data(JSON_DATA, jsonData);
 
+    //  Set required attribute
     if(required)
       inputField.attr(REQUIRED, '');
+
+    //  Set maxlength attribute
+    if(maxLength) {
+      inputField.attr(MAXLENGTH, maxLength);
+      if(maxLength > 100)
+        inputField.addClass(V_LARGE_TEXTFIELD);
+    }
 
     return inputField;
   }
@@ -369,6 +390,7 @@
       .data(OPTIONS_DATA, options)
       .data(JSON_DATA, jsonData);
 
+    //  Set required attribute
     if(required)
       selectField.attr(REQUIRED, '');
 
