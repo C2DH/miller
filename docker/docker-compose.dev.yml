@@ -64,3 +64,4 @@ services:
     volumes:
       - ../:/miller
       - ./schema:/schema
+      - ./media:/media

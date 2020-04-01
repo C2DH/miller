@@ -1,0 +1,26 @@
+{% extends 'admin/change_form.html' %}
+{% load static %}
+
+{% block field_sets %}
+
+{% if adminform.form.instance.snapshot %}
+  <img width="300" src="{{ adminform.form.instance.snapshot.url }}" style="margin-bottom:10px" />
+{% endif %}
+
+{{ block.super }}
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+  <script type="text/JavaScript" src="{% static 'js/edit_json_field.js' %}"></script>
+  <script type="text/javascript">
+    (function($) {
+
+      var editJSONField = new EditJSONField($('.field-data').parent(), {
+        schema: "{% static 'schema/document/payload.json' %}",
+        validate: {{ errors | yesno:"true,false" }}
+      });
+
+    })(django.jQuery)
+  </script>
+{% endblock %}

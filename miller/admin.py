@@ -59,8 +59,16 @@ class DataAdminForm(forms.ModelForm):
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('id','slug','title','type')
     list_filter = ('type', DataTypeListFilter, DataProviderListFilter)
+    fieldsets = [
+        (None, {'fields': ['type', 'short_url', 'title', 'slug']}),
+        ('Metadata', {'fields': ['data']}),
+        ('Content', {'fields': ['copyrights', 'url', 'owner', 'attachment', 'snapshot', 'mimetype', 'locked', 'search_vector', 'documents']})
+    ]
     form = DataAdminForm
+    change_form_template = 'miller/document/document_change_form.html'
 
+    class Media:
+        css = {'all': ('css/edit_json_field.css',)}
 
 
 admin.site.register(Story, StoryAdmin)

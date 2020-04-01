@@ -1,0 +1,7 @@
+.json-fields label + div {
+  margin-left: 180px;
+}
+
+.json-fields .json-fields .form-row {
+  border: none;
+}
