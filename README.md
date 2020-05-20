@@ -52,16 +52,17 @@ As we're going to use docker for development purposes, remember to copy the post
     POSTGRES_DB=your db user
     POSTGRES_PASSWORD=your db pass
 
-From the folder where the Makefile is, run:
-
-    make run-dev
-
-to initialize or restart the postgres database defined in the docker-compose file.
-Finally, run migration and check that the system is working properly:
+Docker compose file used for development is `docker/docker-compose.dev.yml` and as you see expose postgres to the port 54320 and redis to port 63790.
+This comes in handy if we want to use those services with external software (eg pgadmin). This allows also to use management commands outside of docker.
+For instance, we might run django migration command to check that the system is working properly:
 
     ENV=development pipenv run ./manage.py migrate
 
 ## run!
+Using docker for devlopment, from the folder where the Makefile is, run:
+
+    ENV=development make run-dev
+
 Using pipenv:
 
     ENV=development pipenv run ./manage.py runserver
@@ -69,3 +70,8 @@ Using pipenv:
 With celery tasks:
 
     ENV=development pipenv run celery -A miller worker -l info
+
+## test
+Use test runner without DB:
+
+    ENV=development pipenv run ./manage.py test --testrunner=miller.test.NoDbTestRunner
