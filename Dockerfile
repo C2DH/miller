@@ -4,6 +4,7 @@ WORKDIR /miller
 ARG GIT_BRANCH
 ARG GIT_REVISION
 
+RUN pip install --upgrade pip
 RUN pip install -U pipenv
 
 COPY Pipfile .
@@ -28,9 +29,11 @@ RUN apk add --no-cache --virtual .build-deps \
     fribidi-dev \
     libxslt-dev
 RUN pipenv install --system --deploy --ignore-pipfile
+
 RUN apk del --no-cache .build-deps
 RUN mkdir -p logs
 COPY miller ./miller
+COPY schema ./schema
 COPY manage.py .
 
 ENV MILLER_GIT_BRANCH=${GIT_BRANCH}
