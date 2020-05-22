@@ -18,6 +18,7 @@ celery = "*"
 redis = "*"
 watchdog = "*"
 argh = "*"
+wand = "*"
 
 [requires]
 python_version = "3.8"
