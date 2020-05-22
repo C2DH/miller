@@ -157,6 +157,13 @@ MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable('MILLER_SCHEMA_ENABLE_VALIDAT
 # Current version
 MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
 MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', 'nd')
+# snapshots and thumbnail sizes
+# default: max size, both heght and width must be 1200 px
+MILLER_SIZES_SNAPSHOT = [int(n) for n in get_env_variable('MILLER_SIZES_SNAPSHOT', '150,1200,0,0').split(',')]
+# default: height calculated based on fixed width
+MILLER_SIZES_SNAPSHOT_THUMBNAIL = [int(n) for n in get_env_variable('MILLER_SIZES_SNAPSHOT_THUMBNAIL', '72,0,260,0').split(',')]
+# default: width calculated based on fixed height
+MILLER_SIZES_SNAPSHOT_PREVIEW = [int(n) for n in get_env_variable('MILLER_SIZES_SNAPSHOT_PREVIEW', '96,0,0,800').split(',')]
 
 
 # Celery
