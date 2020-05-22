@@ -1,7 +1,7 @@
 import os
 from django.test import TestCase
 from django.conf import settings
-from miller.utils.models import get_docs_from_json
+from miller.utils.models import get_docs_from_json, get_cache_key
 
 class TestUtilsModels(TestCase):
     def test_get_docs_from_json(self):
@@ -27,3 +27,9 @@ class TestUtilsModels(TestCase):
             ignore_duplicates=True
         )
         print (docs)
+
+    def test_get_cache_key(self):
+        self.assertEquals(
+            'document.32.extra',
+            get_cache_key(model='document', pk=32, extra='extra'),
+        )
