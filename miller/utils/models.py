@@ -6,8 +6,22 @@ from jsonschema.exceptions import ValidationError
 logger = logging.getLogger(__name__)
 document_json_schema = JSONSchema(filepath='document/instance.json')
 
+
+def get_cache_key(pk, model, extra=None):
+    """
+    get current cachekey name  based on random generated shorten url
+    (to be used in redis cache)
+    """
+    return '.'.join(filter(None, (model, str(pk), str(extra))))
+
+
+def snapshot_attachment_file_name(instance, filename):
+    return os.path.join(instance.type, 'snapshots', filename)
+
+
 def get_user_path(user):
     return os.path.join(settings.MEDIA_ROOT, user.username)
+
 
 def get_docs_from_json(filepath, pk=None, ignore_duplicates=False):
     if filepath is None:
