@@ -6,6 +6,7 @@ from django.db import connection
 from django.contrib.postgres.search import SearchVectorField
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
+from ..snapshots import generate_snapshot
 
 def attachment_file_name(instance, filename):
   return os.path.join(instance.type, filename)
@@ -87,7 +88,9 @@ class Document(models.Model):
     def create_snapshot_from_attachment(self, override=True):
         """
         if there is an attachment, generate a PNG snapshot or similar.
+        If snapshot is already present, look for override param
         """
+
         pass
 
     def update_search_vector(self):
