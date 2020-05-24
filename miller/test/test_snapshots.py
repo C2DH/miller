@@ -10,8 +10,9 @@ abs_dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestSnapshots(TestCase):
     def test_create_snapshot(self):
         attachment = '{}/media/PDP-8L_on_ICS_Astrotype_system.jpg'.format(abs_dir_path)
+        logger.info('"File:PDP-8L on ICS Astrotype system.jpg" by AstrotypeSystem.jpg: Douglas W. Jones derivative work: User:Clusternote is licensed under CC0 1.0')
         snapshot, w, h = create_snapshot(basepath='test', source=attachment)
-        self.assertEquals(os.path.exists(snapshot))
+        self.assertTrue(os.path.exists(snapshot))
 
     def test_resize_wand_image(self):
         attachment = '{}/media/PDP-8L_on_ICS_Astrotype_system.jpg'.format(abs_dir_path)
