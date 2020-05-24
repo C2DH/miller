@@ -1,4 +1,4 @@
-import os;
+import os, logging;
 
 from django.conf import settings
 from django.db import models
@@ -6,7 +6,9 @@ from django.db import connection
 from django.contrib.postgres.search import SearchVectorField
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
-from ..snapshots import generate_snapshot
+from ..snapshots import create_snapshot
+
+logger = logging.getLogger(__name__)
 
 def attachment_file_name(instance, filename):
   return os.path.join(instance.type, filename)
@@ -90,8 +92,33 @@ class Document(models.Model):
         if there is an attachment, generate a PNG snapshot or similar.
         If snapshot is already present, look for override param
         """
+        logger.debug('document pk:{} create_snapshot_from_attachment using type:{} ...'.format(
+            self.pk,
+            self.type,
+        ))
 
-        pass
+        if not self.attachment or not getattr(self.attachment, 'path', None):
+            logger.error('document pk:{} no attachment found! Skip.'.format(self.pk))
+            return
+
+        if not os.path.exists(self.attachment.path):
+            logger.error('document pk:{} snapshot cannot be generated, attached file {} does not exist.'.format(
+                self.pk,
+                self.attachment.path,
+            ))
+            return
+        # get snaphot path and its width / height
+        snapshot,w,h = create_snapshot(basepath=self.type, source=self.attachment.path)
+        # save document
+        self.snapshot = snapshot
+        self.data.update({
+            'snapshot': {
+                'width': w,
+                'height': h
+            }
+        })
+        self.save()
+
 
     def update_search_vector(self):
         """
