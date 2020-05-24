@@ -1,5 +1,5 @@
 # Modle dedicated to snapshot generation
-import os, logging
+import os, logging, mimetypes
 from pathlib import Path
 
 from django.conf import settings
@@ -14,7 +14,7 @@ def _get_or_create_snapshots_folder(basepath='image'):
     """
     snapshots_path = os.path.join(settings.MEDIA_ROOT, basepath, 'snapshots')
     try:
-        os.makedirs(os.path.dirname(snapshots_path))
+        os.makedirs(snapshots_path)
     except OSError:
         # directory exists, pass .
         pass
@@ -32,10 +32,10 @@ def resize_wand_image(img, max_size=None, set_width=None, set_height=None):
     if max_size:
         if img.width > img.height:
             w = max_size
-            h = w / ratio
+            h = round(w / ratio)
         elif img.width < img.height:
             h = max_size
-            w = ratio * h
+            w = round(ratio * h)
         else:
             #squared image
             h = w = max_size
@@ -44,15 +44,15 @@ def resize_wand_image(img, max_size=None, set_width=None, set_height=None):
         w = set_width
     elif set_width:
         w = set_width
-        h = w / ratio
+        h = round(w / ratio)
     elif set_height:
         h = set_height
-        w = ratio * height
+        w = round(ratio * h)
     img.transform(resize='%sx%s'% (w, h))
-    return (img, w, h)
+    return img, w, h
 
 
-def create_snapshot(basepath, source, dest=None, mimetype=None, **options):
+def create_snapshot(basepath, source, dest=None, mimetype=None, format='jpg', **options):
     """
     "Snapshot" is a JPG image, normally medium resolution of whatever source file is.
     Generate snapshot from filepath using current settings.MILLER_SIZES_SNAPSHOT
@@ -64,15 +64,15 @@ def create_snapshot(basepath, source, dest=None, mimetype=None, **options):
     """
     # output file
     snapshot = dest if dest else os.path.join(
-        get_or_create_snapshots_folder(basepath),
-        Path(source).stem,
+        _get_or_create_snapshots_folder(basepath),
+        '{}.{}'.format(Path(source).stem, format)
     )
     # guess mimetype. If mimetype cannot be guessed. raise an error
     source_mimetype, encoding = (mimetype, None) if mimetype else mimetypes.guess_type(source, strict=True)
 
     resolution, max_size, set_width, set_height = settings.MILLER_SIZES_SNAPSHOT
-    logger.info('create_snapshot with resolution:{}, max_size:{}, set_width:{}, set_height:{}'.format(
-        resolution, max_size, set_width, set_height,
+    logger.info('create_snapshot with resolution:{}, max_size:{}, set_width:{}, set_height:{}, source_mimetype: {}'.format(
+        resolution, max_size, set_width, set_height, source_mimetype
     ))
 
     if source_mimetype == 'application/pdf':
@@ -80,32 +80,20 @@ def create_snapshot(basepath, source, dest=None, mimetype=None, **options):
         alpha_channel = options.get('pdf_alpha_channel', 'remove')
         background_color = options.get('pdf_background_color', 'white')
         with Image(filename='{source}[{page}]'.format(source=source, page=page), resolution=resolution) as img:
-            img.format = 'jpg'
+            img.format = format
             img.background_color = Color(background_color) # Set white background.
             img.alpha_channel = alpha_channel
             # img.compression_quality = compression_quality
             img.resolution = (resolution, resolution)
-            img,w,h = resize_wand_image(img)
+            img,w,h = resize_wand_image(img=img, max_size=max_size, set_width=set_width, set_height=set_height)
             img.save(filename=snapshot)
     else:
         with Image(filename=source, resolution=resolution) as img:
-            img,w,h = resize_wand_image(img)
+            img.format = format
+            resizedImg, w, h = resize_wand_image(img=img, max_size=max_size, set_width=set_width, set_height=set_height)
             img.save(filename=snapshot)
-    _d ={
-      'width': img.height,
-      'height': img.width
-    }
 
-
-    img.resolution = (resolution, resolution)
-    img.compression_quality = compression_quality
-
-    if progressive:
-      img.format = 'pjpeg'
-    img.save(filename=output)
-    return d
-
-    return snapshot
+    return snapshot,w,h
 
 #
 # def generate_other_images_from_snapshot(filename, output, width=None, height=None, crop=False, resolution=72, max_size=None, compression_quality=95, progressive=False):
