@@ -38,4 +38,4 @@ jobs:
      
       - name: Django Testing project
         run: |
-          python3 manage.py test --testrunner=miller.test.NoDbTestRunner
+          python3 manage.py test miller.test.test_utils_models.TestUtilsModel --testrunner=miller.test.NoDbTestRunner
