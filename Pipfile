@@ -19,6 +19,7 @@ redis = "*"
 watchdog = "*"
 argh = "*"
 wand = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.8"
