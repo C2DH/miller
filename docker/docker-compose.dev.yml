@@ -31,6 +31,7 @@ services:
        REDIS_PORT: 6379
        MILLER_DATABASE_HOST: postgresdb
        MILLER_DATABASE_PORT: 5432
+       MILLER_SCHEMA_ROOT: /miller/miller/schema
     depends_on:
       - redis
       - postgresdb
@@ -54,6 +55,7 @@ services:
        REDIS_PORT: 6379
        MILLER_DATABASE_HOST: postgresdb
        MILLER_DATABASE_PORT: 5432
+       MILLER_SCHEMA_ROOT: /miller/miller/schema/
     depends_on:
       - redis
       - postgresdb

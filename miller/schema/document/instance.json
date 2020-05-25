@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "//schema/document/instance.json",
+  "type": "object",
+  "title": "JSON schema to validate all Document instance fields",
+  "description": "Basic schema for a data field",
+  "required": [
+    "type",
+    "slug",
+    "data"
+  ],
+  "properties": {
+    "data": {
+      "$id": "#/properties/data",
+      "type": "object",
+      "title": "The Document data (check payload.json)",
+      "description": "Custom data attached to document"
+    },
+    "type": {
+      "$id": "#/properties/type",
+      "type": "string",
+      "title": "The Document type (sort of mimetype)",
+      "description": "An explanation about the purpose of this instance.",
+      "examples": [
+        "image",
+        "video",
+        "pdf"
+      ]
+    },
+    "type": {
+      "$id": "#/properties/slug",
+      "type": "string",
+      "title": "The Document slug",
+      "description": "Human readable version of the document identifier. Usually based on document title",
+      "examples": [
+        "this-is-a-valid-slug"
+      ]
+    }
+  }
+}
