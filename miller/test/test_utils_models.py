@@ -1,7 +1,7 @@
 import os
-from django.conf import settings
 from django.test import TestCase
-from miller.utils.models import get_docs_from_json, get_cache_key, get_search_vector_query
+from miller.utils.models import get_docs_from_json, get_cache_key
+from miller.utils.models import get_search_vector_query
 from miller.models import Document
 
 

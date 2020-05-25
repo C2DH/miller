@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
 from .base import get_env_variable
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -75,17 +76,25 @@ WSGI_APPLICATION = 'miller.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': get_env_variable('MILLER_DATABASE_NAME'),
-        'USER': get_env_variable('MILLER_DATABASE_USER'),
-        'PASSWORD': get_env_variable('MILLER_DATABASE_PASSWORD'),
-        'HOST': get_env_variable('MILLER_DATABASE_HOST', 'localhost'),
-        'PORT': get_env_variable('MILLER_DATABASE_PORT', '54320'),
+if sys.argv[1] == 'test':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': get_env_variable('MILLER_DATABASE_NAME'),
+            'USER': get_env_variable('MILLER_DATABASE_USER'),
+            'PASSWORD': get_env_variable('MILLER_DATABASE_PASSWORD'),
+            'HOST': get_env_variable('MILLER_DATABASE_HOST', 'localhost'),
+            'PORT': get_env_variable('MILLER_DATABASE_PORT', '54320'),
+        }
+    }
+
 
 
 # Password validation
