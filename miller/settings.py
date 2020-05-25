@@ -145,7 +145,7 @@ LOGGING = {
 }
 
 # LANGUAGES
-LANGUAGES = list([
+LANGUAGES = [
     str(n).split('|')[:2] for n in get_env_variable(
         'LANGUAGES',
         ','.join([
@@ -154,7 +154,7 @@ LANGUAGES = list([
             'de|German|de_DE|german'
         ])
     ).split(',')
-])
+]
 LANGUAGE_CODE = get_env_variable('LANGUAGE_CODE', 'en')
 
 # MILLER
