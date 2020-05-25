@@ -1,10 +1,17 @@
-import os, json, logging, collections
+import os
+import json
+import logging
+import collections
+
 from django.conf import settings
 from .schema import JSONSchema
+from . import get_data_from_dict
 from jsonschema.exceptions import ValidationError
+
 
 logger = logging.getLogger(__name__)
 document_json_schema = JSONSchema(filepath='document/instance.json')
+document_data_json_schema = JSONSchema(filepath='document/payload.json')
 
 
 def get_cache_key(pk, model, extra=None):
@@ -23,7 +30,11 @@ def get_user_path(user):
     return os.path.join(settings.MEDIA_ROOT, user.username)
 
 
-def get_docs_from_json(filepath, pk=None, ignore_duplicates=False):
+def get_docs_from_json(
+    filepath, pk=None,
+    ignore_duplicates=False,
+    expand_flatten_data=True
+):
     if filepath is None:
         raise TypeError('filepath must be specified')
     logger.info('get_docs_from_json with params filepath={} pk={}...'.format(
@@ -44,13 +55,23 @@ def get_docs_from_json(filepath, pk=None, ignore_duplicates=False):
         if len(slugs) != len(unique_slugs):
             print(slugs)
             print(unique_slugs)
-            dupes = [item for item, count in collections.Counter(slugs).items() if count > 1]
-            raise ValueError('there are {} duplicates: {} {}'.format(len(dupes), dupes, ignore_duplicates))
+            dupes = [
+                item for item, count in collections.Counter(slugs).items()
+                if count > 1
+            ]
+            raise ValueError('there are {} duplicates: {} {}'.format(
+                len(dupes),
+                dupes,
+                ignore_duplicates
+            ))
         logger.info('found {0} docs'.format(len(list(docs))))
         logger.info('headers: {0} '.format(docs[0].keys()))
 
     # schema Validation
     for doc in docs:
+        if expand_flatten_data:
+            doc.update(get_data_from_dict(doc))
+            print(doc)
         try:
             document_json_schema.validate(doc)
         except ValidationError as err:
@@ -59,5 +80,14 @@ def get_docs_from_json(filepath, pk=None, ignore_duplicates=False):
                 doc,
             ))
             raise err
-            #raise err
+        try:
+            document_data_json_schema.validate(doc['data'])
+        except ValidationError as err:
+            logger.error(
+                'ValidationError "{}" on current instance payload {}'.format(
+                    err.message,
+                    doc,
+                )
+            )
+            raise err
     return docs
