@@ -3,8 +3,9 @@
     "slug": "A",
     "type": "video",
     "data": {
-      "end_date": "",
-      "start_date": "",
+      "type": "Other",
+      "end_date": "1990-01-01",
+      "start_date": "1990-01-02",
       "year": 2018,
       "download": false,
       "title": {
