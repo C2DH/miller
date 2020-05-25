@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from . import Document
 from . import Author
 from . import Tag
-from ..utils import get_user_path
+from ..utils.models import get_user_path
 from ..fields import UTF8JSONField
 
 from ..tasks import populate_search_vectors
