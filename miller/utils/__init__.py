@@ -61,11 +61,11 @@ def nested_set(
                         ).isoformat()
                     else:
                         # 0 padded values, 1917-05-21
-                        data[path[-1]] = datetime.datetime.strptime('-'.join(
+                        data[path[-1]] = datetime.datetime.strptime('-'.join((
                             m.group(2),
                             m.group(3),
-                            m.group(4)
-                        ), '%Y-%m-%d').isoformat()
+                            m.group(4),
+                        )), '%Y-%m-%d').isoformat()
                 else:
                     data[path[-1]] = xldate_to_datetime(
                         float(value)
