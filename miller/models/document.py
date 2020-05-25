@@ -1,4 +1,6 @@
-import os, logging;
+import os
+import logging
+import dpath.util
 
 from django.conf import settings
 from django.db import models
@@ -7,17 +9,21 @@ from django.contrib.postgres.search import SearchVectorField
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot
+from ..utils.models import get_search_vector_query
 
 logger = logging.getLogger(__name__)
 
+
 def attachment_file_name(instance, filename):
-  return os.path.join(instance.type, filename)
+    return os.path.join(instance.type, filename)
+
 
 def private_attachment_file_name(instance, filename):
-  return os.path.join(settings.MEDIA_PRIVATE_ROOT, instance.type, filename)
+    return os.path.join(settings.MEDIA_PRIVATE_ROOT, instance.type, filename)
+
 
 def snapshot_attachment_file_name(instance, filename):
-  return os.path.join(instance.type, 'snapshots', filename)
+    return os.path.join(instance.type, 'snapshots', filename)
 
 
 class Document(models.Model):
@@ -25,33 +31,32 @@ class Document(models.Model):
     CROSSREF_REFERENCE = 'crossref'
     VIDEO_COVER = 'video-cover'
     PICTURE = 'picture'
-    IMAGE   = 'image'
-    PHOTO   = 'photo'
-    VIDEO   = 'video'
-    AUDIO   = 'audio'
-    TEXT    = 'text'
-    PDF     = 'pdf'
-    RICH    = 'rich'
-    LINK    = 'link'
-    AV      = 'audiovisual'
+    IMAGE = 'image'
+    PHOTO = 'photo'
+    VIDEO = 'video'
+    AUDIO = 'audio'
+    TEXT = 'text'
+    PDF = 'pdf'
+    RICH = 'rich'
+    LINK = 'link'
+    AV = 'audiovisual'
 
-    ENTITY      = 'entity'
+    ENTITY = 'entity'
 
     TYPE_CHOICES = (
-    (BIBLIOGRAPHIC_REFERENCE, 'bibtex'),
-    (CROSSREF_REFERENCE, 'bibtex'),
-    (VIDEO_COVER, 'video interview'),
-    (VIDEO, 'video'),
-    (TEXT, 'text'),
-    (PICTURE, 'picture'),
-    (PDF, 'pdf'),
-    (IMAGE, 'image'),
-    (PHOTO, 'photo'),
-    (RICH, 'rich'),
-    (LINK, 'link'),
-    (AV, 'audiovisual'),
-
-    (ENTITY, 'entity: see data type property'), # use the type field inside data JsonField.
+        (BIBLIOGRAPHIC_REFERENCE, 'bibtex'),
+        (CROSSREF_REFERENCE, 'bibtex'),
+        (VIDEO_COVER, 'video interview'),
+        (VIDEO, 'video'),
+        (TEXT, 'text'),
+        (PICTURE, 'picture'),
+        (PDF, 'pdf'),
+        (IMAGE, 'image'),
+        (PHOTO, 'photo'),
+        (RICH, 'rich'),
+        (LINK, 'link'),
+        (AV, 'audiovisual'),
+        (ENTITY, 'entity: see data type property'), # use the type field inside data JsonField.
     ) + settings.MILLER_DOCUMENT_TYPE_CHOICES
 
     type       = models.CharField(max_length=24, choices=TYPE_CHOICES)
@@ -78,14 +83,11 @@ class Document(models.Model):
     search_vector = SearchVectorField(null=True, blank=True)
 
     # add last modified date
-
     # undirected
     documents  = models.ManyToManyField("self", blank=True)
 
-
     def __str__(self):
         return self.slug
-
 
     def create_snapshot_from_attachment(self, override=True):
         """
@@ -119,41 +121,40 @@ class Document(models.Model):
         })
         self.save()
 
-
     def update_search_vector(self):
         """
         Fill the search_vector using self.data:
-        e.g. get data['title'] if is a basestring or data['title']['en_US'] according to the values contained into settings.LANGUAGES
-        Note that a language configuration can be done as well, in this case consider the last value in settings.LANGUAGES (e.g. 'english')
+        e.g. get data['title'] if is a str or data['title']['en_US']
+        according to the values contained into settings.LANGUAGES
+        Note that is possible to configure stemmer using language configuration
+        in this case consider to add a fourth value for each
+        language tuple in settings.LANGUAGES
+        (e.g. 'english')
         """
-        fields = settings.MILLER_VECTORS_MULTILANGUAGE_FIELDS
-        contents = [(getattr(self, _field), _weight, _config) for _field, _weight, _config in settings.MILLER_VECTORS_INITIAL_FIELDS ]
-
-        for _field, _weight in fields:
-            default_value = self.data.get(_field, None)
-            value = u"\n".join(filter(None,[
-                default_value if isinstance(default_value, basestring) else None
-            ] + list(
-                set(
-                    py_.get(self.data, '{}.{}'.format() % (_field, lang[2]), None) for lang in settings.LANGUAGES)
-                )
-            ))
-            contents.append((value, _weight, 'simple'))
-
-        q = ' || '.join(["setweight(to_tsvector('simple', COALESCE(%%s,'')), '%s')" % weight for value, weight, _config in contents])
-
+        q, contents = get_search_vector_query(
+            instance=self,
+            languages=settings.MILLER_LANGUAGES,
+            simple_fields=settings.MILLER_VECTORS_SIMPLE_FIELDS,
+            multilanguage_fields=settings.MILLER_VECTORS_MULTILANGUAGE_FIELDS,
+        )
         with connection.cursor() as cursor:
-          cursor.execute(''.join(["""
-            UPDATE miller_document SET search_vector = x.weighted_tsv FROM (
-              SELECT id,""",
-                q,
-              """
-                    AS weighted_tsv
-                FROM miller_document
-              WHERE miller_document.id=%s
-            ) AS x
-            WHERE x.id = miller_document.id
-          """]), [value for value, _w, _c in contents] +  [self.id])
-
-        # logger.debug('document {pk:%s, slug:%s} search_vector updated.'%(self.pk, self.slug))
+            cursor.execute(
+                ''.join([
+                    """
+                    UPDATE miller_document
+                    SET search_vector = x.weighted_tsv FROM (
+                        SELECT id,
+                    """,
+                    q,
+                    """
+                        AS weighted_tsv
+                            FROM miller_document
+                            WHERE miller_document.id=%s
+                    ) AS x
+                    WHERE x.id = miller_document.id
+                    """
+                ]), [
+                    value
+                    for value, w, c in contents
+                ])
         return contents
