@@ -27,7 +27,6 @@ RUN apk add --no-cache --virtual .build-deps \
     libxslt-dev
 
 COPY miller ./miller
-COPY schema ./schema
 COPY manage.py .
 COPY Pipfile .
 COPY Pipfile.lock .
