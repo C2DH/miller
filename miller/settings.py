@@ -152,7 +152,7 @@ MILLER_TAG_CATEGORY_CHOICES = tuple()
 MILLER_VECTORS_MULTILANGUAGE_FIELDS = (('title', 'A'), ('description', 'B'))
 MILLER_VECTORS_INITIAL_FIELDS = (('title', 'A', 'simple'),) # ('slug', 'A', 'simple'))
 # JSON Schema
-MILLER_SCHEMA_ROOT = get_env_variable('MILLER_SCHEMA_ROOT', '/schema')
+MILLER_SCHEMA_ROOT = get_env_variable('MILLER_SCHEMA_ROOT', os.path.join(BASE_DIR, 'schema'))
 MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable('MILLER_SCHEMA_ENABLE_VALIDATION', True)
 # Current version
 MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
