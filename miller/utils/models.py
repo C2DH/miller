@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import collections
+import dpath.util
 
 from django.conf import settings
 from .schema import JSONSchema
@@ -53,8 +54,6 @@ def get_docs_from_json(
         slugs = [x.get('slug') for x in docs]
         unique_slugs = set(slugs)
         if len(slugs) != len(unique_slugs):
-            print(slugs)
-            print(unique_slugs)
             dupes = [
                 item for item, count in collections.Counter(slugs).items()
                 if count > 1
@@ -71,7 +70,6 @@ def get_docs_from_json(
     for doc in docs:
         if expand_flatten_data:
             doc.update(get_data_from_dict(doc))
-            print(doc)
         try:
             document_json_schema.validate(doc)
         except ValidationError as err:
@@ -91,3 +89,32 @@ def get_docs_from_json(
             )
             raise err
     return docs
+
+
+def get_search_vector_query(
+    instance, simple_fields, multilanguage_fields,
+    languages=settings.MILLER_LANGUAGES,
+    separator=settings.MILLER_DATA_SEPARATOR
+):
+    contents = [
+        (getattr(instance, field), weight, stemmer)
+        for field, weight, stemmer
+        in simple_fields
+    ]
+
+    for field, w in multilanguage_fields:
+        for lang, label, language, stemmer in languages:
+            value = dpath.util.get(
+                instance.data,
+                f'{field}{separator}{language}',
+                separator=separator,
+                default=None
+            )
+            if value:
+                contents.append((value, w, stemmer))
+    # join using tsvector concatenation operator ||
+    q = ' || '.join([
+        f"setweight(to_tsvector('{config}', COALESCE(%%s,'')), '{weight}')"
+        for value, weight, config in contents
+    ])
+    return q, contents
