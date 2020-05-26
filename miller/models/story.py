@@ -11,7 +11,6 @@ from . import Tag
 from ..utils.models import get_user_path
 from ..fields import UTF8JSONField
 
-from ..tasks import populate_search_vectors
 
 def get_owner_path(instance, filename, safeOrigin=False):
     root, ext = os.path.splitext(filename)
@@ -93,9 +92,6 @@ class Story(models.Model):
 
     class Meta:
         verbose_name_plural = "stories"
-
-    def populate_search_vectors(self):
-        populate_search_vectors.delay(story_id=self.pk)
 
     def __str__(self):
         return self.slug
