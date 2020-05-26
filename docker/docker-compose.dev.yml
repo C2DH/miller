@@ -32,7 +32,11 @@ services:
        MILLER_DATABASE_HOST: postgresdb
        MILLER_DATABASE_PORT: 5432
        MILLER_SCHEMA_ROOT: /miller/miller/schema
+       MILLER_GIT_TAG: ${MILLER_GIT_TAG}
+       MILLER_GIT_BRANCH: ${MILLER_GIT_BRANCH}
+       MILLER_GIT_REVISION: ${MILLER_GIT_REVISION}
     depends_on:
+      - miller
       - redis
       - postgresdb
     # volumes:
@@ -56,6 +60,9 @@ services:
        MILLER_DATABASE_HOST: postgresdb
        MILLER_DATABASE_PORT: 5432
        MILLER_SCHEMA_ROOT: /miller/miller/schema/
+       MILLER_GIT_TAG: ${MILLER_GIT_TAG}
+       MILLER_GIT_BRANCH: ${MILLER_GIT_BRANCH}
+       MILLER_GIT_REVISION: ${MILLER_GIT_REVISION}
     depends_on:
       - redis
       - postgresdb
