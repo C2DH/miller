@@ -1,32 +1,45 @@
 import yaml
+from django.conf import settings
 from django.db.models import Q
 from rest_framework import viewsets
-from rest_framework.response import Response
+# from rest_framework.response import Response
 from .pagination import VerbosePagination
 from .serializers import CreateStorySerializer
 from ..models import Story
+from django.shortcuts import get_object_or_404
 
-# ViewSets define the view behavior. Filter by status
+
 class StoryViewSet(viewsets.ModelViewSet):
     queryset = Story.objects.filter(status=Story.PUBLIC)
     serializer_class = CreateStorySerializer
     pagination_class = VerbosePagination
 
-
     def getInitialQueryset(self, request):
         if request.user.is_staff:
             q = Story.objects.all()
-        elif request.user.is_authenticated and request.user.groups.filter(name=Review.GROUP_CHIEF_REVIEWERS).exists():
-            q = Story.objects.filter(Q(owner=request.user) | Q(authors__user=request.user) | Q(status__in=[Story.PUBLIC, Story.PENDING, Story.EDITING, Story.REVIEW, Story.REVIEW_DONE])).distinct()
+        elif request.user.is_authenticated and request.user.groups.filter(
+                name__in=settings.MILLER_REVIEWERS_GROUPS
+        ).exists():
+            q = Story.objects.filter(
+                    Q(owner=request.user) |
+                    Q(authors__user=request.user) |
+                    Q(status__in=[
+                        Story.PUBLIC, Story.PENDING, Story.EDITING,
+                        Story.REVIEW, Story.REVIEW_DONE
+                    ])
+                ).distinct()
         elif request.user.is_authenticated:
-            q = Story.objects.filter(Q(owner=request.user) | Q(status=Story.PUBLIC) | Q(authors__user=request.user)).distinct()
+            q = Story.objects.filter(
+                    Q(owner=request.user) |
+                    Q(status=Story.PUBLIC) |
+                    Q(authors__user=request.user)
+                ).distinct()
         else:
             q = Story.objects.filter(status=Story.PUBLIC).distinct()
         return q
 
-
     def retrieve(self, request, pk=None):
-        queryset = getInitialQueryset(request)
+        queryset = self.getInitialQueryset(request)
         if pk.isdigit():
             story = get_object_or_404(queryset, pk=pk)
         else:

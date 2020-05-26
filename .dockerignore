@@ -1,6 +1,5 @@
 .*.env
 .git
-*.json
 *.csv
 *.rdb
 **/*.pyc

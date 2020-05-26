@@ -20,7 +20,7 @@ services:
       # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres-data:/var/lib/postgresql/data
   celery:
-    build: ../ # miller directory
+    build: .. # miller directory
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
@@ -31,6 +31,7 @@ services:
        REDIS_PORT: 6379
        MILLER_DATABASE_HOST: postgresdb
        MILLER_DATABASE_PORT: 5432
+       MILLER_SCHEMA_ROOT: /miller/miller/schema
     depends_on:
       - redis
       - postgresdb
@@ -42,7 +43,7 @@ services:
       - ../:/miller
       - ./schema:/schema
   miller:
-    build: ../ # miller directory
+    build: .. # miller directory
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
@@ -54,6 +55,7 @@ services:
        REDIS_PORT: 6379
        MILLER_DATABASE_HOST: postgresdb
        MILLER_DATABASE_PORT: 5432
+       MILLER_SCHEMA_ROOT: /miller/miller/schema/
     depends_on:
       - redis
       - postgresdb

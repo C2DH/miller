@@ -1,23 +1,29 @@
 import logging
 from django import forms
 from django.contrib import admin
-from collections import Counter
 from jsonschema.exceptions import ValidationError
 
 from .models import Story, Tag, Document, Caption, Mention, Author
-from .utils import DataPropertyListFilter, JSONSchema
+from .utils.admin import DataPropertyListFilter
+from .utils.schema import JSONSchema
+from .tasks import update_story_search_vectors
+from .tasks import update_document_search_vectors
+
 
 logger = logging.getLogger(__name__)
 # document data validation
 document_json_schema = JSONSchema(filepath='document/payload.json')
 
+
 class DataTypeListFilter(DataPropertyListFilter):
     parameter_name = 'data__type'
     params = ['type', 'data']
 
+
 class DataProviderListFilter(DataPropertyListFilter):
     parameter_name = 'data__provider'
     params = ['provider', 'data']
+
 
 class StoryAdmin(admin.ModelAdmin):
     list_display = ['title', 'status']
@@ -29,16 +35,21 @@ class StoryAdmin(admin.ModelAdmin):
         if rows_updated == 1:
             message_bit = "1 story was"
         else:
-            message_bit = "%s stories were" % rows_updated
-        self.message_user(request, "%s successfully marked as published." % message_bit)
+            message_bit = F'{rows_updated} stories were'
+        self.message_user(
+            request,
+            F'{message_bit} successfully marked as published.'
+        )
 
     make_published.short_description = "Mark selected stories as published"
 
     def populate_search_vectors(modeladmin, request, queryset):
         for item in queryset:
             item.populate_search_vectors()
+            update_story_search_vectors(story_pk=item.pk)
 
     populate_search_vectors.short_description = "Rewrite search vectors"
+
 
 class DataAdminForm(forms.ModelForm):
     def clean_data(self):
@@ -47,28 +58,44 @@ class DataAdminForm(forms.ModelForm):
         try:
             document_json_schema.validate(data)
         except ValidationError as err:
-            logger.error('ValidationError on current data (model:{},pk:{}): {}'.format(
-                self.instance.__class__.__name__,
-                self.instance.pk,
-                err.message,
-            ))
+            logger.error(
+                'ValidationError on current data (model:{},pk:{}): {}'.format(
+                    self.instance.__class__.__name__,
+                    self.instance.pk,
+                    err.message,
+                )
+            )
             raise forms.ValidationError(err.message)
 
         return data
 
+
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ('id','slug','title','type')
+    list_display = ('id', 'slug', 'title', 'type')
     list_filter = ('type', DataTypeListFilter, DataProviderListFilter)
     fieldsets = [
         (None, {'fields': ['type', 'short_url', 'title', 'slug']}),
         ('Metadata', {'fields': ['data']}),
-        ('Content', {'fields': ['copyrights', 'url', 'owner', 'attachment', 'snapshot', 'mimetype', 'locked', 'search_vector', 'documents']})
+        ('Content', {
+            'fields': [
+                'copyrights', 'url', 'owner', 'attachment', 'snapshot',
+                'mimetype', 'locked', 'search_vector',
+                'documents'
+            ]
+        })
     ]
+    actions = ['populate_search_vectors']
     form = DataAdminForm
     change_form_template = 'miller/document/document_change_form.html'
 
     class Media:
         css = {'all': ('css/edit_json_field.css',)}
+
+    def populate_search_vectors(modeladmin, request, queryset):
+        for item in queryset:
+            update_document_search_vectors(document_pk=item.pk)
+
+    populate_search_vectors.short_description = "Rewrite search vectors"
 
 
 admin.site.register(Story, StoryAdmin)

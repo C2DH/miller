@@ -1,0 +1,21 @@
+[
+  {
+    "slug": "A",
+    "type": "video",
+    "data": {
+      "type": "Other",
+      "end_date": "1990-01-01",
+      "start_date": "1990-01-02",
+      "year": 2018,
+      "download": false,
+      "title": {
+        "de_DE": "Finaler Bericht von Gaston Bohnenberger und Guy Modert zur Restrukturierung von EUTELSAT.",
+        "fr_FR": "EUTELSAT - Rapport final de Guy Modert et Gaston Bohnenberger sur la restructuration"
+      },
+      "description": {
+        "de_DE": "Finaler Bericht von Gaston Bohnenberger und Guy Modert zur Restrukturierung von EUTELSAT.",
+        "fr_FR": "EUTELSAT - Rapport final de Guy Modert et Gaston Bohnenberger sur la restructuration"
+      }
+    }
+  }
+]

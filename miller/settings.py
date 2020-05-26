@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import sys
 from .base import get_env_variable
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -75,17 +76,25 @@ WSGI_APPLICATION = 'miller.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': get_env_variable('MILLER_DATABASE_NAME'),
-        'USER': get_env_variable('MILLER_DATABASE_USER'),
-        'PASSWORD': get_env_variable('MILLER_DATABASE_PASSWORD'),
-        'HOST': get_env_variable('MILLER_DATABASE_HOST', 'localhost'),
-        'PORT': get_env_variable('MILLER_DATABASE_PORT', '54320'),
+if sys.argv[1] == 'test':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': get_env_variable('MILLER_DATABASE_NAME'),
+            'USER': get_env_variable('MILLER_DATABASE_USER'),
+            'PASSWORD': get_env_variable('MILLER_DATABASE_PASSWORD'),
+            'HOST': get_env_variable('MILLER_DATABASE_HOST', 'localhost'),
+            'PORT': get_env_variable('MILLER_DATABASE_PORT', '54320'),
+        }
+    }
+
 
 
 # Password validation
@@ -136,32 +145,99 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            # 'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            # 'format': '%(levelname)s %(asctime)s %(module)s %(process)d
+            # %(thread)d %(message)s'
             'format': '{levelname} {asctime} - {name:s} L{lineno:d}: {message}',
             'style': '{',
         },
     },
 }
 
+# LANGUAGES
+LANGUAGES = [
+    str(n).split('|')[:2] for n in get_env_variable(
+        'LANGUAGES',
+        ','.join([
+            'en|British English|en_GB|english',
+            'fr|French|fr_FR|french',
+            'de|German|de_DE|german'
+        ])
+    ).split(',')
+]
+LANGUAGE_CODE = get_env_variable('LANGUAGE_CODE', 'en')
+
 # MILLER
+MILLER_DATA_SEPARATOR = '__'
 # Additional type choices for Document Model: must be a tuple
 MILLER_DOCUMENT_TYPE_CHOICES = tuple()
 # Additional category choices for Tag Model: must be a tuple
 MILLER_TAG_CATEGORY_CHOICES = tuple()
 # search vectors fileds in JSON data, with weight
-MILLER_VECTORS_MULTILANGUAGE_FIELDS = (('title', 'A'), ('description', 'B'))
-MILLER_VECTORS_INITIAL_FIELDS = (('title', 'A', 'simple'),) # ('slug', 'A', 'simple'))
+# in env file, 'title|A,description|B'
+# results in (('title', 'A'), ('description', 'B'))
+# and will use language codes to stem.
+MILLER_VECTORS_MULTILANGUAGE_FIELDS = [
+    str(n).split('|') for n in get_env_variable(
+        'MILLER_VECTORS_MULTILANGUAGE_FIELDS',
+        'title|A,description|B'
+    ).split(',')
+]
+MILLER_VECTORS_SIMPLE_FIELDS = [
+    str(n).split('|') for n in get_env_variable(
+        'MILLER_VECTORS_SIMPLE_FIELDS',
+        'slug|A|simple,title|A|simple'
+    ).split(',')
+]
 # JSON Schema
-MILLER_SCHEMA_ROOT = get_env_variable('MILLER_SCHEMA_ROOT', '/schema')
-MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable('MILLER_SCHEMA_ENABLE_VALIDATION', True)
+MILLER_SCHEMA_ROOT = get_env_variable(
+    'MILLER_SCHEMA_ROOT',
+    os.path.join(BASE_DIR, 'schema')
+)
+MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable(
+    'MILLER_SCHEMA_ENABLE_VALIDATION',
+    True
+)
 # Current version
 MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
 MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', 'nd')
+# snapshots and thumbnail sizes
+# default: max size, both heght and width must be 1200 px
+MILLER_SIZES_SNAPSHOT = [
+    int(n) for n in get_env_variable(
+        'MILLER_SIZES_SNAPSHOT',
+        '150,1200,0,0'
+    ).split(',')
+]
+# default: height calculated based on fixed width
+MILLER_SIZES_SNAPSHOT_THUMBNAIL = [
+    int(n) for n in get_env_variable(
+        'MILLER_SIZES_SNAPSHOT_THUMBNAIL',
+        '72,0,260,0'
+    ).split(',')
+]
+# default: width calculated based on fixed height
+MILLER_SIZES_SNAPSHOT_PREVIEW = [
+    int(n) for n in get_env_variable(
+        'MILLER_SIZES_SNAPSHOT_PREVIEW',
+        '96,0,0,800'
+    ).split(',')
+]
 
+
+MILLER_LANGUAGES = [
+    str(n).split('|') for n in get_env_variable(
+        'LANGUAGES',
+        ','.join([
+            'en-gb|British English|en_GB|english',
+            'fr-fr|French|fr_FR|french',
+            'de-de|German|de_DE|german'
+        ])
+    ).split(',')
+]
 
 # Celery
-REDIS_HOST=get_env_variable('REDIS_HOST', 'localhost')
-REDIS_PORT=get_env_variable('REDIS_PORT', '63790')
+REDIS_HOST = get_env_variable('REDIS_HOST', 'localhost')
+REDIS_PORT = get_env_variable('REDIS_PORT', '63790')
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/4'
 CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/5'
 CELERYD_PREFETCH_MULTIPLIER = 2

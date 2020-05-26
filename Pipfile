@@ -18,6 +18,9 @@ celery = "*"
 redis = "*"
 watchdog = "*"
 argh = "*"
+wand = "*"
+flake8 = "*"
+dpath = "*"
 
 [requires]
 python_version = "3.8"
