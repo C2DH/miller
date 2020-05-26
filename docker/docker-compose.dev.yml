@@ -24,17 +24,17 @@ services:
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
-       MILLER_DATABASE_NAME: ${POSTGRES_DB}
-       MILLER_DATABASE_USER: ${POSTGRES_USER}
-       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-       REDIS_HOST: redis
-       REDIS_PORT: 6379
-       MILLER_DATABASE_HOST: postgresdb
-       MILLER_DATABASE_PORT: 5432
-       MILLER_SCHEMA_ROOT: /miller/miller/schema
-       MILLER_GIT_TAG: ${MILLER_GIT_TAG}
-       MILLER_GIT_BRANCH: ${MILLER_GIT_BRANCH}
-       MILLER_GIT_REVISION: ${MILLER_GIT_REVISION}
+      MILLER_DATABASE_NAME: ${POSTGRES_DB}
+      MILLER_DATABASE_USER: ${POSTGRES_USER}
+      MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MILLER_DATABASE_HOST: postgresdb
+      MILLER_DATABASE_PORT: 5432
+      MILLER_SCHEMA_ROOT: /miller/miller/schema
+      MILLER_GIT_TAG: ${GIT_TAG}
+      MILLER_GIT_BRANCH: ${GIT_BRANCH}
+      MILLER_GIT_REVISION: ${GIT_REVISION}
     depends_on:
       - miller
       - redis
@@ -51,18 +51,18 @@ services:
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
-       STATIC_URL: ${STATIC_URL}
-       MILLER_DATABASE_NAME: ${POSTGRES_DB}
-       MILLER_DATABASE_USER: ${POSTGRES_USER}
-       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-       REDIS_HOST: redis
-       REDIS_PORT: 6379
-       MILLER_DATABASE_HOST: postgresdb
-       MILLER_DATABASE_PORT: 5432
-       MILLER_SCHEMA_ROOT: /miller/miller/schema/
-       MILLER_GIT_TAG: ${MILLER_GIT_TAG}
-       MILLER_GIT_BRANCH: ${MILLER_GIT_BRANCH}
-       MILLER_GIT_REVISION: ${MILLER_GIT_REVISION}
+      STATIC_URL: ${STATIC_URL}
+      MILLER_DATABASE_NAME: ${POSTGRES_DB}
+      MILLER_DATABASE_USER: ${POSTGRES_USER}
+      MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MILLER_DATABASE_HOST: postgresdb
+      MILLER_DATABASE_PORT: 5432
+      MILLER_SCHEMA_ROOT: /miller/miller/schema/
+      MILLER_GIT_TAG: ${GIT_TAG}
+      MILLER_GIT_BRANCH: ${GIT_BRANCH}
+      MILLER_GIT_REVISION: ${GIT_REVISION}
     depends_on:
       - redis
       - postgresdb

@@ -1,6 +1,7 @@
 FROM python:3.8.0-alpine
 WORKDIR /miller
 
+ARG GIT_TAG
 ARG GIT_BRANCH
 ARG GIT_REVISION
 

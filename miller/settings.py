@@ -167,6 +167,10 @@ LANGUAGES = [
 LANGUAGE_CODE = get_env_variable('LANGUAGE_CODE', 'en')
 
 # MILLER
+MILLER_GIT_TAG = get_env_variable('MILLER_GIT_TAG', '?')
+MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', '?')
+MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', '?')
+
 MILLER_DATA_SEPARATOR = '__'
 # Additional type choices for Document Model: must be a tuple
 MILLER_DOCUMENT_TYPE_CHOICES = tuple()
