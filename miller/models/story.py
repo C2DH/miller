@@ -96,6 +96,15 @@ class Story(models.Model):
     def __str__(self):
         return self.slug
 
-@receiver(post_save, sender=Story)
-def story_populate_search_vectors(sender, instance, **kwargs):
-    populate_search_vectors.delay(story_id=instance.pk)
+    def update_search_vector(self):
+        """
+        @TODO
+        Fill the search_vector using self.data:
+        e.g. get data['title'] if is a str or data['title']['en_US']
+        according to the values contained into settings.LANGUAGES
+        Note that is possible to configure stemmer using language configuration
+        in this case consider to add a fourth value for each
+        language tuple in settings.LANGUAGES
+        (e.g. 'english')
+        """
+        pass
