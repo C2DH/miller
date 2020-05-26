@@ -6,6 +6,9 @@ from jsonschema.exceptions import ValidationError
 from .models import Story, Tag, Document, Caption, Mention, Author
 from .utils.admin import DataPropertyListFilter
 from .utils.schema import JSONSchema
+from .tasks import update_story_search_vectors
+from .tasks import update_document_search_vectors
+
 
 logger = logging.getLogger(__name__)
 # document data validation
@@ -43,6 +46,7 @@ class StoryAdmin(admin.ModelAdmin):
     def populate_search_vectors(modeladmin, request, queryset):
         for item in queryset:
             item.populate_search_vectors()
+            update_story_search_vectors(story_pk=item.pk)
 
     populate_search_vectors.short_description = "Rewrite search vectors"
 
@@ -80,11 +84,18 @@ class DocumentAdmin(admin.ModelAdmin):
             ]
         })
     ]
+    actions = ['populate_search_vectors']
     form = DataAdminForm
     change_form_template = 'miller/document/document_change_form.html'
 
     class Media:
         css = {'all': ('css/edit_json_field.css',)}
+
+    def populate_search_vectors(modeladmin, request, queryset):
+        for item in queryset:
+            update_document_search_vectors(document_pk=item.pk)
+
+    populate_search_vectors.short_description = "Rewrite search vectors"
 
 
 admin.site.register(Story, StoryAdmin)
