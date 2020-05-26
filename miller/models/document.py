@@ -137,24 +137,29 @@ class Document(models.Model):
             simple_fields=settings.MILLER_VECTORS_SIMPLE_FIELDS,
             multilanguage_fields=settings.MILLER_VECTORS_MULTILANGUAGE_FIELDS,
         )
+        if not contents:
+            logger.error(
+                f'update_search_vector failed for document:{self.pk} (empty?)'
+            )
+            return
+
         with connection.cursor() as cursor:
-            cursor.execute(
-                ''.join([
-                    """
-                    UPDATE miller_document
-                    SET search_vector = x.weighted_tsv FROM (
-                        SELECT id,
-                    """,
-                    q,
-                    """
-                        AS weighted_tsv
-                            FROM miller_document
-                            WHERE miller_document.id=%s
-                    ) AS x
-                    WHERE x.id = miller_document.id
-                    """
-                ]), [
-                    value
-                    for value, w, c in contents
-                ])
-        return contents
+            to_be_executed = ''.join([
+                """
+                UPDATE miller_document
+                SET search_vector = x.weighted_tsv FROM (
+                    SELECT id,
+                """,
+                q,
+                """
+                    AS weighted_tsv
+                        FROM miller_document
+                        WHERE miller_document.id=%s
+                ) AS x
+                WHERE x.id = miller_document.id
+                """
+            ])
+            cursor.execute(to_be_executed, [
+                value
+                for value, w, c in contents
+            ] + [self.pk])
