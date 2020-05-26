@@ -67,20 +67,20 @@ class TestUtilsModels(TestCase):
         })
         q, contents = get_search_vector_query(
             doc,
-            languages=(
+            languages=[
                 ('en', 'British English', 'en_GB', 'english'),
                 ('fr', 'French', 'fr_FR', 'french'),
                 ('de', 'German', 'de_DE', 'german'),
-            ),
-            simple_fields=(
+            ],
+            simple_fields=[
                 ('pk', 'A', 'simple'),
                 ('slug', 'A', 'simple'),
                 ('title', 'A', 'simple'),
-            ),
-            multilanguage_fields=(
+            ],
+            multilanguage_fields=[
                 ('title', 'A'),
                 ('description', 'B')
-            ),
+            ],
         )
         self.assertEquals(contents, [
             (1, 'A', 'simple'),
@@ -93,11 +93,11 @@ class TestUtilsModels(TestCase):
         ])
         self.assertEquals(
             q,
-            "setweight(to_tsvector('simple', COALESCE(%%s,'')), 'A') || "
-            "setweight(to_tsvector('simple', COALESCE(%%s,'')), 'A') || "
-            "setweight(to_tsvector('simple', COALESCE(%%s,'')), 'A') || "
-            "setweight(to_tsvector('french', COALESCE(%%s,'')), 'A') || "
-            "setweight(to_tsvector('german', COALESCE(%%s,'')), 'A') || "
-            "setweight(to_tsvector('french', COALESCE(%%s,'')), 'B') || "
-            "setweight(to_tsvector('german', COALESCE(%%s,'')), 'B')"
+            "setweight(to_tsvector(COALESCE(%s,'')), 'A') || "
+            "setweight(to_tsvector(COALESCE(%s,'')), 'A') || "
+            "setweight(to_tsvector(COALESCE(%s,'')), 'A') || "
+            "setweight(to_tsvector('french',COALESCE(%s,'')), 'A') || "
+            "setweight(to_tsvector('german',COALESCE(%s,'')), 'A') || "
+            "setweight(to_tsvector('french',COALESCE(%s,'')), 'B') || "
+            "setweight(to_tsvector('german',COALESCE(%s,'')), 'B')"
         )
