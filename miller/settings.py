@@ -176,18 +176,18 @@ MILLER_TAG_CATEGORY_CHOICES = tuple()
 # in env file, 'title|A,description|B'
 # results in (('title', 'A'), ('description', 'B'))
 # and will use language codes to stem.
-MILLER_VECTORS_MULTILANGUAGE_FIELDS = (
+MILLER_VECTORS_MULTILANGUAGE_FIELDS = [
     str(n).split('|') for n in get_env_variable(
         'MILLER_VECTORS_MULTILANGUAGE_FIELDS',
         'title|A,description|B'
     ).split(',')
-)
-MILLER_VECTORS_SIMPLE_FIELDS = (
+]
+MILLER_VECTORS_SIMPLE_FIELDS = [
     str(n).split('|') for n in get_env_variable(
         'MILLER_VECTORS_SIMPLE_FIELDS',
-        'pk|A|simple,slug|A|simple,title|A|simple'
+        'slug|A|simple,title|A|simple'
     ).split(',')
-)
+]
 # JSON Schema
 MILLER_SCHEMA_ROOT = get_env_variable(
     'MILLER_SCHEMA_ROOT',
@@ -224,7 +224,7 @@ MILLER_SIZES_SNAPSHOT_PREVIEW = [
 ]
 
 
-MILLER_LANGUAGES = (
+MILLER_LANGUAGES = [
     str(n).split('|') for n in get_env_variable(
         'LANGUAGES',
         ','.join([
@@ -233,7 +233,7 @@ MILLER_LANGUAGES = (
             'de-de|German|de_DE|german'
         ])
     ).split(',')
-)
+]
 
 # Celery
 REDIS_HOST = get_env_variable('REDIS_HOST', 'localhost')
