@@ -96,25 +96,40 @@ def get_search_vector_query(
     languages=settings.MILLER_LANGUAGES,
     separator=settings.MILLER_DATA_SEPARATOR
 ):
-    contents = [
-        (getattr(instance, field), weight, stemmer)
-        for field, weight, stemmer
-        in simple_fields
-    ]
+    logger.info(
+        f'get_search_vector_query simple_fields:{list(simple_fields)}'
+        f' for instance pk:{instance.pk}'
+    )
 
+    contents = [
+        (
+            getattr(instance, field),
+            weight,
+            config,
+        ) for field, weight, config in simple_fields
+    ]
     for field, w in multilanguage_fields:
-        for lang, label, language, stemmer in languages:
-            value = dpath.util.get(
-                instance.data,
-                f'{field}{separator}{language}',
-                separator=separator,
-                default=None
-            )
-            if value:
+        for lang, label, language, stemmer in list(languages):
+            try:
+                value = dpath.util.get(
+                    instance.data,
+                    f'{field}{separator}{language}',
+                    separator=separator
+                )
+            except KeyError as e:
+                logger.warning(
+                    f'KeyError: {e} not found for instance pk:{instance.pk}'
+                )
+            else:
                 contents.append((value, w, stemmer))
+    # logger.info(
+    #     f'get_search_vector_query simple_fields contents:{list(contents)}'
+    # )
     # join using tsvector concatenation operator ||
     q = ' || '.join([
-        f"setweight(to_tsvector('{config}', COALESCE(%%s,'')), '{weight}')"
+        f"setweight(to_tsvector('{config}',COALESCE(%s,'')), '{weight}')"
+        if config != 'simple' else
+        f"setweight(to_tsvector(COALESCE(%s,'')), '{weight}')"
         for value, weight, config in contents
     ])
     return q, contents
