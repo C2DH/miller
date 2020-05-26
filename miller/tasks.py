@@ -1,6 +1,6 @@
 from .celery import app
 from celery.utils.log import get_task_logger
-from .models import Document
+from .models import Document, Story
 
 logger = get_task_logger(__name__)
 
@@ -16,6 +16,11 @@ def echo(self, message):
 )
 def update_story_search_vectors(self, story_pk):
     logger.info(f'update_story_search_vectors story(pk={story_pk})')
+    story = Story.objects.get(pk=story_pk)
+    story.update_search_vector()
+    logger.info(
+        f'update_story_search_vectors story(pk={story_pk}) success.'
+    )
 
 
 @app.task(
