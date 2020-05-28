@@ -17,5 +17,11 @@ run-dev:
 	&& export GIT_REVISION=$(shell git rev-parse --short HEAD) \
 	&& cd docker && docker-compose -f docker-compose.dev.yml up
 
-test-celery:
+run-test:
+	docker exec -it docker_miller_1 python manage.py test --testrunner=miller.test.NoDbTestRunner
+
+run-migrate:
+	docker exec -it docker_miller_1 python manage.py migrate
+
+run-test-celery:
 	docker exec -it docker_miller_1 python manage.py celery_test
