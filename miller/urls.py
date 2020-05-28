@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url, include
+from django.utils.safestring import mark_safe
 from rest_framework import routers
 from .api import StoryViewSet
 
@@ -28,6 +29,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
+admin.site.site_header = mark_safe(
+    '<b style="color:white">Miller</b>'
+    f' &middot {settings.MILLER_GIT_TAG}'
+    f' ({settings.MILLER_GIT_BRANCH}/{settings.MILLER_GIT_REVISION})'
+)
+
 if settings.DEBUG:
-  from django.conf.urls.static import static
-  urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    from django.conf.urls.static import static
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

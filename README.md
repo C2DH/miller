@@ -1,13 +1,27 @@
 # Miller
 a very basic django app to run "digital exhibition websites"
 
-# Requirements
-Miller works with Postgres databases
-
-# Install with Docker
-@todo
-
 # Install for development
+We use docker to make development easier:
+    
+    cp docker/.env.example docker/.env
+
+edit the `docker/.env` file setting proper database name and password; then
+
+    make run-dev
+
+Will install all images (redis, postgres...) and build locally celery and miller for you.
+`Watchdog` takes care of restarting miller and celery when a py file change in the codebase.
+
+Make sure the db is aligned:
+
+    make run-migrate
+
+then test that everything works as expected:
+
+    make run-test
+
+## Install without docker (not recommended)
 We followed the doc at https://hackernoon.com/reaching-python-development-nirvana-bb5692adf30c
 
     pyenv installs 3.8.0
@@ -18,9 +32,10 @@ use pip shipped with local python version:
 
     python -m pip install pipenv
 
-Then install requirements:
+Install the library imagemagick6, then install requirements:
 
     pipenv install
+
 
 ## configure
 Copy the `.example.env` file to `.development.env` and fill the fields:
@@ -58,10 +73,14 @@ For instance, we might run django migration command to check that the system is 
 
     ENV=development pipenv run ./manage.py migrate
 
-## run!
+# run!
 Using docker for devlopment, from the folder where the Makefile is, run:
 
-    ENV=development make run-dev
+    make run-dev
+
+then go to http://localhost:8008
+
+## with pipenv
 
 Using pipenv:
 
@@ -71,7 +90,7 @@ With celery tasks:
 
     ENV=development pipenv run celery -A miller worker -l info
 
-## test
+# test
 Use test runner without DB:
 
     ENV=development pipenv run ./manage.py test --testrunner=miller.test.NoDbTestRunner

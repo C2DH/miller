@@ -24,46 +24,51 @@ services:
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
-       MILLER_DATABASE_NAME: ${POSTGRES_DB}
-       MILLER_DATABASE_USER: ${POSTGRES_USER}
-       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-       REDIS_HOST: redis
-       REDIS_PORT: 6379
-       MILLER_DATABASE_HOST: postgresdb
-       MILLER_DATABASE_PORT: 5432
-       MILLER_SCHEMA_ROOT: /miller/miller/schema
+      DEBUG: ${DEBUG}
+      MILLER_DATABASE_NAME: ${POSTGRES_DB}
+      MILLER_DATABASE_USER: ${POSTGRES_USER}
+      MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MILLER_DATABASE_HOST: postgresdb
+      MILLER_DATABASE_PORT: 5432
+      MILLER_SCHEMA_ROOT: /miller/miller/schema
+      MILLER_GIT_TAG: ${GIT_TAG}
+      MILLER_GIT_BRANCH: ${GIT_BRANCH}
+      MILLER_GIT_REVISION: ${GIT_REVISION}
     depends_on:
-      - redis
-      - postgresdb
+      - miller
     # volumes:
     #  - ./config/impresso-user-admin.env:/impresso-user-admin/.docker.env
     entrypoint: celery -A miller worker -l info
     # entrypoint: watchmedo auto-restart --directory="/miller" --pattern="*.py" --recursive celery -A miller worker -l info
     volumes:
       - ../:/miller
-      - ./schema:/schema
   miller:
     build: .. # miller directory
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
-       STATIC_URL: ${STATIC_URL}
-       MILLER_DATABASE_NAME: ${POSTGRES_DB}
-       MILLER_DATABASE_USER: ${POSTGRES_USER}
-       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-       REDIS_HOST: redis
-       REDIS_PORT: 6379
-       MILLER_DATABASE_HOST: postgresdb
-       MILLER_DATABASE_PORT: 5432
-       MILLER_SCHEMA_ROOT: /miller/miller/schema/
+      DEBUG: ${DEBUG}
+      STATIC_URL: ${STATIC_URL}
+      MILLER_DATABASE_NAME: ${POSTGRES_DB}
+      MILLER_DATABASE_USER: ${POSTGRES_USER}
+      MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MILLER_DATABASE_HOST: postgresdb
+      MILLER_DATABASE_PORT: 5432
+      MILLER_SCHEMA_ROOT: /miller/miller/schema/
+      MILLER_GIT_TAG: ${GIT_TAG}
+      MILLER_GIT_BRANCH: ${GIT_BRANCH}
+      MILLER_GIT_REVISION: ${GIT_REVISION}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     depends_on:
       - redis
       - postgresdb
-    entrypoint: python ./manage.py runserver 0.0.0.0:8000
-    # command: python ./manage.py runserver 0.0.0.0:8000
+    entrypoint: /bin/sh -c "PYTHONPATH=/ python miller/dbconnection.py && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8008:8000"
     volumes:
       - ../:/miller
-      - ./schema:/schema
       - ./media:/media

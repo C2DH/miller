@@ -1,5 +1,7 @@
 # Modle dedicated to snapshot generation
-import os, logging, mimetypes
+import os
+import logging
+import mimetypes
 from pathlib import Path
 
 from django.conf import settings
@@ -37,7 +39,7 @@ def resize_wand_image(img, max_size=None, set_width=None, set_height=None):
             h = max_size
             w = round(ratio * h)
         else:
-            #squared image
+            # squared image
             h = w = max_size
     elif set_width and set_height:
         h = set_height
