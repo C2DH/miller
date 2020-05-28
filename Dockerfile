@@ -6,7 +6,6 @@ ARG GIT_BRANCH
 ARG GIT_REVISION
 
 RUN pip install --upgrade pip
-RUN pip install -U pipenv
 
 RUN apk add --no-cache \
     postgresql-libs
@@ -29,10 +28,9 @@ RUN apk add --no-cache --virtual .build-deps \
 
 COPY miller ./miller
 COPY manage.py .
-COPY Pipfile .
-COPY Pipfile.lock .
+COPY requirements.txt .
 
-RUN pipenv install --system --deploy --ignore-pipfile
+RUN pip install -r requirements.txt
 
 RUN apk del --no-cache .build-deps
 RUN mkdir -p logs
