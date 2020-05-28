@@ -8,8 +8,14 @@ build:
 run-latest:
 	cd docker && docker-compose -f docker-compose.yml up --build
 
+run-down:
+	cd docker && docker-compose down
+
 run-dev:
 	export GIT_TAG=$(shell git describe --tags)\
 	&& export GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD) \
 	&& export GIT_REVISION=$(shell git rev-parse --short HEAD) \
-	&& cd docker && docker-compose -f docker-compose.dev.yml up --build
+	&& cd docker && docker-compose -f docker-compose.dev.yml up
+
+test-celery:
+	docker exec -it docker_miller_1 python manage.py celery_test
