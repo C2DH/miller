@@ -44,7 +44,6 @@ services:
     # entrypoint: watchmedo auto-restart --directory="/miller" --pattern="*.py" --recursive celery -A miller worker -l info
     volumes:
       - ../:/miller
-      - ./schema:/schema
   miller:
     build: .. # miller directory
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
@@ -63,6 +62,7 @@ services:
       MILLER_GIT_TAG: ${GIT_TAG}
       MILLER_GIT_BRANCH: ${GIT_BRANCH}
       MILLER_GIT_REVISION: ${GIT_REVISION}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     depends_on:
       - redis
       - postgresdb
@@ -71,5 +71,4 @@ services:
       - "8008:8000"
     volumes:
       - ../:/miller
-      - ./schema:/schema
       - ./media:/media
