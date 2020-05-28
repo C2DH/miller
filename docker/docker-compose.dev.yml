@@ -37,8 +37,6 @@ services:
       MILLER_GIT_REVISION: ${GIT_REVISION}
     depends_on:
       - miller
-      - redis
-      - postgresdb
     # volumes:
     #  - ./config/impresso-user-admin.env:/impresso-user-admin/.docker.env
     entrypoint: celery -A miller worker -l info
@@ -66,8 +64,7 @@ services:
     depends_on:
       - redis
       - postgresdb
-    entrypoint: python ./manage.py runserver 0.0.0.0:8000
-    # command: python ./manage.py runserver 0.0.0.0:8000
+    command: /bin/sh -c "sleep 5; PYTHONPATH=/ python miller/dbconnection.py && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8008:8000"
     volumes:
