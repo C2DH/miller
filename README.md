@@ -13,6 +13,14 @@ edit the `docker/.env` file setting proper database name and password; then
 Will install all images (redis, postgres...) and build locally celery and miller for you.
 `Watchdog` takes care of restarting miller and celery when a py file change in the codebase.
 
+Make sure the db is aligned:
+
+    make run-migrate
+
+then test that everything works as expected:
+
+    make run-test
+
 ## Install without docker (not recommended)
 We followed the doc at https://hackernoon.com/reaching-python-development-nirvana-bb5692adf30c
 
