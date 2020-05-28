@@ -24,6 +24,7 @@ services:
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
+      DEBUG: ${DEBUG}
       MILLER_DATABASE_NAME: ${POSTGRES_DB}
       MILLER_DATABASE_USER: ${POSTGRES_USER}
       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
@@ -49,6 +50,7 @@ services:
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
     environment:
+      DEBUG: ${DEBUG}
       STATIC_URL: ${STATIC_URL}
       MILLER_DATABASE_NAME: ${POSTGRES_DB}
       MILLER_DATABASE_USER: ${POSTGRES_USER}
