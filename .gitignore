@@ -5,6 +5,8 @@ docker/*.sql
 docker/redis-data
 docker/schema
 docker/media
+docker/private
+docker/contents
 *.sqlite3
 docker/postgres-data
 __pycache__
