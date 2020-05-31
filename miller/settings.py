@@ -96,7 +96,6 @@ else:
     }
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -204,6 +203,8 @@ MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable(
 # Current version
 MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
 MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', 'nd')
+
+MILLER_CONTENTS_ROOT = get_env_variable('CONTENTS_ROOT', '/contents')
 # snapshots and thumbnail sizes
 # default: max size, both heght and width must be 1200 px
 MILLER_SIZES_SNAPSHOT = [
