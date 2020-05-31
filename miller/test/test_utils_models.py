@@ -14,33 +14,36 @@ class TestUtilsModels(TestCase):
         --testrunner=miller.test.NoDbTestRunner
     """
     def test_get_docs_from_json(self):
-        abs_dir_path = os.path.dirname(os.path.realpath(__file__))
-        # test not found
-        try:
-            get_docs_from_json(
-                filepath=F'{abs_dir_path}/media/NOT_FOUND_documents.json'
-            )
-        except FileNotFoundError:
-            pass
+        # Then override the LOGIN_URL setting
+        with self.settings(MILLER_SCHEMA_ROOT='schema'):
+            abs_dir_path = os.path.dirname(os.path.realpath(__file__))
+            # test not found
+            try:
+                get_docs_from_json(
+                    filepath=F'{abs_dir_path}/media/NOT_FOUND_documents.json'
+                )
+            except FileNotFoundError:
+                pass
 
-        try:
-            get_docs_from_json(
-                filepath=F'{abs_dir_path}/media/documents_with_duplicates.json'
-            )
-        except ValueError:
-            pass
+            try:
+                get_docs_from_json(
+                    filepath=F'{abs_dir_path}/media/documents_with_duplicates.json'
+                )
+            except ValueError:
+                pass
 
-        # force ignore duplicates - it takes latest element with the same slug
-        docs = get_docs_from_json(
-            filepath=F'{abs_dir_path}/media/documents.json',
-            ignore_duplicates=True
-        )
-        # print(docs)
-        docs = get_docs_from_json(
-            filepath=F'{abs_dir_path}/media/documents-flatten.json',
-            ignore_duplicates=True,
-            expand_flatten_data=True
-        )
+            # force ignore duplicates - it takes latest element
+            # with the same slug
+            docs = get_docs_from_json(
+                filepath=F'{abs_dir_path}/media/documents.json',
+                ignore_duplicates=True
+            )
+            print(docs)
+            docs = get_docs_from_json(
+                filepath=F'{abs_dir_path}/media/documents-flatten.json',
+                ignore_duplicates=True,
+                expand_flatten_data=True
+            )
         # print(docs)
 
     def test_get_cache_key(self):

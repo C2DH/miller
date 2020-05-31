@@ -31,24 +31,11 @@ def get_user_path(user):
     return os.path.join(settings.MEDIA_ROOT, user.username)
 
 
-def get_docs_from_json(
-    filepath, pk=None,
-    ignore_duplicates=False,
-    expand_flatten_data=True
+def get_valid_serialized_docs(
+    docs=[], ignore_duplicates=False,
+    expand_flatten_data=True,
+    raise_validation_errors=True
 ):
-    if filepath is None:
-        raise TypeError('filepath must be specified')
-    logger.info('get_docs_from_json with params filepath={} pk={}...'.format(
-        filepath,
-        pk,
-    ))
-    with open(filepath) as f:
-        docs = [x for x in json.load(f) if 'slug' in x]
-        if pk is not None:
-            docs = [x for x in docs if x.get('slug', None) == pk]
-    if not docs:
-        logger.warning('no docs in for file: {}'.format(filepath))
-        return []
     # get duplicates in slug field.
     if not ignore_duplicates:
         slugs = [x.get('slug') for x in docs]
@@ -77,7 +64,10 @@ def get_docs_from_json(
                 err.message,
                 doc,
             ))
-            raise err
+            if raise_validation_errors:
+                raise err
+            else:
+                doc = None
         try:
             document_data_json_schema.validate(doc['data'])
         except ValidationError as err:
@@ -87,8 +77,37 @@ def get_docs_from_json(
                     doc,
                 )
             )
-            raise err
-    return docs
+            if raise_validation_errors:
+                raise err
+            else:
+                doc = None
+
+    return filter(None, docs)
+
+
+def get_docs_from_json(
+    filepath, pk=None,
+    ignore_duplicates=False,
+    expand_flatten_data=True
+):
+    if filepath is None:
+        raise TypeError('filepath must be specified')
+    logger.info('get_docs_from_json with params filepath={} pk={}...'.format(
+        filepath,
+        pk,
+    ))
+    with open(filepath) as f:
+        docs = [x for x in json.load(f) if 'slug' in x]
+        if pk is not None:
+            docs = [x for x in docs if x.get('slug', None) == pk]
+    if not docs:
+        logger.warning('no docs in for file: {}'.format(filepath))
+        return []
+    return get_valid_serialized_docs(
+        docs=docs,
+        ignore_duplicates=ignore_duplicates,
+        expand_flatten_data=expand_flatten_data
+    )
 
 
 def get_search_vector_query(
