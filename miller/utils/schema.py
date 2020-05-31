@@ -28,6 +28,19 @@ class JSONSchema:
                 'settings.MILLER_SCHEMA_ENABLE_VALIDATION is disabled!'
             )
 
+    def set_schema_root(self, schema_root):
+        abs_filepath = os.path.join(schema_root, self.filepath)
+        logger.info(
+            f'JSONSchema() init on abs_filepath:"{abs_filepath}"'
+            f'(*SCHEMA_ROOT: {schema_root})'
+        )
+        with open(abs_filepath, 'r') as schema:
+            try:
+                self.schema = json.load(schema)
+            except Exception as e:
+                logger.error(F'Unable to load JSON from {abs_filepath}')
+                raise e
+
     def validate(self, instance):
         logger.info('validate() using json filepath: {}'.format(self.filepath))
         jsonschemaValidate(instance=instance, schema=self.schema)
