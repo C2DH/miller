@@ -37,7 +37,7 @@ def nested_set(
         if isinstance(value, bool):
             data[path[-1]] = value
         elif not value:
-            data[path[-1]] = None
+            data[path[-1]] = ''
         elif path[-1] in datetime_suffix:
             # print('nested:', path[-1], value)
             if isinstance(value, str):
@@ -59,14 +59,14 @@ def nested_set(
                             month=int(m.group(3)) + 1,
                             day=int(m.group(4))
                         ).isoformat()
-                    else:
+                    elif m.group(2) is not None:
                         # 0 padded values, 1917-05-21
                         data[path[-1]] = datetime.datetime.strptime('-'.join((
                             m.group(2),
                             m.group(3),
                             m.group(4),
                         )), '%Y-%m-%d').isoformat()
-                else:
+                elif value:
                     data[path[-1]] = xldate_to_datetime(
                         float(value)
                     ).isoformat()
@@ -78,10 +78,10 @@ def nested_set(
             data[path[-1]] = value
     else:
         # if as_list: it is a list, comma separated ;)
-        data[path[-1]] = map(lambda x: x.strip(), filter(
+        data[path[-1]] = list(map(lambda x: x.strip(), filter(
             None,
             [] if not value else value.split(',')
-        ))
+        )))
     return data
 
 

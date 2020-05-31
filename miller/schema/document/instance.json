@@ -27,7 +27,7 @@
         "pdf"
       ]
     },
-    "type": {
+    "slug": {
       "$id": "#/properties/slug",
       "type": "string",
       "title": "The Document slug",

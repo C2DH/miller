@@ -32,7 +32,7 @@ services:
       REDIS_PORT: 6379
       MILLER_DATABASE_HOST: postgresdb
       MILLER_DATABASE_PORT: 5432
-      MILLER_SCHEMA_ROOT: /miller/miller/schema
+      MILLER_SCHEMA_ROOT: ${MILLER_SCHEMA_ROOT}
       MILLER_GIT_TAG: ${GIT_TAG}
       MILLER_GIT_BRANCH: ${GIT_BRANCH}
       MILLER_GIT_REVISION: ${GIT_REVISION}
@@ -44,6 +44,7 @@ services:
     # entrypoint: watchmedo auto-restart --directory="/miller" --pattern="*.py" --recursive celery -A miller worker -l info
     volumes:
       - ../:/miller
+      - ./contents:/contents
   miller:
     build: .. # miller directory
     # image: c2dhunilu/miller-v2:${MILLER_TAG}
@@ -58,11 +59,13 @@ services:
       REDIS_PORT: 6379
       MILLER_DATABASE_HOST: postgresdb
       MILLER_DATABASE_PORT: 5432
-      MILLER_SCHEMA_ROOT: /miller/miller/schema/
+      MILLER_SCHEMA_ROOT: ${MILLER_SCHEMA_ROOT}
       MILLER_GIT_TAG: ${GIT_TAG}
       MILLER_GIT_BRANCH: ${GIT_BRANCH}
       MILLER_GIT_REVISION: ${GIT_REVISION}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      GOOGLE_SPREADHSEEET_ID: ${GOOGLE_SPREADHSEEET_ID}
+      GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY: ${GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY}
     depends_on:
       - redis
       - postgresdb
@@ -72,3 +75,5 @@ services:
     volumes:
       - ../:/miller
       - ./media:/media
+      - ./private:/private
+      - ./contents:/contents

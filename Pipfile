@@ -21,6 +21,7 @@ argh = "*"
 wand = "*"
 flake8 = "*"
 dpath = "*"
+gspread = "*"
 
 [requires]
 python_version = "3.8"
