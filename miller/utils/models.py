@@ -15,6 +15,15 @@ document_json_schema = JSONSchema(filepath='document/instance.json')
 document_data_json_schema = JSONSchema(filepath='document/payload.json')
 
 
+def set_schema_root(schema_root):
+    """
+    set a different schema root for the JSONSchema instances.
+    Used mainly for testing purposes.
+    """
+    document_json_schema.set_schema_root(schema_root=schema_root)
+    document_data_json_schema.set_schema_root(schema_root=schema_root)
+
+
 def get_cache_key(pk, model, extra=None):
     """
     get current cachekey name  based on random generated shorten url
