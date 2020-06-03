@@ -2,7 +2,7 @@ import yaml
 from django.conf import settings
 from django.db.models import Q
 from rest_framework import viewsets
-# from rest_framework.response import Response
+from rest_framework.response import Response
 from .pagination import VerbosePagination
 from .serializers.story import CreateStorySerializer
 from ..models import Story
@@ -49,3 +49,7 @@ class StoryViewSet(viewsets.ModelViewSet):
         parser = request.query_params.get('parser', None)
         if parser and parser == 'yaml':
             story.contents = yaml.load(story.contents)
+
+        serializer = CreateStorySerializer(
+            story, context={'request': request})
+        return Response(serializer.data)
