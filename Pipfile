@@ -23,6 +23,8 @@ flake8 = "*"
 dpath = "*"
 gspread = "*"
 gitpython = "*"
+django-oauth-toolkit = "*"
+djoser = "*"
 
 [requires]
 python_version = "3.8"
