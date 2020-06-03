@@ -213,21 +213,3 @@ class Glue(object):
                 _validated_ordering.append(
                     '%s%s' % ('-' if _reverse else '', _field))
         return _validated_ordering
-
-
-class CachedGlue(Glue):
-    """
-    Used when caching is needed, prevent validation if cache is present.
-    Note that queryset will be empty of cache is present...
-    """
-    is_in_cache = False
-    cache_key = None
-
-    def __init__(
-        self, request, queryset, extra_ordering=[],
-        perform_q=True, cache_prefix=None
-    ):
-        super(CachedGlue, self).__init__(
-            request=request, queryset=queryset,
-            extra_ordering=extra_ordering, perform_q=perform_q
-        )
