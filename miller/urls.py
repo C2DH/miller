@@ -19,14 +19,18 @@ from django.urls import path
 from django.conf.urls import url, include
 from django.utils.safestring import mark_safe
 from rest_framework import routers
-from .api import StoryViewSet
+from .api.story import StoryViewSet
+from .api.document import DocumentViewSet
 
 router = routers.DefaultRouter(trailing_slash=True)
 router.register(r'story', StoryViewSet)
+router.register(r'document', DocumentViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
     path('admin/', admin.site.urls),
+    # oaht2 toolkit here
+    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
 
 admin.site.site_header = mark_safe(
