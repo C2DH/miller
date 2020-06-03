@@ -17,6 +17,12 @@ run-dev:
 	&& export GIT_REVISION=$(shell git rev-parse --short HEAD) \
 	&& cd docker && docker-compose -f docker-compose.dev.yml up
 
+run-dev-detach:
+	export GIT_TAG=$(shell git describe --tags)\
+	&& export GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD) \
+	&& export GIT_REVISION=$(shell git rev-parse --short HEAD) \
+	&& cd docker && docker-compose -f docker-compose.dev.yml up --build -d
+
 run-test:
 	docker exec -it docker_miller_1 python manage.py test --testrunner=miller.test.NoDbTestRunner
 
