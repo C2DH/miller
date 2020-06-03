@@ -205,6 +205,8 @@ MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
 MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', 'nd')
 
 MILLER_CONTENTS_ROOT = get_env_variable('CONTENTS_ROOT', '/contents')
+MILLER_CONTENTS_ENABLE_GIT = get_env_variable(
+    'MILLER_CONTENTS_ENABLE_GIT', 'True') == 'True'
 # snapshots and thumbnail sizes
 # default: max size, both heght and width must be 1200 px
 MILLER_SIZES_SNAPSHOT = [

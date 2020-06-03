@@ -7,6 +7,8 @@ ARG GIT_REVISION
 
 RUN pip install --upgrade pip
 
+RUN apk add --no-cache git
+
 RUN apk add --no-cache \
     postgresql-libs
 RUN apk add imagemagick6-dev -U --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
