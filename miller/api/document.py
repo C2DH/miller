@@ -1,4 +1,4 @@
-from django.core.cache import cache
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
@@ -8,8 +8,7 @@ from ..models import Document
 from .pagination import FacetedPagination
 from .serializers.document import CreateDocumentSerializer, DocumentSerializer
 from .serializers.document import LiteDocumentSerializer
-from ..utils.api import CachedGlue
-from ..utils.models import get_cache_key
+from ..utils.api import Glue
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
@@ -25,13 +24,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def list(self, request):
-        g = CachedGlue(
-            request=request, queryset=self.queryset.distinct(),
-            cache_prefix=get_cache_key(model='Document', pk='list')
+        g = Glue(
+            request=request, queryset=self.queryset.distinct()
         )
-        if g.is_in_cache:
-            return Response(cache.get(g.cache_key))
-
         if not request.query_params.get('detailed', None):
             page = self.paginate_queryset(g.queryset)
             serializer = self.list_serializer_class(
@@ -45,5 +40,4 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
         serialized = self.paginator.get_paginated_response_as_dict(
             data=serializer.data)
-        cache.set(g.cache_key, serialized)
         return Response(serialized)
