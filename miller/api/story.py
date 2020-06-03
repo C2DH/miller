@@ -4,7 +4,7 @@ from django.db.models import Q
 from rest_framework import viewsets
 # from rest_framework.response import Response
 from .pagination import VerbosePagination
-from .serializers import CreateStorySerializer
+from .serializers.story import CreateStorySerializer
 from ..models import Story
 from django.shortcuts import get_object_or_404
 
