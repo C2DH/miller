@@ -3,6 +3,7 @@
 docker/.env
 docker/*.sql
 docker/redis-data
+docker/nginx-data
 docker/schema
 docker/media
 docker/private
