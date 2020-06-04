@@ -44,6 +44,8 @@ services:
     # entrypoint: watchmedo auto-restart --directory="/miller" --pattern="*.py" --recursive celery -A miller worker -l info
     volumes:
       - ../:/miller
+      - ./media:/media:z
+      - ./private:/private:z
       - ./contents:/contents:z
   miller:
     build: .. # miller directory
@@ -79,7 +81,7 @@ services:
     restart: always
     image: nginx:1.17-alpine
     ports:
-      - 8008:80
+      - 80:80
     depends_on:
       - miller
     volumes:
