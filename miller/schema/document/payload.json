@@ -39,7 +39,7 @@
       "title": "The Provenance Schema",
       "description": "An explanation about the purpose of this instance.",
       "default": "",
-      "maxLength": 127,
+      "maxLength": 200,
       "examples": [
         "Archiv(es) POST Luxembourg"
       ]
