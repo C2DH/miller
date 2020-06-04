@@ -8,6 +8,7 @@ from .utils.admin import DataPropertyListFilter
 from .utils.schema import JSONSchema
 from .tasks import update_story_search_vectors
 from .tasks import update_document_search_vectors
+from .tasks import create_document_snapshot
 
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ class DocumentAdmin(admin.ModelAdmin):
             ]
         })
     ]
-    actions = ['populate_search_vectors']
+    actions = ['populate_search_vectors', 'create_document_snapshot']
     form = DataAdminForm
     change_form_template = 'miller/document/document_change_form.html'
 
@@ -95,9 +96,13 @@ class DocumentAdmin(admin.ModelAdmin):
 
     def populate_search_vectors(modeladmin, request, queryset):
         for item in queryset:
-            update_document_search_vectors(document_pk=item.pk)
+            update_document_search_vectors.delay(document_pk=item.pk)
 
-    populate_search_vectors.short_description = "Rewrite search vectors"
+    def create_document_snapshot(modeladmin, request, queryset):
+        for item in queryset:
+            create_document_snapshot.delay(document_pk=item.pk)
+
+    create_document_snapshot.short_description = "Create thumbnails"
 
 
 admin.site.register(Story, StoryAdmin)
