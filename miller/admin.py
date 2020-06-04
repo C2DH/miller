@@ -71,7 +71,9 @@ class DataAdminForm(forms.ModelForm):
 
 
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'slug', 'title', 'type')
+    list_display = (
+        'id', 'slug', 'title', 'type', 'date_last_modified',
+        'attachment')
     list_filter = ('type', DataTypeListFilter, DataProviderListFilter)
     fieldsets = [
         (None, {'fields': ['type', 'short_url', 'title', 'slug']}),
