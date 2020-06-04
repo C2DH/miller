@@ -119,7 +119,7 @@ class Document(models.Model):
         if there is an attachment, generate a PNG snapshot or similar.
         If snapshot is already present, look for override param
         """
-        logger.debug(
+        logger.info(
             f'create_snapshot_from_attachment document pk:{self.pk}'
             f' using type:{self.type} ...'
         )
@@ -132,8 +132,8 @@ class Document(models.Model):
 
         if not os.path.exists(self.attachment.path):
             logger.error(
-                f'create_snapshot_from_attachment document pk:{self.pk}'
-                ' failed, attached file {self.attachment.path} does not exist.'
+                f'create_snapshot_from_attachment document pk:{self.pk} '
+                f'failed, attached file {self.attachment.path} does not exist.'
             )
             return
         # get snaphot path and its width / height
@@ -141,14 +141,21 @@ class Document(models.Model):
             basepath=self.type,
             source=self.attachment.path
         )
-        # save document
-        self.snapshot = snapshot
+        # save document, snapshot should be related to MEDIA_ROOT
+        self.snapshot = os.path.join(*snapshot.replace(
+            settings.MEDIA_ROOT, ''
+        ).split('/'))
         self.data.update({
             'snapshot': {
                 'width': w,
                 'height': h
             }
         })
+        logger.info(
+            f'create_snapshot_from_attachment document pk:{self.pk}'
+            f' using file {self.attachment.path}'
+            f' success: created {self.snapshot.path}'
+        )
         self.save()
 
     def update_search_vector(self):

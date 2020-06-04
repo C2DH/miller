@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.utils.translation import ugettext_lazy as _
 
+
 class DataPropertyListFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
@@ -21,8 +22,8 @@ class DataPropertyListFilter(admin.SimpleListFilter):
         qs = model_admin.get_queryset(request).annotate(
             types=KeyTextTransform(*self.params),
         ).values_list('types', flat=True)
-        q = [(x, _('[%s]'%x)) for x in set(filter(None,[q for q in qs]))]
-        return  q + [(u'not-defined',_('no data type defined'))]
+        q = [(x, _('[%s]' % x)) for x in set(filter(None, [q for q in qs]))]
+        return q + [(u'not-defined', _('no data type defined'))]
 
     def queryset(self, request, queryset):
         """
@@ -33,8 +34,12 @@ class DataPropertyListFilter(admin.SimpleListFilter):
         # Compare the requested value (either '80s' or '90s')
         # to decide how to filter the queryset.
         if self.value() == 'not-defined':
-            return queryset.filter(**{ '{}__isnull'.format(self.parameter_name): True })
+            return queryset.filter(**{
+                f'{self.parameter_name}__isnull': True
+            })
         elif self.value():
-            return queryset.filter(**{self.parameter_name:self.value()})
+            return queryset.filter(**{
+                self.parameter_name: self.value()
+            })
         else:
-          return queryset
+            return queryset
