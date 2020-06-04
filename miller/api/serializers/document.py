@@ -1,14 +1,19 @@
 from rest_framework import serializers
 from ...models import Document
-from ..fields import OptionalFileField
 
 
 class LiteDocumentSerializer(serializers.ModelSerializer):
     """
     # light document serializer (to be used in manytomany retrieve)
     """
-    snapshot = OptionalFileField()
-    attachment = OptionalFileField()
+    snapshot = serializers.FileField(
+        required=False, max_length=None,
+        allow_empty_file=True, use_url=True
+    )
+    attachment = serializers.FileField(
+        required=False, max_length=None,
+        allow_empty_file=True, use_url=True
+    )
 
     class Meta:
         model = Document
@@ -19,23 +24,20 @@ class LiteDocumentSerializer(serializers.ModelSerializer):
 
 
 class DocumentSerializer(LiteDocumentSerializer):
-    src = OptionalFileField(source='attachment')
     documents = LiteDocumentSerializer(many=True)
 
     class Meta:
         model = Document
         fields = (
-            'id', 'url', 'src',  'data', 'type', 'slug', 'title', 'snapshot',
+            'id', 'url', 'data', 'type', 'slug', 'title', 'snapshot',
             'copyrights', 'attachment', 'documents', 'locked'
         )
 
 
-class CreateDocumentSerializer(serializers.ModelSerializer):
+class CreateDocumentSerializer(LiteDocumentSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
-    snapshot = OptionalFileField(read_only=True)
-    attachment = OptionalFileField(required=False)
 
     class Meta:
         model = Document

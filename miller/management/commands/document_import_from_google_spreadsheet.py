@@ -75,11 +75,12 @@ class Command(BaseCommand):
                 x for x in docs if x.get('type', None) and x.get('slug', None)
                 and x.get('data__type', None)
             ]
-            all_data.append(list(get_valid_serialized_docs(
+            print(complete_docs)
+            all_data = all_data + list(get_valid_serialized_docs(
                 docs=complete_docs,
                 ignore_duplicates=True,
                 raise_validation_errors=False
-            )))
+            ))
             self.stdout.write(
                 f'worksheet {worksheet}'
                 f' n. docs valid: {len(list(complete_docs))}'
@@ -97,7 +98,7 @@ class Command(BaseCommand):
 
             self.stdout.write(f'writing {len(all_data)} in {filename}...')
 
-            with open(filename, 'a') as out:
+            with open(filename, 'w') as out:
                 out.write(json.dumps(all_data, sort_keys=True, indent=2))
 
             self.stdout.write(f'done, file {filename} written.')

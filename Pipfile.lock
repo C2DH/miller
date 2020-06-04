@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "edbbc759ec3ded9d26085b4d779748d1b1e6b106226d00d8094929eeabb0f967"
+            "sha256": "721eb7ce4a1d8970a809df44cb4abf58c27276cbb1218d125c69c379cab16624"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -61,11 +61,11 @@
         },
         "celery": {
             "hashes": [
-                "sha256:5147662e23dc6bc39c17a2cbc9a148debe08ecfb128b0eded14a0d9c81fc5742",
-                "sha256:df2937b7536a2a9b18024776a3a46fd281721813636c03a5177fa02fe66078f6"
+                "sha256:9ae2e73b93cc7d6b48b56aaf49a68c91752d0ffd7dfdcc47f842ca79a6f13eae",
+                "sha256:c2037b6a8463da43b19969a0fc13f9023ceca6352b4dd51be01c66fbbb13647e"
             ],
             "index": "pypi",
-            "version": "==4.4.3"
+            "version": "==4.4.4"
         },
         "certifi": {
             "hashes": [
@@ -83,11 +83,11 @@
         },
         "django": {
             "hashes": [
-                "sha256:051ba55d42daa3eeda3944a8e4df2bc96d4c62f94316dea217248a22563c3621",
-                "sha256:9aaa6a09678e1b8f0d98a948c56482eac3e3dd2ddbfb8de70a868135ef3b5e01"
+                "sha256:5052b34b34b3425233c682e0e11d658fd6efd587d11335a0203d827224ada8f2",
+                "sha256:e1630333248c9b3d4e38f02093a26f1e07b271ca896d73097457996e0fae12e8"
             ],
             "index": "pypi",
-            "version": "==3.0.6"
+            "version": "==3.0.7"
         },
         "django-oauth-toolkit": {
             "hashes": [
@@ -134,6 +134,13 @@
             ],
             "index": "pypi",
             "version": "==3.8.2"
+        },
+        "future": {
+            "hashes": [
+                "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"
+            ],
+            "index": "pypi",
+            "version": "==0.18.2"
         },
         "gitdb": {
             "hashes": [
@@ -343,6 +350,14 @@
             ],
             "index": "pypi",
             "version": "==1.2.2"
+        },
+        "shortuuid": {
+            "hashes": [
+                "sha256:3c11d2007b915c43bee3e10625f068d8a349e04f0d81f08f5fa08507427ebf1f",
+                "sha256:492c7402ff91beb1342a5898bd61ea953985bf24a41cd9f247409aa2e03c8f77"
+            ],
+            "index": "pypi",
+            "version": "==1.0.1"
         },
         "six": {
             "hashes": [
