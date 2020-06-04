@@ -34,9 +34,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         else:
             page = self.paginate_queryset(
                 g.queryset.prefetch_related('documents'))
-        serializer = DocumentSerializer(
-            page, many=True,
-            context={'request': request})
+            serializer = DocumentSerializer(
+                page, many=True,
+                context={'request': request})
 
         serialized = self.paginator.get_paginated_response_as_dict(
             data=serializer.data)
