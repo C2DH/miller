@@ -42,5 +42,5 @@ class JSONSchema:
                 raise e
 
     def validate(self, instance):
-        logger.info('validate() using json filepath: {}'.format(self.filepath))
+        # logger.info(f'validate() using json filepath: {self.filepath}')
         jsonschemaValidate(instance=instance, schema=self.schema)
