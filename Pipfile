@@ -25,6 +25,8 @@ gspread = "*"
 gitpython = "*"
 django-oauth-toolkit = "*"
 djoser = "*"
+shortuuid = "*"
+future = "*"
 
 [requires]
 python_version = "3.8"

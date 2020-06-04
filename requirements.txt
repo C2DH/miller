@@ -4,16 +4,17 @@ asgiref==3.2.7
 attrs==19.3.0
 billiard==3.6.3.0
 cachetools==4.1.0
-celery==4.4.3
+celery==4.4.4
 certifi==2020.4.5.1
 chardet==3.0.4
-Django==3.0.6
+Django==3.0.7
 django-oauth-toolkit==1.3.2
 django-templated-mail==1.1.1
 djangorestframework==3.11.0
 djoser==2.0.3
 dpath==2.0.1
 flake8==3.8.2
+future==0.18.2
 gitdb==4.0.5
 GitPython==3.1.3
 google-auth==1.16.0
@@ -38,6 +39,7 @@ requests==2.23.0
 requests-oauthlib==1.3.0
 rsa==4.0
 short-url==1.2.2
+shortuuid==1.0.1
 six==1.15.0
 smmap==3.0.4
 sqlparse==0.3.1
