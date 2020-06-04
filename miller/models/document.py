@@ -1,6 +1,6 @@
 import os
 import logging
-
+import shortuuid
 from django.conf import settings
 from django.db import models
 from django.db import connection
@@ -23,6 +23,10 @@ def private_attachment_file_name(instance, filename):
 
 def snapshot_attachment_file_name(instance, filename):
     return os.path.join(instance.type, 'snapshots', filename)
+
+
+def create_short_url():
+    return shortuuid.uuid()[:7]  # => "IRVaY2b"
 
 
 class Document(models.Model):
@@ -63,7 +67,8 @@ class Document(models.Model):
 
     type = models.CharField(max_length=24, choices=TYPE_CHOICES, default=TBD)
     short_url = models.CharField(
-        max_length=22, db_index=True, unique=True, blank=True
+        max_length=22, db_index=True, unique=True, blank=True,
+        default=create_short_url
     )
 
     title = models.CharField(max_length=500, default='')
