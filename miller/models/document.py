@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.db import connection
 from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot
@@ -111,6 +112,9 @@ class Document(models.Model):
     # undirected links
     documents = models.ManyToManyField("self", blank=True)
 
+    class Meta:
+        indexes = [GinIndex(fields=['search_vector'])]
+
     def __str__(self):
         return self.slug
 
@@ -158,7 +162,7 @@ class Document(models.Model):
         )
         self.save()
 
-    def update_search_vector(self):
+    def update_search_vector(self, verbose=False):
         """
         Fill the search_vector using self.data:
         e.g. get data['title'] if is a str or data['title']['en_US']
@@ -173,13 +177,17 @@ class Document(models.Model):
             languages=settings.MILLER_LANGUAGES,
             simple_fields=settings.MILLER_VECTORS_SIMPLE_FIELDS,
             multilanguage_fields=settings.MILLER_VECTORS_MULTILANGUAGE_FIELDS,
+            verbose=verbose
         )
         if not contents:
             logger.error(
                 f'update_search_vector failed for document:{self.pk} (empty?)'
             )
             return
-
+        if verbose:
+            logger.info(
+                f'VERBOSE - contents: {contents}'
+            )
         with connection.cursor() as cursor:
             to_be_executed = ''.join([
                 """

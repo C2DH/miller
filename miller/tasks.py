@@ -27,10 +27,10 @@ def update_story_search_vectors(self, story_pk):
     bind=True, autoretry_for=(Exception,), exponential_backoff=2,
     retry_kwargs={'max_retries': 5}, retry_jitter=True
 )
-def update_document_search_vectors(self, document_pk):
+def update_document_search_vectors(self, document_pk, verbose=False):
     logger.info(f'update_document_search_vectors document(pk={document_pk})')
     doc = Document.objects.get(pk=document_pk)
-    doc.update_search_vector()
+    doc.update_search_vector(verbose=verbose)
     logger.info(
         f'update_document_search_vectors document(pk={document_pk}) success.'
     )
