@@ -1,9 +1,11 @@
 import logging
 from django import forms
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 from jsonschema.exceptions import ValidationError
-
 from .models import Story, Tag, Document, Caption, Mention, Author
+from .models.profile import Profile
 from .utils.admin import DataPropertyListFilter
 from .utils.schema import JSONSchema
 from .tasks import update_story_search_vectors
@@ -105,6 +107,22 @@ class DocumentAdmin(admin.ModelAdmin):
     create_document_snapshot.short_description = "Create thumbnails"
 
 
+# Define an inline admin descriptor for Employee model
+# which acts a bit like a singleton
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'employee'
+
+
+# Define a new User admin
+class UserAdmin(BaseUserAdmin):
+    inlines = (ProfileInline,)
+
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 admin.site.register(Story, StoryAdmin)
 admin.site.register(Tag)
 admin.site.register(Document, DocumentAdmin)
