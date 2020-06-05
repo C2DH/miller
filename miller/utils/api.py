@@ -88,6 +88,7 @@ def filters_from_request(request, field_name='filters'):
             logger.exception(e)
             filters = dict()
     # filter filters having _ prefixes (cascade stuffs)
+    cleaned_filters = {}
     for k, v in filters.items():
         if k.endswith(WATERFALL_IN):
             if not isinstance(v, types.StringTypes):
@@ -99,8 +100,11 @@ def filters_from_request(request, field_name='filters'):
             waterfall.append({
                 waterfallre.sub('', k): v
             })
-        # get rifd of dirty filters
-        filters.pop(k, None)
+        cleaned_filters.update({k: v})
+    logger.info(
+        f'filters_from_request() field_name:{field_name}'
+        f' cleaned_filters: {cleaned_filters}'
+    )
     return filters, waterfall
 
 
