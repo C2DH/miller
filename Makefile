@@ -9,7 +9,7 @@ run-latest:
 	cd docker && docker-compose -f docker-compose.yml up --build
 
 run-down:
-	cd docker && docker-compose down
+	cd docker && docker-compose down --remove-orphans
 
 run-dev:
 	export GIT_TAG=$(shell git describe --tags)\
