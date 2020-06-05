@@ -1,6 +1,5 @@
 import os
 import logging
-import shortuuid
 from django.conf import settings
 from django.db import models
 from django.db import connection
@@ -9,7 +8,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot
-from ..utils.models import get_search_vector_query
+from ..utils.models import get_search_vector_query, create_short_url
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +23,6 @@ def private_attachment_file_name(instance, filename):
 
 def snapshot_attachment_file_name(instance, filename):
     return os.path.join(instance.type, 'snapshots', filename)
-
-
-def create_short_url():
-    return shortuuid.uuid()[:7]  # => "IRVaY2b"
 
 
 class Document(models.Model):
