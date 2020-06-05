@@ -25,6 +25,7 @@ services:
     restart: always
     environment:
       DEBUG: ${DEBUG}
+      LANGUAGES: ${LANGUAGES}
       MILLER_DATABASE_NAME: ${POSTGRES_DB}
       MILLER_DATABASE_USER: ${POSTGRES_USER}
       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
@@ -53,6 +54,7 @@ services:
     restart: always
     environment:
       DEBUG: ${DEBUG}
+      LANGUAGES: ${LANGUAGES}
       STATIC_URL: ${STATIC_URL}
       MILLER_DATABASE_NAME: ${POSTGRES_DB}
       MILLER_DATABASE_USER: ${POSTGRES_USER}
