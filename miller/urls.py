@@ -21,10 +21,12 @@ from django.utils.safestring import mark_safe
 from rest_framework import routers
 from .api.story import StoryViewSet
 from .api.document import DocumentViewSet
+from .api.profile import ProfileViewSet
 
 router = routers.DefaultRouter(trailing_slash=True)
 router.register(r'story', StoryViewSet)
 router.register(r'document', DocumentViewSet)
+router.register(r'profile', ProfileViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
