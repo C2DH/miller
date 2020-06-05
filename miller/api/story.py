@@ -1,12 +1,13 @@
 import yaml
 from django.conf import settings
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 from .pagination import VerbosePagination
-from .serializers.story import CreateStorySerializer
+from .serializers.story import CreateStorySerializer, LiteStorySerializer
 from ..models import Story
-from django.shortcuts import get_object_or_404
+from ..utils.api import Glue
 
 
 class StoryViewSet(viewsets.ModelViewSet):
@@ -53,3 +54,44 @@ class StoryViewSet(viewsets.ModelViewSet):
         serializer = CreateStorySerializer(
             story, context={'request': request})
         return Response(serializer.data)
+
+    def list(self, request):
+        queryset = self.getInitialQueryset(request)
+        g = Glue(
+            request=request, queryset=queryset
+        )
+
+        stories = g.queryset
+
+        # exclude deleted when not filtering by status
+        if 'status' not in g.filters:
+            stories = stories.exclude(status=Story.DELETED)
+
+        page = self.paginate_queryset(
+            stories.prefetch_related('documents'))
+
+        if page is not None:
+            serializer = LiteStorySerializer(
+                page, many=True,
+                context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = LiteStorySerializer(
+            page, many=True,
+            context={'request': request})
+        return Response(serializer.data)
+        # if g.warnings is not None:
+        #     # this comes from the VerbosePagination class
+        #     self.paginator.set_queryset_warnings(g.warnings)
+        #     self.paginator.set_queryset_verbose(g.get_verbose_info())
+        #
+        # page = self.paginate_queryset(stories)
+        #
+        # if page is not None:
+        #   serializer = LiteStorySerializer(page, many=True,
+        #         context={'request': request})
+        #   return self.get_paginated_response(serializer.data)
+        #
+        # serializer = LiteStorySerializer(page, many=True,
+        #                 context={'request': request})
+        # return Response(serializer.data)
