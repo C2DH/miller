@@ -2,6 +2,7 @@
 .env
 docker/.env
 docker/*.sql
+docker/*.htpasswd
 docker/redis-data
 docker/nginx-data
 docker/schema

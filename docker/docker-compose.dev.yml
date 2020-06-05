@@ -87,6 +87,7 @@ services:
     depends_on:
       - miller
     volumes:
+      - ./nginx.htpasswd:/etc/nginx/conf.d/nginx.htpasswd
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./media:/opt/media:z
       - ./nginx-data/cache:/opt/cache:z
