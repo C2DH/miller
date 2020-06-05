@@ -73,12 +73,13 @@ services:
     depends_on:
       - redis
       - postgresdb
-    entrypoint: /bin/sh -c "PYTHONPATH=/ python miller/dbconnection.py && python manage.py init_git && python manage.py runserver 0.0.0.0:8000"
+    entrypoint: /bin/sh -c "PYTHONPATH=/ python miller/dbconnection.py && python manage.py init_git && python manage.py collectstatic --clear --no-input && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ../:/miller
       - ./media:/media:z
       - ./private:/private:z
       - ./contents:/contents:z
+      - miller-static-files:/static
   nginx:
     restart: always
     image: nginx:1.17-alpine
@@ -90,4 +91,7 @@ services:
       - ./nginx.htpasswd:/etc/nginx/conf.d/nginx.htpasswd
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./media:/opt/media:z
+      - miller-static-files:/opt/static
       - ./nginx-data/cache:/opt/cache:z
+volumes:
+  miller-static-files:
