@@ -119,7 +119,8 @@ def create_different_sizes_from_snapshot(
     ],
     format='jpg',
     data_key='resolutions',
-    media_root=settings.MEDIA_ROOT
+    media_root=settings.MEDIA_ROOT,
+    media_url=None
 ):
     data_values = {}
 
@@ -133,6 +134,8 @@ def create_different_sizes_from_snapshot(
         dest_url = os.path.join(*dest.replace(
             media_root, ''
         ).split('/'))
+        if media_url:
+            dest_url = os.path.join(media_url, dest_url)
 
         logger.info(
             f'generate_other_images_from_snapshot'
