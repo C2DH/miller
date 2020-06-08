@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework.decorators import action
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from ..models.profile import Profile
@@ -16,7 +16,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     lookup_field = 'user__username'
     lookup_value_regex = '[0-9a-zA-Z.-_]+'
-
+    permission_classes = [IsAdminUser]
     # @detail_route(methods=['get'])
     # def authors(self, request, *args, **kwargs):
     # authors = Author.objects.filter(user__username=kwargs['user__username'])
