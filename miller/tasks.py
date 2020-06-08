@@ -44,6 +44,7 @@ def create_document_snapshot(self, document_pk):
     logger.info('document_pk: {}'.format(document_pk))
     doc = Document.objects.get(pk=document_pk)
     doc.create_snapshot_from_attachment()
+    doc.create_different_sizes_from_snapshot()
 
 
 @app.task(
