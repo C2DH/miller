@@ -5,6 +5,7 @@ import collections
 import dpath.util
 import shortuuid
 from django.conf import settings
+from django.utils.text import slugify
 from .schema import JSONSchema
 from . import get_data_from_dict
 from jsonschema.exceptions import ValidationError
@@ -18,6 +19,27 @@ document_data_json_schema = JSONSchema(filepath='document/payload.json')
 def create_short_url():
     return shortuuid.uuid()[:7]  # => "IRVaY2b"
 
+def get_unique_slug(instance, base, max_length=140):
+    """
+    generate a slug that do not exists in db, incrementing the number. usage sample:
+    yom = YourModel()
+    print(get_unique_slug(instance=yom, base=yom.title))
+    """
+    slug = slugify(base)[:max_length]
+    slug_exists = True
+    counter = 1
+    initial_slug = slug
+
+    while slug_exists:
+        try:
+            # use ORM api to check slug
+            slug_exists = instance.__class__.objects.filter(slug=slug).exists()
+            if slug_exists:
+                slug = f'{initial_slug}-{counter}'
+                counter += 1
+        except instance.__class__.DoesNotExist:
+            break
+    return slug
 
 def set_schema_root(schema_root):
     """

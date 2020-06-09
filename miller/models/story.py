@@ -2,13 +2,11 @@ import os
 from django.contrib.auth.models import User
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from . import Document
 from . import Author
 from . import Tag
-from ..utils.models import get_user_path, create_short_url
+from ..utils.models import get_user_path, create_short_url, get_unique_slug
 from ..fields import UTF8JSONField
 
 
@@ -99,6 +97,12 @@ class Story(models.Model):
 
     def __str__(self):
         return self.slug
+
+    def save(self, *args, **kwargs):
+        # check slug
+        if not self.slug:
+            self.slug = get_unique_slug(instance=self, base=self.title, max_length=68)
+        super(Story, self).save(*args, **kwargs)
 
     def update_search_vector(self):
         """
