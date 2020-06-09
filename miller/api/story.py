@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 from .pagination import VerbosePagination
-from .serializers.story import CreateStorySerializer, LiteStorySerializer, StorySerializer
+from .serializers.story import CreateStorySerializer, LiteStorySerializer, StorySerializer, YAMLStorySerializer
 from ..models import Story
 from ..utils.api import Glue
 
@@ -37,18 +37,16 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None):
         queryset = self.getInitialQueryset(request)
-        if pk.isdigit():
-            story = get_object_or_404(queryset, pk=pk)
-        else:
-            story = get_object_or_404(queryset, slug=pk)
-
+        story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
         # transform contents if required
         parser = request.query_params.get('parser', None)
         if parser and parser == 'yaml':
             story.contents = yaml.load(story.contents)
-
-        serializer = StorySerializer(
-            story, context={'request': request})
+            serializer = YAMLStorySerializer(
+                story, context={'request': request})
+        else:
+            serializer = StorySerializer(
+                story, context={'request': request})
         return Response(serializer.data)
 
     def list(self, request):

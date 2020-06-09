@@ -70,3 +70,31 @@ class StorySerializer(LiteStorySerializer):
             'authors', 'owner',
             'version'
         )
+
+class YAMLField(serializers.Field):
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, obj):
+        if obj is dict:
+            return obj
+        return obj
+
+
+class YAMLStorySerializer(StorySerializer):
+    contents = YAMLField()
+
+    class Meta:
+        model = Story
+        fields = (
+            'id', 'url', 'slug', 'short_url',
+            'title', 'abstract',
+            'documents', 'tags', 'covers', 'stories',
+            'data',
+            'contents',
+            'date', 'date_created', 'date_last_modified',
+            'status',
+            'source',
+            'authors', 'owner',
+            'version'
+        )
