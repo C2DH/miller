@@ -9,5 +9,5 @@ class Mention(models.Model):
         ordering = ["-date_created"]
         verbose_name_plural = "mentions"
 
-    def __unicode__(self):
+    def __str__(self):
         return f'{self.from_story} -> {self.to_story}'
