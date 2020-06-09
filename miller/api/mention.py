@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from miller.models import Story, Mention
-from serializers import MentionSerializer
+from .serializers.mention import MentionSerializer
 
 # Mention viewset. A mention is a story mentioned in another story.
 # This viewset create or delete items in a throucgh m2m model
