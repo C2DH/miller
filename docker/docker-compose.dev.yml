@@ -93,8 +93,7 @@ services:
       - ./nginx.htpasswd:/etc/nginx/conf.d/nginx.htpasswd
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./media:/opt/media:z
-      - ./editor-files:/opt/editor-files
-      - ./frontend-files:/opt/frontend-files
+      - ./nginx-data/html:/opt/html
       - miller-static-files:/opt/static
       - ./nginx-data/cache:/opt/cache:z
 volumes:
