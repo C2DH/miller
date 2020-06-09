@@ -1,4 +1,5 @@
 import os
+import json
 from django.contrib.auth.models import User
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
@@ -6,6 +7,7 @@ from django.db import models
 from . import Document
 from . import Author
 from . import Tag
+from ..utils import get_all_values_from_dict_by_key
 from ..utils.models import get_user_path, create_short_url, get_unique_slug
 from ..fields import UTF8JSONField
 
@@ -116,3 +118,34 @@ class Story(models.Model):
         (e.g. 'english')
         """
         pass
+
+    def save_captions_from_contents(self, key='pk', parser='json'):
+        """
+        Analyse contents looking for document slug or pk, based on your current settings.
+        Bulk create relationship with the Document model thrugh Caption
+        Return saved=[], missing=[], expecting=[]
+        """
+        expecting = []  # list of keys we expect to find in the db
+        missing = []  # list of keys not found in the db
+        saved = []  # Caption relationships saved
+        docs = []  # documents to be saved
+        if parser == 'json':
+            try:
+                json_contents = json.loads(self.contents)
+            except Exception as e:
+                # handle this at API level
+                raise e
+        # look for the keys (should be based on your settings)
+        expecting = get_all_values_from_dict_by_key(json_contents, key=key)
+        # get all documents ids using expecting
+        docs = Document.objects.filter(**{f'{key}__in': expecting})
+        if docs.count() != len(expecting):
+            # calculate diff!
+            missing = list(set(expecting) - set(docs.values_list(key, flat=True)))
+        # clear current list of captions
+        self.caption_set.all().delete()
+        # model (so we don't reference to Caption here to prevent circular ref
+        ThroughModel = Story.documents.through
+        # save captions
+        saved = ThroughModel.objects.bulk_create([ThroughModel(document=d, story=self) for d in docs])
+        return saved, missing, expecting
