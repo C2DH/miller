@@ -11,7 +11,7 @@ from ..utils.api import Glue
 
 
 class StoryViewSet(viewsets.ModelViewSet):
-    queryset = Story.objects.filter(status=Story.PUBLIC)
+    queryset = Story.objects.all()
     serializer_class = CreateStorySerializer
     pagination_class = VerbosePagination
 
@@ -22,19 +22,15 @@ class StoryViewSet(viewsets.ModelViewSet):
                 name__in=settings.MILLER_REVIEWERS_GROUPS
         ).exists():
             q = Story.objects.filter(
-                    Q(owner=request.user) |
-                    Q(authors__user=request.user) |
-                    Q(status__in=[
-                        Story.PUBLIC, Story.PENDING, Story.EDITING,
-                        Story.REVIEW, Story.REVIEW_DONE
-                    ])
-                ).distinct()
+                Q(owner=request.user) | Q(authors__user=request.user) | Q(status__in=[
+                    Story.PUBLIC, Story.PENDING, Story.EDITING,
+                    Story.REVIEW, Story.REVIEW_DONE
+                ])
+            ).distinct()
         elif request.user.is_authenticated:
             q = Story.objects.filter(
-                    Q(owner=request.user) |
-                    Q(status=Story.PUBLIC) |
-                    Q(authors__user=request.user)
-                ).distinct()
+                Q(owner=request.user) | Q(status=Story.PUBLIC) | Q(authors__user=request.user)
+            ).distinct()
         else:
             q = Story.objects.filter(status=Story.PUBLIC).distinct()
         return q
@@ -95,3 +91,12 @@ class StoryViewSet(viewsets.ModelViewSet):
         # serializer = LiteStorySerializer(page, many=True,
         #                 context={'request': request})
         # return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        story = serializer.save(owner=self.request.user)
+        story.save()
+
+    def partial_update(self, request, pk=0, *args, **kwargs):
+        queryset = self.getInitialQueryset(request)
+        story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
+        return super(StoryViewSet, self).partial_update(request, pk=story.pk, *args, **kwargs)
