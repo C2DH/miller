@@ -3,8 +3,9 @@ import json
 import logging
 import collections
 import dpath.util
-
+import shortuuid
 from django.conf import settings
+from django.utils.text import slugify
 from .schema import JSONSchema
 from . import get_data_from_dict
 from jsonschema.exceptions import ValidationError
@@ -14,6 +15,31 @@ logger = logging.getLogger(__name__)
 document_json_schema = JSONSchema(filepath='document/instance.json')
 document_data_json_schema = JSONSchema(filepath='document/payload.json')
 
+
+def create_short_url():
+    return shortuuid.uuid()[:7]  # => "IRVaY2b"
+
+def get_unique_slug(instance, base, max_length=140):
+    """
+    generate a slug that do not exists in db, incrementing the number. usage sample:
+    yom = YourModel()
+    print(get_unique_slug(instance=yom, base=yom.title))
+    """
+    slug = slugify(base)[:max_length]
+    slug_exists = True
+    counter = 1
+    initial_slug = slug
+
+    while slug_exists:
+        try:
+            # use ORM api to check slug
+            slug_exists = instance.__class__.objects.filter(slug=slug).exists()
+            if slug_exists:
+                slug = f'{initial_slug}-{counter}'
+                counter += 1
+        except instance.__class__.DoesNotExist:
+            break
+    return slug
 
 def set_schema_root(schema_root):
     """
@@ -122,13 +148,13 @@ def get_docs_from_json(
 def get_search_vector_query(
     instance, simple_fields, multilanguage_fields,
     languages=settings.MILLER_LANGUAGES,
-    separator=settings.MILLER_DATA_SEPARATOR
+    separator=settings.MILLER_DATA_SEPARATOR,
+    verbose=False
 ):
     logger.info(
         f'get_search_vector_query simple_fields:{list(simple_fields)}'
         f' for instance pk:{instance.pk}'
     )
-
     contents = [
         (
             getattr(instance, field),
@@ -136,6 +162,10 @@ def get_search_vector_query(
             config,
         ) for field, weight, config in simple_fields
     ]
+    logger.info(
+        f'get_search_vector_query simple_fields:{list(multilanguage_fields)}'
+        f' for instance pk:{instance.pk}'
+    )
     for field, w in multilanguage_fields:
         for lang, label, language, stemmer in list(languages):
             try:
@@ -149,10 +179,19 @@ def get_search_vector_query(
                     f'KeyError: {e} not found for instance pk:{instance.pk}'
                 )
             else:
-                contents.append((value, w, stemmer))
-    # logger.info(
-    #     f'get_search_vector_query simple_fields contents:{list(contents)}'
-    # )
+                if value:
+                    if verbose:
+                        logger.info(
+                            f'get_search_vector_query lang:{lang}'
+                            f' - field: {field}{separator}{language}'
+                            f' - for instance pk:{instance.pk}'
+                            f'v: {value}'
+                        )
+                    contents.append((value, w, stemmer))
+    if verbose:
+        logger.info(
+            f'get_search_vector_query simple_fields contents:{list(contents)}'
+        )
     # join using tsvector concatenation operator ||
     q = ' || '.join([
         f"setweight(to_tsvector('{config}',COALESCE(%s,'')), '{weight}')"
@@ -161,3 +200,13 @@ def get_search_vector_query(
         for value, weight, config in contents
     ])
     return q, contents
+
+
+def get_search_results(query, queryset, field='search_vector'):
+    logger.info(f'get_search_results:{query} {field}')
+
+    from django.contrib.postgres.search import SearchQuery, SearchRank
+    search_query = SearchQuery(query)
+    return queryset.filter(**{field: search_query}).annotate(
+        rank=SearchRank(field, search_query)
+    ).order_by('-rank')

@@ -10,7 +10,7 @@ class Command(BaseCommand):
     or if in docker:
     docker exec -it docker_miller_1 \
     python manage.py document_update_search_vectors \
-    <document_pk>, <document_pk> ... [--immediate]
+    <document_pk>, <document_pk> ... [--immediate] [--verbose]
     """
     help = 'create snapshots for given documents having an attachment'
 
@@ -21,8 +21,15 @@ class Command(BaseCommand):
             action='store_true',
             help='avoid delay tasks using celery (not use in production)',
         )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            help='use verbose logging',
+        )
 
-    def handle(self, document_pks, immediate=False, *args, **options):
+    def handle(
+        self, document_pks, immediate=False, verbose=False, *args, **options
+    ):
         self.stdout.write('document_update_search_vectors pks:{}'.format(
             document_pks
         ))
@@ -31,12 +38,15 @@ class Command(BaseCommand):
         for doc in docs:
             try:
                 if immediate:
-                    doc.update_search_vector()
+                    doc.update_search_vector(verbose=verbose)
                     self.stdout.write(
                         f'document_update_search_vectors pk:{doc.pk}'
                         f'vector: {doc.search_vector}'
                     )
                 else:
-                    update_document_search_vectors.delay(document_pk=doc.pk)
+                    update_document_search_vectors.delay(
+                        document_pk=doc.pk,
+                        verbose=verbose
+                    )
             except Exception as e:
                 self.stderr.write(e)

@@ -74,6 +74,8 @@ services:
       - redis
       - postgresdb
     entrypoint: /bin/sh -c "PYTHONPATH=/ python miller/dbconnection.py && python manage.py init_git && python manage.py collectstatic --clear --no-input && python manage.py runserver 0.0.0.0:8000"
+    # ports:
+    #   - 8008:8000
     volumes:
       - ../:/miller
       - ./media:/media:z
@@ -91,6 +93,7 @@ services:
       - ./nginx.htpasswd:/etc/nginx/conf.d/nginx.htpasswd
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./media:/opt/media:z
+      - ./nginx-data/html:/opt/html
       - miller-static-files:/opt/static
       - ./nginx-data/cache:/opt/cache:z
 volumes:

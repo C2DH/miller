@@ -34,6 +34,7 @@ class Command(BaseCommand):
                 if immediate:
                     doc = Document.objects.get(pk=doc.pk)
                     doc.create_snapshot_from_attachment()
+                    doc.create_different_sizes_from_snapshot()
                 else:
                     create_document_snapshot.delay(document_pk=doc.pk)
             except Exception as e:

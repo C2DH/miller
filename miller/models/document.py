@@ -1,6 +1,5 @@
 import os
 import logging
-import shortuuid
 from django.conf import settings
 from django.db import models
 from django.db import connection
@@ -8,8 +7,8 @@ from django.contrib.postgres.search import SearchVectorField
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
-from ..snapshots import create_snapshot
-from ..utils.models import get_search_vector_query
+from ..snapshots import create_snapshot, create_different_sizes_from_snapshot
+from ..utils.models import get_search_vector_query, create_short_url
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +23,6 @@ def private_attachment_file_name(instance, filename):
 
 def snapshot_attachment_file_name(instance, filename):
     return os.path.join(instance.type, 'snapshots', filename)
-
-
-def create_short_url():
-    return shortuuid.uuid()[:7]  # => "IRVaY2b"
 
 
 class Document(models.Model):
@@ -82,7 +77,7 @@ class Document(models.Model):
         default=dict, blank=True
     )
 
-    copyrights = models.TextField(null=True, blank=True,  default='')
+    copyrights = models.TextField(null=True, blank=True, default='')
 
     url = models.URLField(max_length=500, null=True, blank=True)
     owner = models.ForeignKey(
@@ -160,6 +155,32 @@ class Document(models.Model):
             f' using file {self.attachment.path}'
             f' success: created {self.snapshot.path}'
         )
+        self.save()
+
+    def create_different_sizes_from_snapshot(self, data_key='resolutions'):
+        if not self.snapshot or not getattr(self.snapshot, 'path', None):
+            logger.error(
+                f'generate_other_images_from_snapshot document pk:{self.pk}'
+                f' failed, no snapshot found! Skip.')
+            return
+        if not os.path.exists(self.snapshot.path):
+            logger.error(
+                f'generate_other_images_from_snapshot document pk:{self.pk} '
+                f'failed, snapshot file {self.snapshot.path} does not exist.'
+            )
+            return
+        sizes = create_different_sizes_from_snapshot(
+            snapshot=self.snapshot.path,
+            sizes=[
+                ('preview', settings.MILLER_SIZES_SNAPSHOT_PREVIEW),
+                ('thumbnail', settings.MILLER_SIZES_SNAPSHOT_THUMBNAIL),
+                ('medium', settings.MILLER_SIZES_SNAPSHOT_MEDIUM),
+            ],
+            format='jpg',
+            data_key=data_key,
+            media_url=settings.MEDIA_URL
+        )
+        self.data.update(sizes)
         self.save()
 
     def update_search_vector(self, verbose=False):

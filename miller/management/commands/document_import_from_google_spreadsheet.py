@@ -71,20 +71,31 @@ class Command(BaseCommand):
         all_data = []
         for worksheet in worksheet_list:
             docs = worksheet.get_all_records()
+            # docs ready to be employed
+            expected_docs = [x for x in docs if x.get('slug', None)]
+            expected_docs_slugs = set([x.get('slug') for x in expected_docs])
             complete_docs = [
-                x for x in docs if x.get('type', None) and x.get('slug', None)
-                and x.get('data__type', None)
+                x for x in docs
+                if x.get('type', None) and x.get('slug', None) and x.get('data__type', None)
             ]
-            print(complete_docs)
-            all_data = all_data + list(get_valid_serialized_docs(
+            complete_docs_slugs = set([x.get('slug') for x in complete_docs])
+            validated_docs = list(get_valid_serialized_docs(
                 docs=complete_docs,
                 ignore_duplicates=True,
-                raise_validation_errors=False
+                raise_validation_errors=True
             ))
+            validated_docs_slugs = set([x.get('slug') for x in validated_docs])
+            all_data = all_data + validated_docs
             self.stdout.write(
                 f'worksheet {worksheet}'
                 f' n. docs valid: {len(list(complete_docs))}'
-                f' / {len(list(docs))}'
+                f' / {len(list(expected_docs))}'
+                f' n. docs validated: {len(list(validated_docs))}'
+            )
+            self.stdout.write(
+                f'worksheet {worksheet}'
+                f' incomplete docs: {expected_docs_slugs - complete_docs_slugs}'
+                f' invalid docs: {complete_docs_slugs - validated_docs_slugs}'
             )
 
         if fake:

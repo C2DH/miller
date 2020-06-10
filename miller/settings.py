@@ -245,9 +245,17 @@ MILLER_SIZES_SNAPSHOT_THUMBNAIL = [
 MILLER_SIZES_SNAPSHOT_PREVIEW = [
     int(n) for n in get_env_variable(
         'MILLER_SIZES_SNAPSHOT_PREVIEW',
-        '96,0,0,800'
+        '96,0,0,768'
     ).split(',')
 ]
+# default: max size, both heght and width must be 600 px
+MILLER_SIZES_SNAPSHOT_MEDIUM = [
+    int(n) for n in get_env_variable(
+        'MILLER_SIZES_SNAPSHOT_MEDIUM',
+        '96,768,0,0'
+    ).split(',')
+]
+MILLER_SIZES_SNAPSHOT_DATA_KEY = get_env_variable('MILLER_SIZES_SNAPSHOT_DATA_KEY', 'resolutions')
 
 
 MILLER_LANGUAGES = [

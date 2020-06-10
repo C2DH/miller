@@ -112,3 +112,22 @@ def xldate_to_datetime(xldate, datemode=0):
     epoch = datetime.datetime(1899, 12, 30)
     excel_date = datetime.timedelta(days=xldate + 1462 * datemode)
     return epoch + excel_date
+
+
+def get_all_values_from_dict_by_key(obj, key):
+    """
+    Given a obj, recursively look for values given the key specified.
+    Return a flat
+    """
+    out = []
+    if type(obj) == dict:
+        for x in obj.keys():
+            if x == key:
+                out.append(obj[x])
+            out.extend(get_all_values_from_dict_by_key(obj=obj[x], key=key))
+
+    if type(obj) == list:
+        for x in obj:
+            out.extend(get_all_values_from_dict_by_key(obj=x, key=key))
+
+    return out

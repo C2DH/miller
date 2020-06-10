@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
+from ..fields import UTF8JSONField
 from django.db import models
 
 
@@ -40,7 +40,13 @@ class Tag(models.Model):
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default=PUBLIC)
 
-    data = JSONField(default=dict)
+    data = UTF8JSONField(
+        verbose_name=u'data contents', help_text='JSON format',
+        default=dict, blank=True
+    )
+
+    def __str__(self):
+        return self.slug
 
     class Meta:
         unique_together = ('name', 'category')
