@@ -19,7 +19,7 @@ class Profile(models.Model):
         (NEWSLETTER_NEVER, 'never'),
     )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     short_url = models.CharField(
         max_length=22, default=create_short_url, unique=True
     )
@@ -40,7 +40,7 @@ class Profile(models.Model):
 # Create a folder to store user contents: stories, files etc..
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
-    if not instance.profile:
+    if not hasattr(instance, 'profile'):
         pro = Profile(user=instance)
         pro.save()
         logger.debug(f'create_profile (user {instance.pk}) @post_save: done.')
