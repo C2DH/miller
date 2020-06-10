@@ -116,9 +116,10 @@ def create_different_sizes_from_snapshot(
     sizes=[
         ('preview', settings.MILLER_SIZES_SNAPSHOT_PREVIEW),
         ('thumbnail', settings.MILLER_SIZES_SNAPSHOT_THUMBNAIL),
+        ('medium', settings.MILLER_SIZES_SNAPSHOT_MEDIUM),
     ],
     format='jpg',
-    data_key='resolutions',
+    data_key=settings.MILLER_SIZES_SNAPSHOT_DATA_KEY,
     media_root=settings.MEDIA_ROOT,
     media_url=None
 ):
@@ -139,7 +140,7 @@ def create_different_sizes_from_snapshot(
 
         logger.info(
             f'generate_other_images_from_snapshot'
-            f' settings: resolution:{resolution}, max_size:{max_size},'
+            f' settings: {key}, resolution:{resolution}, max_size:{max_size},'
             f' set_width:{set_width}, set_height:{set_height}'
             f' dest: {dest}'
             f' dest_url: {dest_url}'

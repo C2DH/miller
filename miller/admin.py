@@ -1,8 +1,11 @@
 import logging
+import os
 from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
 from jsonschema.exceptions import ValidationError
 from .models import Story, Tag, Document, Caption, Mention, Author
 from .models.profile import Profile
@@ -76,7 +79,7 @@ class DataAdminForm(forms.ModelForm):
 class DocumentAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'slug', 'title', 'type', 'date_last_modified',
-        'attachment')
+        'attachment', 'thumbnail')
     list_filter = ('type', DataTypeListFilter, DataProviderListFilter)
     fieldsets = [
         (None, {'fields': ['type', 'short_url', 'title', 'slug']}),
@@ -96,14 +99,38 @@ class DocumentAdmin(admin.ModelAdmin):
     class Media:
         css = {'all': ('css/edit_json_field.css',)}
 
-    def populate_search_vectors(modeladmin, request, queryset):
+    def thumbnail(self, instance):
+        resolutions = instance.data.get(settings.MILLER_SIZES_SNAPSHOT_DATA_KEY, None)
+        if not resolutions:
+            if instance.type not in ['image', 'pdf']:
+                return ''
+            if not instance.attachment or not getattr(instance.attachment, 'path', None):
+                return mark_safe('⚠️ missing <b>required</b> attachment')
+            if not os.path.exists(instance.attachment.path):
+                return mark_safe('⚠️ attachment <b>not found</b>')
+            return mark_safe('... <b>ready to be queued</b> to get preview')
+        thumbnail = resolutions.get('thumbnail', {})
+        return mark_safe('<img src="{url}"  width="{width}" height="{height}" />'.format(**thumbnail))
+
+    thumbnail.__name__ = 'Thumbnail'
+
+    def populate_search_vectors(self, request, queryset):
         for item in queryset:
             update_document_search_vectors.delay(document_pk=item.pk)
 
-    def create_document_snapshot(modeladmin, request, queryset):
+    def create_document_snapshot(self, request, queryset):
         for item in queryset:
             create_document_snapshot.delay(document_pk=item.pk)
-
+        rows_updated = queryset.count()
+        if rows_updated == 1:
+            message_bit = "1 document"
+        else:
+            message_bit = f'{rows_updated} documents'
+        self.message_user(
+            request,
+            F'{message_bit} added to the queue'
+        )
+        
     create_document_snapshot.short_description = "Create thumbnails"
 
 

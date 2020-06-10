@@ -174,6 +174,7 @@ class Document(models.Model):
             sizes=[
                 ('preview', settings.MILLER_SIZES_SNAPSHOT_PREVIEW),
                 ('thumbnail', settings.MILLER_SIZES_SNAPSHOT_THUMBNAIL),
+                ('medium', settings.MILLER_SIZES_SNAPSHOT_MEDIUM),
             ],
             format='jpg',
             data_key=data_key,
