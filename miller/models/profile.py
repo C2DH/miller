@@ -14,9 +14,9 @@ class Profile(models.Model):
     NEWSLETTER_NEVER = '0'
 
     NEWSLETTER_CHOICES = (
-        (NEWSLETTER_WEEKLY,   'weekly'),
-        (NEWSLETTER_MONTHLY,  'monthly'),
-        (NEWSLETTER_NEVER,    'never'),
+        (NEWSLETTER_WEEKLY, 'weekly'),
+        (NEWSLETTER_MONTHLY, 'monthly'),
+        (NEWSLETTER_NEVER, 'never'),
     )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -35,11 +35,12 @@ class Profile(models.Model):
         default=NEWSLETTER_WEEKLY
     )
 
-
+    def __str__(self):
+        return self.user.username
 # Create a folder to store user contents: stories, files etc..
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
-    if created:
+    if not instance.profile:
         pro = Profile(user=instance)
         pro.save()
         logger.debug(f'create_profile (user {instance.pk}) @post_save: done.')

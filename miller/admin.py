@@ -130,7 +130,7 @@ class DocumentAdmin(admin.ModelAdmin):
             request,
             F'{message_bit} added to the queue'
         )
-        
+    
     create_document_snapshot.short_description = "Create thumbnails"
 
 
@@ -156,4 +156,5 @@ admin.site.register(Document, DocumentAdmin)
 admin.site.register(Caption)
 admin.site.register(Mention)
 admin.site.register(Author)
+admin.site.register(Profile)
 logger.info('admin registered.')
