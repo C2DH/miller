@@ -20,5 +20,5 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         lookup_field = 'user__username'
         fields = (
-            'id', 'short_url', 'bio', 'picture',
+            'short_url', 'bio', 'picture',
             'username', 'user', 'newsletter')
