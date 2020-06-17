@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from .pagination import VerbosePagination
 from .serializers.story import CreateStorySerializer, LiteStorySerializer, StorySerializer, YAMLStorySerializer
 from ..models import Story
@@ -98,3 +100,19 @@ class StoryViewSet(viewsets.ModelViewSet):
         queryset = self.getInitialQueryset(request)
         story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
         return super(StoryViewSet, self).partial_update(request, pk=story.pk, *args, **kwargs)
+
+    @action(detail=True, permission_classes=[IsAuthenticated])
+    def publish(self, request, pk):
+        """
+        A safe method to publish the story, only if the author is the owner
+        """
+        queryset = self.queryset.filter(Q(owner=request.user) | Q(authors__user=request.user)).distinct()
+        story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
+
+        if request.user.is_staff:
+            story.status = Story.PUBLIC
+        else:
+            story.status = Story.PENDING
+        story.save()
+        serializer = LiteStorySerializer(story, context={'request': request})
+        return Response(serializer.data)
