@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot, create_different_sizes_from_snapshot
 from ..utils.models import get_search_vector_query, create_short_url
+from ..utils.media import get_video_subtitles
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +182,24 @@ class Document(models.Model):
             media_url=settings.MEDIA_URL
         )
         self.data.update(sizes)
+        self.save()
+
+    def update_data_by_type(self):
+        """
+        update data.source according to multilingual settings if multilanguage version of the attachment are dfounf
+        for video add subtitles section:
+            "subtitles": [
+                {
+                    type: "vtt",
+                    language: "de_DE",
+                    url: "/video/{slug}.de_DE.vtt"
+                }
+            ]
+        for images
+        """
+        if self.type == Document.VIDEO:
+            subtitles = get_video_subtitles(path_prefix=f'{self.type}/{self.slug}')
+            self.data.update(subtitles)
         self.save()
 
     def update_search_vector(self, verbose=False):
