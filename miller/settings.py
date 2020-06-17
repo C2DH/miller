@@ -257,6 +257,9 @@ MILLER_SIZES_SNAPSHOT_MEDIUM = [
 ]
 MILLER_SIZES_SNAPSHOT_DATA_KEY = get_env_variable('MILLER_SIZES_SNAPSHOT_DATA_KEY', 'resolutions')
 
+MILLER_VIDEO_SUBTITLES_TYPES = get_env_variable('MILLER_VIDEO_SUBTITLES_TYPES', 'vtt,srt').split(',')
+MILLER_VIDEO_SUBTITLES_DATA_KEY = get_env_variable('MILLER_VIDEO_SUBTITLES_DATA_KEY', 'subtitles')
+
 
 MILLER_LANGUAGES = [
     str(n).split('|') for n in get_env_variable(
