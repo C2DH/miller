@@ -100,13 +100,18 @@ def create_snapshot(
             )
             img.save(filename=snapshot)
     else:
-        with Image(filename=source, resolution=resolution) as img:
-            img.format = format
-            resizedImg, w, h = resize_wand_image(
-                img=img, max_size=max_size,
-                set_width=set_width, set_height=set_height
-            )
-            img.save(filename=snapshot)
+        try:
+            with Image(filename=source, resolution=resolution) as img:
+                img.format = format
+                resizedImg, w, h = resize_wand_image(
+                    img=img, max_size=max_size,
+                    set_width=set_width, set_height=set_height
+                )
+                img.save(filename=snapshot)
+        except Exception as e:
+            logger.exception(e)
+            w = 0
+            h = 0
 
     return snapshot, w, h
 
