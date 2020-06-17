@@ -24,7 +24,7 @@ from .api.document import DocumentViewSet
 from .api.profile import ProfileViewSet
 from .api.mention import MentionViewSet
 from .api.caption import CaptionViewSet
-
+from .api.tag import TagViewSet
 
 router = routers.DefaultRouter(trailing_slash=True)
 router.register(r'story', StoryViewSet)
@@ -32,6 +32,7 @@ router.register(r'document', DocumentViewSet)
 router.register(r'profile', ProfileViewSet)
 router.register(r'mention', MentionViewSet)
 router.register(r'caption', CaptionViewSet)
+router.register(r'tag', TagViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
