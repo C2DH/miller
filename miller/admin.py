@@ -14,6 +14,7 @@ from .utils.schema import JSONSchema
 from .tasks import update_story_search_vectors
 from .tasks import update_document_search_vectors
 from .tasks import create_document_snapshot
+from .tasks import update_document_data_by_type
 
 
 logger = logging.getLogger(__name__)
@@ -81,6 +82,7 @@ class DocumentAdmin(admin.ModelAdmin):
         'id', 'slug', 'title', 'type', 'date_last_modified',
         'attachment', 'thumbnail')
     list_filter = ('type', DataTypeListFilter, DataProviderListFilter)
+    search_fields = ('pk', 'slug', 'short_url', 'title')
     fieldsets = [
         (None, {'fields': ['type', 'short_url', 'title', 'slug']}),
         ('Metadata', {'fields': ['data']}),
@@ -92,7 +94,7 @@ class DocumentAdmin(admin.ModelAdmin):
             ]
         })
     ]
-    actions = ['populate_search_vectors', 'create_document_snapshot']
+    actions = ['populate_search_vectors', 'create_document_snapshot', 'update_data_by_type']
     form = DataAdminForm
     change_form_template = 'miller/document/document_change_form.html'
 
@@ -132,6 +134,20 @@ class DocumentAdmin(admin.ModelAdmin):
         )
     
     create_document_snapshot.short_description = "Create thumbnails"
+    
+    def update_data_by_type(self, request, queryset):
+        for item in queryset:
+            update_document_data_by_type.delay(document_pk=item.pk)
+        rows_updated = queryset.count()
+        if rows_updated == 1:
+            message_bit = "1 document"
+        else:
+            message_bit = f'{rows_updated} documents'
+        self.message_user(
+            request,
+            F'{message_bit} added to the queue'
+        )
+
 
 
 # Define an inline admin descriptor for Employee model
