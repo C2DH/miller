@@ -39,7 +39,10 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk=None):
         queryset = self.getInitialQueryset(request)
-        story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
+        if pk.isdigit():
+            story = get_object_or_404(queryset, pk=pk)
+        else:
+            story = get_object_or_404(queryset, Q(slug=pk) | Q(short_url=pk))
         # transform contents if required
         parser = request.query_params.get('parser', None)
         if parser and parser == 'yaml':
@@ -98,7 +101,10 @@ class StoryViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, pk=0, *args, **kwargs):
         queryset = self.getInitialQueryset(request)
-        story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
+        if pk.isdigit():
+            story = get_object_or_404(queryset, pk=pk)
+        else:
+            story = get_object_or_404(queryset, Q(slug=pk) | Q(short_url=pk))
         return super(StoryViewSet, self).partial_update(request, pk=story.pk, *args, **kwargs)
 
     @action(detail=True, permission_classes=[IsAuthenticated])
@@ -107,7 +113,10 @@ class StoryViewSet(viewsets.ModelViewSet):
         A safe method to publish the story, only if the author is the owner
         """
         queryset = self.queryset.filter(Q(owner=request.user) | Q(authors__user=request.user)).distinct()
-        story = get_object_or_404(queryset, Q(pk=pk) | Q(slug=pk))
+        if pk.isdigit():
+            story = get_object_or_404(queryset, pk=pk)
+        else:
+            story = get_object_or_404(queryset, Q(slug=pk) | Q(short_url=pk))
 
         if request.user.is_staff:
             story.status = Story.PUBLIC

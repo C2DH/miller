@@ -19,7 +19,11 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     # retrieve by PK or slug
     def retrieve(self, request, pk, *args, **kwargs):
-        doc = get_object_or_404(Document, Q(slug=pk) | Q(pk=pk))
+        if pk.isdigit():
+            doc = get_object_or_404(self.queryset, pk=pk)
+        else:
+            doc = get_object_or_404(self.queryset, Q(slug=pk) | Q(short_url=pk))
+
         serializer = DocumentSerializer(doc, context={'request': request})
         return Response(serializer.data)
 
