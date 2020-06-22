@@ -49,14 +49,6 @@ def create_document_snapshot(self, document_pk):
 
 @app.task(
     bind=True, autoretry_for=(Exception,), exponential_backoff=2,
-    retry_kwargs={'max_retries': 5}, retry_jitter=True)
-def create_document_snapshot_images(self, document_pk):
-    logger.info('document_pk: {}'.format(document_pk))
-    doc = Document.objects.get(pk=document_pk)
-
-
-@app.task(
-    bind=True, autoretry_for=(Exception,), exponential_backoff=2,
     retry_kwargs={'max_retries': 5}, retry_jitter=True
 )
 def update_document_data_by_type(self, document_pk):
