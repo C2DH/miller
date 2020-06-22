@@ -19,7 +19,7 @@ class LiteDocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = (
             'id', 'title', 'slug', 'mimetype', 'type', 'data', 'url',
-            'attachment', 'snapshot'
+            'attachment', 'snapshot', 'short_url'
         )
 
 
@@ -30,7 +30,7 @@ class DocumentSerializer(LiteDocumentSerializer):
         model = Document
         fields = (
             'id', 'url', 'data', 'type', 'slug', 'title', 'snapshot',
-            'copyrights', 'attachment', 'documents', 'locked'
+            'copyrights', 'attachment', 'documents', 'locked', 'short_url'
         )
 
 
