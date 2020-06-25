@@ -63,4 +63,3 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write(f'document: {doc.slug} leave attachment as it is: {doc.attachment}')
                 doc.save()
-                print(doc, created)
