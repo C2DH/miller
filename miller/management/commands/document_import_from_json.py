@@ -54,6 +54,8 @@ class Command(BaseCommand):
                     doc.data = d.get('data')
                 else:
                     doc.data.update(d.get('data'))
+                if slug:
+                    self.stdout.write(f'document: {doc.slug} data: {doc.data}')
                 doc.type = d.get('type')
                 self.stdout.write(f'document: {doc.slug} reset attachment: {reset_attachment}')
                 if not doc.attachment or reset_attachment:
