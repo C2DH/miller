@@ -1,3 +1,4 @@
+from django.core import serializers
 from django.core.management.base import BaseCommand
 from miller.utils.models import get_docs_from_json
 from miller.models import Document
@@ -34,8 +35,13 @@ class Command(BaseCommand):
             action='store_true',
             help='replace document attachment field',
         )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            help='display all data',
+        )
 
-    def handle(self, filepaths, slug=None, reset_data=False, reset_attachment=False, *args, **options):
+    def handle(self, filepaths, slug=None, reset_data=False, reset_attachment=False, verbose=False, *args, **options):
         for filepath in filepaths:
             self.stdout.write(f'import data from: {filepath}')
             docs = get_docs_from_json(
@@ -50,12 +56,11 @@ class Command(BaseCommand):
                 self.stdout.write(f'document: {doc.slug} created:{created}')
                 self.stdout.write(f'document: {doc.slug} reset data: {reset_data}')
                 doc.title = d.get('title', '')
+                doc.url = d.get('url', '')
                 if reset_data:
                     doc.data = d.get('data')
                 else:
                     doc.data.update(d.get('data'))
-                if slug:
-                    self.stdout.write(f'document: {doc.slug} data: {doc.data}')
                 doc.type = d.get('type')
                 self.stdout.write(f'document: {doc.slug} reset attachment: {reset_attachment}')
                 if not doc.attachment or reset_attachment:
@@ -64,4 +69,6 @@ class Command(BaseCommand):
                     doc.attachment = attachment
                 else:
                     self.stdout.write(f'document: {doc.slug} leave attachment as it is: {doc.attachment}')
+                if verbose:
+                    self.stdout.write(f'document: {doc.slug} serialized:\n{serializers.serialize("yaml", [doc])}')
                 doc.save()
