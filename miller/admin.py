@@ -33,7 +33,9 @@ class DataProviderListFilter(DataPropertyListFilter):
 
 
 class StoryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status']
+    list_display = ['title', 'slug', 'status', 'owner', 'date_created', 'date_last_modified']
+    list_filter = ('status', 'tags')
+    search_fields = ('pk', 'slug', 'short_url', 'title')
     ordering = ['title']
     actions = ['make_published', 'populate_search_vectors']
 
@@ -104,13 +106,18 @@ class DocumentAdmin(admin.ModelAdmin):
     def thumbnail(self, instance):
         resolutions = instance.data.get(settings.MILLER_SIZES_SNAPSHOT_DATA_KEY, None)
         if not resolutions:
-            if instance.type not in ['image', 'pdf']:
-                return ''
-            if not instance.attachment or not getattr(instance.attachment, 'path', None):
-                return mark_safe('⚠️ missing <b>required</b> attachment')
-            if not os.path.exists(instance.attachment.path):
+            has_valid_attachment = instance.attachment and getattr(instance.attachment, 'path', None) and os.path.exists(instance.attachment.path)
+
+            if has_valid_attachment:
+                if instance.type in [Document.IMAGE, Document.PDF]:
+                    return mark_safe('... <b>ready to be queued</b> to get preview')
+                else:
+                    return f'attachment available, preview not available for type: {instance.type}'
+            if instance.url:
+                return mark_safe(f'remote url: <a href="{instance.url}">{instance.url}</a>, no preview available')
+            if instance.type in [Document.IMAGE, Document.AUDIO, Document.VIDEO, Document.AV, Document.PDF]:
                 return mark_safe('⚠️ attachment <b>not found</b>')
-            return mark_safe('... <b>ready to be queued</b> to get preview')
+            return ''
         thumbnail = resolutions.get('thumbnail', {})
         return mark_safe('<img src="{url}"  width="{width}" height="{height}" />'.format(**thumbnail))
 

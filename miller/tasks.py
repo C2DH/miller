@@ -1,3 +1,4 @@
+import os
 from .celery import app
 from celery.utils.log import get_task_logger
 from .models import Document, Story
@@ -40,11 +41,10 @@ def update_document_search_vectors(self, document_pk, verbose=False):
     bind=True, autoretry_for=(Exception,), exponential_backoff=2,
     retry_kwargs={'max_retries': 5}, retry_jitter=True
 )
-def create_document_snapshot(self, document_pk):
-    logger.info('document_pk: {}'.format(document_pk))
+def create_document_snapshot(self, document_pk, override=True):
+    logger.info(f'create_document_snapshot document(pk={document_pk})')
     doc = Document.objects.get(pk=document_pk)
-    doc.create_snapshot_from_attachment()
-    doc.create_different_sizes_from_snapshot()
+    doc.handle_preview()
 
 
 @app.task(
