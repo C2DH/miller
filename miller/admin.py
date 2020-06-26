@@ -33,7 +33,8 @@ class DataProviderListFilter(DataPropertyListFilter):
 
 
 class StoryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status']
+    list_display = ['title', 'slug', 'status', 'owner', 'date_created', 'date_last_modified']
+    search_fields = ('pk', 'slug', 'short_url', 'title')
     ordering = ['title']
     actions = ['make_published', 'populate_search_vectors']
 
