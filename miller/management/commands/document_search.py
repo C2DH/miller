@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from miller.models import Document
-from miller.utils.models import get_search_results
+from miller.utils.models import enrich_queryset_with_fulltext_search
 
 
 class Command(BaseCommand):
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, q, verbose=False, *args, **options):
         self.stdout.write(f'document_search q:{q} (VERBOSE:{verbose}).')
-        docs = get_search_results(
+        docs = enrich_queryset_with_fulltext_search(
             queryset=Document.objects.all(),
             query=q
         )
