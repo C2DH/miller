@@ -93,6 +93,9 @@ class Story(models.Model):
 
     # add huge search field
     search_vector = SearchVectorField(null=True, blank=True)
+    
+    # enable full text search using postgres vectors stored in search_vector
+    allow_fulltext_search = True
 
     class Meta:
         verbose_name_plural = "stories"
