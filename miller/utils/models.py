@@ -188,6 +188,7 @@ def get_search_vector_query(
                             f'v: {value}'
                         )
                     contents.append((value, w, stemmer))
+                    contents.append((value, w, 'simple'))
     if verbose:
         logger.info(
             f'get_search_vector_query simple_fields contents:{list(contents)}'
@@ -202,11 +203,11 @@ def get_search_vector_query(
     return q, contents
 
 
-def get_search_results(query, queryset, field='search_vector'):
-    logger.info(f'get_search_results:{query} {field}')
+def enrich_queryset_with_fulltext_search(query, queryset, field='search_vector'):
+    logger.info(f'enrich_queryset_with_fulltext_search:{query} {field}')
 
     from django.contrib.postgres.search import SearchQuery, SearchRank
     search_query = SearchQuery(query)
     return queryset.filter(**{field: search_query}).annotate(
         rank=SearchRank(field, search_query)
-    ).order_by('-rank')
+    )
