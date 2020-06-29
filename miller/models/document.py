@@ -11,6 +11,7 @@ from ..snapshots import create_snapshot, create_different_sizes_from_snapshot
 from ..utils.models import get_search_vector_query, create_short_url
 from ..utils.media import get_video_subtitles
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -108,6 +109,9 @@ class Document(models.Model):
 
     # undirected links
     documents = models.ManyToManyField("self", blank=True)
+
+    # enable full text search using postgres vectors
+    allow_fulltext_search = True
 
     class Meta:
         indexes = [GinIndex(fields=['search_vector'])]
@@ -264,3 +268,5 @@ class Document(models.Model):
                 value
                 for value, w, c in contents
             ] + [self.pk])
+
+    
