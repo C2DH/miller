@@ -212,6 +212,7 @@ def escape_search_query_raw(query, is_partial=False):
 def enrich_queryset_with_fulltext_search(query, queryset, field='search_vector'):
     search_type = 'plain'
     prepared_query = query
+    is_partial = False
     if ' ' in query:
         search_type = 'phrase'
         prepared_query = escape_search_query_raw(
@@ -219,9 +220,14 @@ def enrich_queryset_with_fulltext_search(query, queryset, field='search_vector')
             is_partial=False)
     elif '*' in query:
         search_type = 'raw'
+        is_partial = True
         prepared_query = escape_search_query_raw(
             query,
             is_partial=True)
+
+    if is_partial and len(prepared_query) < 3:
+        return queryset.annotate(rank=0)
+
     logger.info(f'enrich_queryset_with_fulltext_search:{query} {field} to q:{prepared_query}')
     search_query = SearchQuery(prepared_query, search_type=search_type)
     return queryset.filter(**{field: search_query}).annotate(
