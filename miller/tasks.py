@@ -1,5 +1,6 @@
-import os
 from .celery import app
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from celery.utils.log import get_task_logger
 from .models import Document, Story
 
@@ -55,3 +56,10 @@ def update_document_data_by_type(self, document_pk):
     logger.info('update_document_data_by_type document_pk: {}'.format(document_pk))
     doc = Document.objects.get(pk=document_pk)
     doc.update_data_by_type()
+
+# listen to django signals
+@receiver(post_save, sender=Document)
+def document_post_save_handler(sender, instance, **kwargs):
+    logger.info(f'received @post_save document_pk: {instance.pk}')
+    update_document_search_vectors.delay(document_pk=instance.pk)
+
