@@ -9,7 +9,7 @@ from django.utils.text import slugify
 from .schema import JSONSchema
 from . import get_data_from_dict
 from jsonschema.exceptions import ValidationError
-
+from django.contrib.postgres.search import SearchQuery, SearchRank
 
 logger = logging.getLogger(__name__)
 document_json_schema = JSONSchema(filepath='document/instance.json')
@@ -188,6 +188,7 @@ def get_search_vector_query(
                             f'v: {value}'
                         )
                     contents.append((value, w, stemmer))
+                    contents.append((value, w, 'simple'))
     if verbose:
         logger.info(
             f'get_search_vector_query simple_fields contents:{list(contents)}'
@@ -201,12 +202,34 @@ def get_search_vector_query(
     ])
     return q, contents
 
+def escape_search_query_raw(query, is_partial=False):
+    q = query.replace(":*", "").replace("*", "")
+    if is_partial:
+        # prefix lexema
+        return f'{q}:*'
+    return q
 
-def get_search_results(query, queryset, field='search_vector'):
-    logger.info(f'get_search_results:{query} {field}')
+def enrich_queryset_with_fulltext_search(query, queryset, field='search_vector'):
+    search_type = 'plain'
+    prepared_query = query
+    is_partial = False
+    if ' ' in query:
+        search_type = 'phrase'
+        prepared_query = escape_search_query_raw(
+            query,
+            is_partial=False)
+    elif '*' in query:
+        search_type = 'raw'
+        is_partial = True
+        prepared_query = escape_search_query_raw(
+            query,
+            is_partial=True)
 
-    from django.contrib.postgres.search import SearchQuery, SearchRank
-    search_query = SearchQuery(query)
+    if is_partial and len(prepared_query) < 3:
+        return queryset.annotate(rank=0)
+
+    logger.info(f'enrich_queryset_with_fulltext_search:{query} {field} to q:{prepared_query}')
+    search_query = SearchQuery(prepared_query, search_type=search_type)
     return queryset.filter(**{field: search_query}).annotate(
         rank=SearchRank(field, search_query)
-    ).order_by('-rank')
+    )

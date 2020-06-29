@@ -5,6 +5,7 @@ import types
 from django.db.models import Q
 from django.core.exceptions import FieldError
 from django.db.models.expressions import RawSQL, OrderBy
+from .models import enrich_queryset_with_fulltext_search
 
 logger = logging.getLogger(__name__)
 WATERFALL_IN = '__all'
@@ -18,7 +19,7 @@ def search_from_request(request, klass):
     try:
         q = klass.get_search_Q(query=search_query)
     except AttributeError:
-        logger.warning('method get_search_Q not available in class')
+        logger.warning(f'method get_search_Q not available in class {klass}')
         # method not found on the model specified
         return None
     else:
@@ -119,23 +120,10 @@ class Glue(object):
         self.extra_ordering = extra_ordering
         self.queryset = queryset
         self.warnings = None
-
-        if perform_q:
-            self.search_query = search_from_request(
-                request=request,
-                klass=queryset.model
-            )
-
+        # get search query via q= parameter
+        self.search_query = request.query_params.get('q', '')
         try:
-            self.queryset = self.queryset.exclude(
-                **self.excludes).filter(**self.filters)
-
-            if perform_q and self.search_query:
-                self.queryset = self.queryset.filter(self.search_query)
-
-            if self.overlaps:
-                self.queryset = self.queryset.filter(self.overlaps)
-
+            self.set_queryset_from_request(request=request)
         except FieldError as e:
             logger.warning(e)
             self.warnings = {
@@ -143,6 +131,13 @@ class Glue(object):
             }
         except TypeError as e:
             logger.warning(e)
+
+    def set_queryset_from_request(self, request):
+        self.queryset = self.queryset.exclude(
+            **self.excludes
+        ).filter(**self.filters)
+        if self.overlaps:
+            self.queryset = self.queryset.filter(self.overlaps)
         # apply filters progressively
         for fil in self.filtersWaterfall:
             try:
@@ -151,8 +146,17 @@ class Glue(object):
                 pass
             except TypeError:
                 pass
-
-        if self.ordering is not None:
+        # get search query via q= parameter
+        if self.search_query and self.queryset.model.allow_fulltext_search:
+            self.queryset = enrich_queryset_with_fulltext_search(
+                query=self.search_query,
+                queryset=self.queryset,
+            )
+            if self.ordering is not None:
+                self.queryset = self.queryset.order_by(*self.validated_ordering())
+            else:
+                self.queryset = self.queryset.order_by('-rank')
+        elif self.ordering is not None:
             self.queryset = self.queryset.order_by(*self.validated_ordering())
 
     def get_hash(self, request):
