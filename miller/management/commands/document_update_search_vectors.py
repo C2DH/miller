@@ -1,3 +1,4 @@
+from django.core import serializers
 from django.core.management.base import BaseCommand
 from miller.models import Document
 from miller.tasks import update_document_search_vectors
@@ -34,7 +35,7 @@ class Command(BaseCommand):
             document_pks
         ))
         docs = Document.objects.filter(pk__in=document_pks)
-        self.stdout.write(f'document-create-snapshot on {docs.count()} items')
+        self.stdout.write(f'document_update_search_vectors on {docs.count()} items')
         for doc in docs:
             try:
                 if immediate:
@@ -43,6 +44,9 @@ class Command(BaseCommand):
                         f'document_update_search_vectors pk:{doc.pk}'
                         f'vector: {doc.search_vector}'
                     )
+                if verbose:
+                    doc.refresh_from_db()
+                    self.stdout.write(f'document_update_search_vectors: {doc.pk} serialized:\n{serializers.serialize("yaml", [doc])}')
                 else:
                     update_document_search_vectors.delay(
                         document_pk=doc.pk,
