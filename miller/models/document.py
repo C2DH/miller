@@ -194,14 +194,16 @@ class Document(models.Model):
         Create a preview images according to the settings.
         """
         if not self.snapshot or not getattr(self.snapshot, 'path', None):
-            if os.path.exists(self.attachment.snapshot):
-                logger.info(f'handle_preview document pk:{self.pk} skip snapshot generation, snapshot file found')
-            elif override:
-                logger.info(f'handle_preview document pk:{self.pk} has a INVALID snapshot, override')
+            if self.attachment and getattr(self.attachment, 'path', None):
+                logger.info(f'handle_preview document pk:{self.pk} try creating snapshot')
                 self.create_snapshot_from_attachment()
+            else:
+                logger.info(f'handle_preview document pk:{self.pk} no attachment found.')
         elif override:
             logger.info(f'handle_preview pk:{self.pk}) creating snapshot...')
             self.create_snapshot_from_attachment()
+        else:
+            logger.info(f'handle_preview document pk:{self.pk} skip snapshot generation, snapshot file found')
         self.create_different_sizes_from_snapshot()
 
     def update_data_by_type(self):
