@@ -84,7 +84,7 @@ def create_snapshot(
     )
 
     if source_mimetype == 'application/pdf':
-        page = options.get('pdf_page', 1)
+        page = options.get('pdf_page', 0)
         alpha_channel = options.get('pdf_alpha_channel', 'remove')
         background_color = options.get('pdf_background_color', 'white')
         with Image(filename=f'{source}[{page}]', resolution=resolution) as img:
