@@ -1,3 +1,4 @@
+import os
 from rest_framework import serializers
 from ...models.story import Story
 # from ...models.document import Document
@@ -6,6 +7,12 @@ from .profile import UserSerializer
 from .author import AuthorSerializer
 from .document import LiteDocumentSerializer
 from .tag import TagSerializer
+from django.conf import settings
+
+
+class RelativeFileField(serializers.FileField):
+    def to_representation(self, value):
+        return os.path.join(settings.MEDIA_URL, value.url)
 
 
 class ToCaptionSerializer(serializers.ModelSerializer):
@@ -18,10 +25,17 @@ class ToCaptionSerializer(serializers.ModelSerializer):
     copyrights = serializers.ReadOnlyField(source='document.copyrights')
     caption = serializers.ReadOnlyField(source='contents')
     data = serializers.ReadOnlyField(source='document.data')
+    attachment = RelativeFileField(
+        source='document.attachment',
+        required=False, max_length=None,
+        allow_empty_file=True, use_url=False
+    )
 
     class Meta:
         model = Caption
-        fields = ('id', 'document_id', 'title', 'slug', 'url', 'type', 'copyrights', 'caption', 'short_url', 'data')
+        fields = (
+            'id', 'document_id', 'title', 'slug', 'url', 'type', 'copyrights',
+            'caption', 'short_url', 'data', 'attachment')
 
 
 class ToStorySerializer(serializers.ModelSerializer):
