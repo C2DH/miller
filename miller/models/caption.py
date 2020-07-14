@@ -10,5 +10,5 @@ class Caption(models.Model):
         ordering = ["-date_created"]
         verbose_name_plural = "captions"
 
-    def __unicode__(self):
+    def __str__(self):
         return f"{self.story} -> {self.document}"
