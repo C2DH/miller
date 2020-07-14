@@ -12,7 +12,8 @@ from django.conf import settings
 
 class RelativeFileField(serializers.FileField):
     def to_representation(self, value):
-        return os.path.join(settings.MEDIA_URL, value.url)
+        if value:
+            return os.path.join(settings.MEDIA_URL, value.url)
 
 
 class ToCaptionSerializer(serializers.ModelSerializer):
