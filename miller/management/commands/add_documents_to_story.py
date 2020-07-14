@@ -8,11 +8,11 @@ class Command(BaseCommand):
     """
     usage:
 
-    ENV=development pipenv run ./manage.py add_document_to_story <story id>
+    ENV=development pipenv run ./manage.py add_documents_to_story <story id>
     <slug> <slug> <slug>
     using docker:
         docker exec -it docker_miller_1 \
-        python manage.py add_document_to_story <story id> <slug> <slug> <slug>
+        python manage.py add_documents_to_story <story id> <slug> <slug> <slug>
 
     """
     help = 'Create caption instance to connect a story with multiple documents, given their slugs'
