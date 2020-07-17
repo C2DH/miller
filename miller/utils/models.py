@@ -91,7 +91,14 @@ def get_valid_serialized_docs(
     # schema Validation
     for doc in docs:
         if expand_flatten_data:
-            doc.update(get_data_from_dict(doc))
+            try:
+                doc.update(get_data_from_dict(doc))
+            except ValueError as err:
+                logger.error('ValidationError "{}" on current instance {}'.format(
+                    err,
+                    doc,
+                ))
+                raise err
         try:
             document_json_schema.validate(doc)
         except ValidationError as err:
