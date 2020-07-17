@@ -1,4 +1,3 @@
-import os
 from rest_framework import serializers
 from ...models.story import Story
 # from ...models.document import Document
@@ -7,13 +6,7 @@ from .profile import UserSerializer
 from .author import AuthorSerializer
 from .document import LiteDocumentSerializer
 from .tag import TagSerializer
-from django.conf import settings
-
-
-class RelativeFileField(serializers.FileField):
-    def to_representation(self, value):
-        if value:
-            return os.path.join(settings.MEDIA_URL, value.url)
+from .fields import RelativeFileField
 
 
 class ToCaptionSerializer(serializers.ModelSerializer):
