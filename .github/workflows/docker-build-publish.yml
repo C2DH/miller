@@ -34,4 +34,4 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
         buildargs: GIT_BRANCH,GIT_REVISION
-        tag_names: "${{ env.RELEASE_VERSION }}"
+        tags: "${{ env.RELEASE_VERSION }}"
