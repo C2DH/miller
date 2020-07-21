@@ -1,0 +1,23 @@
+name: Build and publish Docker image
+on:
+  # Trigger the workflow on push or pull request,
+  # for the develop branch and all new tags
+  push:
+    branches:
+      - miller-v2
+    tags:
+      - v*
+      - preview-*
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@miller-v2
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+    - name: Extract commit hash
+      shell: bash
+      run: echo "##[set-output name=hash;]$(git rev-parse --short ${GITHUB_SHA})"
+      id: extract_hash
