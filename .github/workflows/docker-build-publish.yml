@@ -21,6 +21,9 @@ jobs:
       shell: bash
       run: echo "##[set-output name=hash;]$(git rev-parse --short ${GITHUB_SHA})"
       id: extract_hash
+    - name: Extract latest tag
+      shell: bash
+      run: echo ::set-env name=RELEASE_VERSION::$(git describe --tags --abbrev=0)
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       env:
@@ -31,4 +34,4 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
         buildargs: GIT_BRANCH,GIT_REVISION
-        tag_names: true
+        tag_names: "${{ env.RELEASE_VERSION }}"
