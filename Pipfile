@@ -27,6 +27,7 @@ django-oauth-toolkit = "*"
 djoser = "*"
 shortuuid = "*"
 future = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"

@@ -44,8 +44,8 @@ urlpatterns = [
 
 admin.site.site_header = mark_safe(
     '<b style="color:white">Miller</b>'
-    f' &middot {settings.MILLER_GIT_TAG}{__version__}'
-    f' ({settings.MILLER_GIT_BRANCH}/{settings.MILLER_GIT_REVISION})'
+    f' &middot {__version__}'
+    f' ({settings.MILLER_GIT_TAG}/{settings.MILLER_GIT_BRANCH}/{settings.MILLER_GIT_REVISION})'
 )
 
 if settings.DEBUG:
