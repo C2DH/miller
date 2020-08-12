@@ -3,8 +3,10 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import MethodNotAllowed
 # from rest_framework.response import Response
 from ..models import Document
+from ..models.caption import Caption
 from .pagination import FacetedPagination
 from .serializers.document import CreateDocumentSerializer, DocumentSerializer
 from .serializers.document import LiteDocumentSerializer
@@ -45,3 +47,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
         serialized = self.paginator.get_paginated_response_as_dict(
             data=serializer.data)
         return Response(serialized)
+
+    def destroy(self, request, pk=None):
+        """
+        Delete document
+        If the document is attached to a module, return a 405 NOT ALLOWED
+        """
+        if(pk is not None and Caption.objects.filter(document=pk)):
+            raise MethodNotAllowed(None, 'The document cannot be deleted because it is being used in a story')
+        return super().destroy(self, request, pk)
