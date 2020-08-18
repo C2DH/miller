@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot, create_different_sizes_from_snapshot
 from ..utils.models import get_search_vector_query, create_short_url
+from ..utils.git import commit_instance
 from ..utils.media import get_video_subtitles
 
 
@@ -271,4 +272,8 @@ class Document(models.Model):
                 for value, w, c in contents
             ] + [self.pk])
 
-    
+    def commit(self):
+        """
+        if settings.MILLER_CONTENTS_ENABLE_GIT, write to disk
+        """
+        commit_instance(instance=self)
