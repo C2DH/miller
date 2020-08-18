@@ -42,6 +42,32 @@ def update_document_search_vectors(self, document_pk, verbose=False):
     bind=True, autoretry_for=(Exception,), exponential_backoff=2,
     retry_kwargs={'max_retries': 5}, retry_jitter=True
 )
+def commit_document(self, document_pk, verbose=False):
+    logger.info(f'commit_document document(pk={document_pk})')
+    doc = Document.objects.get(pk=document_pk)
+    doc.commit()
+    logger.info(
+        f'commit_document document(pk={document_pk}) success.'
+    )
+
+
+@app.task(
+    bind=True, autoretry_for=(Exception,), exponential_backoff=2,
+    retry_kwargs={'max_retries': 5}, retry_jitter=True
+)
+def commit_story(self, story_pk, verbose=False):
+    logger.info(f'commit_story document(pk={story_pk})')
+    story = Story.objects.get(pk=story_pk)
+    story.commit()
+    logger.info(
+        f'commit_story document(pk={story_pk}) success.'
+    )
+
+
+@app.task(
+    bind=True, autoretry_for=(Exception,), exponential_backoff=2,
+    retry_kwargs={'max_retries': 5}, retry_jitter=True
+)
 def create_document_snapshot(self, document_pk, override=True):
     logger.info(f'create_document_snapshot document(pk={document_pk})')
     doc = Document.objects.get(pk=document_pk)
@@ -62,4 +88,3 @@ def update_document_data_by_type(self, document_pk):
 def document_post_save_handler(sender, instance, **kwargs):
     logger.info(f'received @post_save document_pk: {instance.pk}')
     update_document_search_vectors.delay(document_pk=instance.pk)
-
