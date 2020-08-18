@@ -9,6 +9,7 @@ from . import Author
 from . import Tag
 from ..utils import get_all_values_from_dict_by_key
 from ..utils.models import get_user_path, create_short_url, get_unique_slug
+from ..utils.git import commit_instance
 from ..fields import UTF8JSONField
 
 
@@ -93,7 +94,7 @@ class Story(models.Model):
 
     # add huge search field
     search_vector = SearchVectorField(null=True, blank=True)
-    
+
     # enable full text search using postgres vectors stored in search_vector
     allow_fulltext_search = True
 
@@ -152,3 +153,9 @@ class Story(models.Model):
         # save captions
         saved = ThroughModel.objects.bulk_create([ThroughModel(document=d, story=self) for d in docs])
         return saved, missing, expecting
+
+    def commit(self):
+        """
+        if settings.MILLER_CONTENTS_ENABLE_GIT, write to disk
+        """
+        commit_instance(instance=self)
