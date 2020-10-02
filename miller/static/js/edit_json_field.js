@@ -7,8 +7,10 @@
   /** Field type */
   var STRING_TYPE = 'string';
   var INTEGER_TYPE = 'integer';
+  var NUMBER_TYPE = 'number';
   var BOOLEAN_TYPE = 'boolean';
   var OBJECT_TYPE = 'object';
+  var ARRAY_TYPE = 'array';
 
   /** Selectors */
   var DEFAULT_JSON_FIELD_SELECTOR = 'textarea';
@@ -24,6 +26,7 @@
   var READONLY = 'readonly';
   var MAXLENGTH = 'maxlength';
   var JSON_DATA = 'json';
+  var TYPE = 'type';
   var OPTIONS_DATA = 'options';
   var PATTERN_DATA = 'pattern';
 
@@ -43,6 +46,7 @@
     required: 'This field is required.',
     options: 'The value is not one of the options.',
     integer: 'The value is not an integer.',
+    number: 'The value is not a number',
     pattern: 'This value doesi not match the pattern.'
   };
 
@@ -64,8 +68,8 @@
   var INPUT_TEXT_FIELD_HTML = '\
     <input type="text" class="field vTextField"></input>\
   ';
-  var INPUT_INTEGER_FIELD_HTML = '\
-    <input type="text" class="field" integer="integer"></input>\
+  var INPUT_NUMBER_FIELD_HTML = '\
+    <input type="number" class="field" ></input>\
   ';
   var SELECT_FIELD_HTML = '<select class="field"></select>';
   var SELECT_OPTION_HTML = '<option></option>';
@@ -221,7 +225,7 @@
     this.delegate(CHANGE_EVENT, this._formField_changeHandler, fields, FIELD_SELECTOR);
     this.delegate(KEY_UP_EVENT, this._formField_keyUpHandler, fields, [INPUT_TAG, TEXTAREA_TAG]);
 
-    this._updateJSONData();
+    this._updateJSONField();
 
     if(this.config.validate)
       this.validateAllFields();
@@ -250,7 +254,7 @@
           fieldId,
           schema.properties[fieldId],
           jsonData,
-          schema.required.indexOf(fieldId) != -1
+          schema.required && (schema.required.indexOf(fieldId) != -1)
         )
       );
     }
@@ -274,7 +278,8 @@
    */
   App.prototype._addField = function(fieldId, fieldProperties, jsonData, required) {
 
-    jsonData[fieldId] = jsonData[fieldId] || fieldProperties.default;
+    if(jsonData[fieldId] === undefined)
+      jsonData[fieldId] = fieldProperties.type === OBJECT_TYPE ? {} : fieldProperties.default;
 
     //  Add the field container with the label
     var field = $(FIELD_CONTAINER_HTML);
@@ -291,9 +296,9 @@
     if(fieldProperties.type == OBJECT_TYPE)
       formField = this._addFields(fieldProperties, jsonData[fieldId]);
     else if(fieldProperties.enum)
-      formField = this._addSelectField(fieldId, fieldProperties.enum, jsonData, required);
+      formField = this._addSelectField(fieldId, fieldProperties.type, fieldProperties.enum, jsonData, required);
     else if(fieldProperties.type == BOOLEAN_TYPE)
-      formField = this._addSelectField(fieldId, [String(false), String(true)], jsonData, required);
+      formField = this._addSelectField(fieldId, fieldProperties.type, [String(false), String(true)], jsonData, required);
     else
       formField = this._addInputField(fieldId, fieldProperties.type, jsonData, required, fieldProperties.maxLength)
         .data(PATTERN_DATA, fieldProperties.pattern);
@@ -328,23 +333,20 @@
 
     var inputField;
 
-    //  For string properties without maxLength defined, a textarea is used as input field
-    if(!maxLength)
-      inputField = $(TEXTAREA_FIELD_HTML);
-
-    else {
-      switch(type) {
-        case STRING_TYPE: inputField = $(INPUT_TEXT_FIELD_HTML); break;
-        case INTEGER_TYPE: inputField = $(INPUT_INTEGER_FIELD_HTML); break;
-        default: inputField = $(INPUT_TEXT_FIELD_HTML);
-      }
+    switch(type) {
+      //  For string properties without maxLength defined, a textarea is used as input field
+      case STRING_TYPE: inputField = maxLength ? $(INPUT_TEXT_FIELD_HTML) : $(TEXTAREA_FIELD_HTML); break;
+      case INTEGER_TYPE:
+      case NUMBER_TYPE: inputField = $(INPUT_NUMBER_FIELD_HTML); break;
+      default: inputField = $(INPUT_TEXT_FIELD_HTML);
     }
 
     inputField
       .attr(ID, this.field_id_pfx + fieldId)
       .data(NAME, fieldId)
-      .val(String(jsonData[fieldId]))
-      .data(JSON_DATA, jsonData);
+      .val(jsonData[fieldId] ? String(jsonData[fieldId]) : null)
+      .data(JSON_DATA, jsonData)
+      .data(TYPE, type);
 
     //  Set required attribute
     if(required)
@@ -365,6 +367,7 @@
    * Add a select field to edit the JSON property identified by the fieldId parameter
    *
    * @param fieldId id of the json property to edit
+   * @param type type of value (string, integer, boolean) for the field
    * @param options array which contains the list of options for the select field
    * @param value current value of the property
    * @param required  boolean value which determines whether the field is required
@@ -374,9 +377,14 @@
    * @author  fre
    * @since   March 25, 2020
    */
-  App.prototype._addSelectField = function(fieldId, options, jsonData, required) {
+  App.prototype._addSelectField = function(fieldId, type, options, jsonData, required) {
 
     var selectField = $(SELECT_FIELD_HTML);
+
+    //  Add a blank option if the field is not required
+    if(!required)
+      selectField.append($(SELECT_OPTION_HTML));
+
     for(var i = 0; i < options.length; i++) {
       selectField.append(
         $(SELECT_OPTION_HTML).text(options[i])
@@ -388,7 +396,8 @@
       .data(NAME, fieldId)
       .val(String(jsonData[fieldId]))
       .data(OPTIONS_DATA, options)
-      .data(JSON_DATA, jsonData);
+      .data(JSON_DATA, jsonData)
+      .data(TYPE, type);
 
     //  Set required attribute
     if(required)
@@ -411,13 +420,14 @@
     var fieldRow = field.parents(FORM_ROW_SELECTOR).first();
     var errorList = fieldRow.children(ERROR_LIST_SELECTOR);
     var value = field.val();
+    var type = field.data(TYPE);
 
     //  Remove all error messages
     fieldRow.removeClass(ERRORS);
     errorList.empty();
 
     //  Check required fields
-    if(value == '' && field.attr(REQUIRED)) {
+    if((value == '' || value == null) && field.attr(REQUIRED)) {
       fieldRow.addClass(ERRORS);
       $(LIST_ITEM_HTML)
         .text(ERROR_MESSAGES[REQUIRED])
@@ -426,7 +436,7 @@
 
     //  Check select field with options
     var options = field.data(OPTIONS_DATA);
-    if(options && options.indexOf(value) == -1) {
+    if(value && options && options.indexOf(value) == -1) {
       fieldRow.addClass(ERRORS);
       $(LIST_ITEM_HTML)
         .text(ERROR_MESSAGES[OPTIONS_DATA])
@@ -434,16 +444,24 @@
     }
 
     //  Check integer type
-    if(field.attr(INTEGER) && !($.isNumeric(value) && Math.floor(value) == value)) {
+    if(value && type === INTEGER_TYPE && !($.isNumeric(value) && Math.floor(value) == value)) {
       fieldRow.addClass(ERRORS);
       $(LIST_ITEM_HTML)
         .text(ERROR_MESSAGES[INTEGER])
         .appendTo(errorList);
     }
 
+    //  Check number type
+    if(value && type === NUMBER_TYPE && !$.isNumeric(value)) {
+      fieldRow.addClass(ERRORS);
+      $(LIST_ITEM_HTML)
+        .text(ERROR_MESSAGES[NUMBER_TYPE])
+        .appendTo(errorList);
+    }
+
     //  Check pattern (for date field)
     var pattern = field.data(PATTERN_DATA);
-    if(pattern && !value.match(pattern)) {
+    if(value && pattern && !value.match(pattern)) {
       fieldRow.addClass(ERRORS);
       $(LIST_ITEM_HTML)
         .text(ERROR_MESSAGES[PATTERN_DATA])
@@ -459,8 +477,39 @@
    * @author  fre
    * @since   March 24, 2020
    */
-  App.prototype._updateJSONData = function() {
+  App.prototype._updateJSONField = function() {
     this.jsonField.text(JSON.stringify(this.jsonData, null, ' '));
+  }
+
+
+  /**
+   * Update the JSON data from the value of the specified field
+   *
+   * @param   field   field used to update JSON data
+   *
+   * @author  fre
+   * @since   October 1, 2020
+   */
+  App.prototype._updateJSONData = function(field) {
+
+    var val   = field.val() || undefined;
+
+    switch(field.data(TYPE)) {
+    case NUMBER_TYPE:
+      val = parseFloat(val);
+      val = isNaN(val) ? undefined : val;
+      break;
+    case INTEGER_TYPE:
+      val = parseInt(val);
+      val = isNaN(val) ? undefined : val;
+      break;
+    case ARRAY_TYPE: val = val ? val.split(',') : undefined; break;
+    case BOOLEAN_TYPE: val = val == null ? undefined : val === "true";
+    }
+
+    field.data(JSON_DATA)[field.data(NAME)] = val;
+
+    this._updateJSONField();
   }
 
 
@@ -481,11 +530,8 @@
   App.prototype._formField_changeHandler = function(e) {
 
     var field = e.target;
-    var fieldId = field.data(NAME);
 
-    field.data(JSON_DATA)[field.data(NAME)] = field.attr(INTEGER) ? parseInt(field.val()) || 0 : field.val();
-
-    this._updateJSONData();
+    this._updateJSONData(field);
 
     if(this.config.validateOnChange)
       this._validateField(field);
@@ -502,11 +548,7 @@
    * @since	March 26, 2020
    */
   App.prototype._formField_keyUpHandler = function(e) {
-
-    var field = e.target;
-
-    field.data(JSON_DATA)[field.data(NAME)] = field.attr(INTEGER) ? parseInt(field.val()) || 0 : field.val();
-    this._updateJSONData();
+    this._updateJSONData(e.target);
   }
 
 
