@@ -52,14 +52,13 @@ class CreateDocumentSerializer(LiteDocumentSerializer):
         )
 
     def validate_data(self, data):
-        logger.info('clean_data on data')
+        logger.info('validate_data on data')
         try:
             document_json_schema.validate(data)
         except ValidationError as err:
             logger.error(
-                'ValidationError on current data (model:{},pk:{}): {}'.format(
-                    self.instance.__class__.__name__,
-                    self.instance.pk,
+                'ValidationError on current data (model:Document,pk:{}): {}'.format(
+                    self.instance.pk if self.instance else 'New',
                     err.message,
                 )
             )
