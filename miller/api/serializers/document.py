@@ -1,6 +1,11 @@
+import logging
 from rest_framework import serializers
 from ...models import Document
+from ...utils.schema import JSONSchema
+from jsonschema.exceptions import ValidationError
 
+logger = logging.getLogger(__name__)
+document_json_schema = JSONSchema(filepath='document/payload.json')
 
 class LiteDocumentSerializer(serializers.ModelSerializer):
     """
@@ -45,3 +50,19 @@ class CreateDocumentSerializer(LiteDocumentSerializer):
             'id', 'owner', 'type', 'data', 'short_url', 'title', 'slug',
             'copyrights', 'url', 'attachment', 'snapshot', 'mimetype'
         )
+
+    def validate_data(self, data):
+        logger.info('clean_data on data')
+        try:
+            document_json_schema.validate(data)
+        except ValidationError as err:
+            logger.error(
+                'ValidationError on current data (model:{},pk:{}): {}'.format(
+                    self.instance.__class__.__name__,
+                    self.instance.pk,
+                    err.message,
+                )
+            )
+            raise serializers.ValidationError('Invalid value for %s: %s' % (err.schema['title'], err.message))
+
+        return data
