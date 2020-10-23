@@ -1,221 +1,253 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "//schema/document/payload.json",
-    "type": "object",
-    "title": "JSON schema for JSONField:data",
-    "description": "Basic schema for a data field",
-    "required": [
-        "type",
-        "end_date",
-        "start_date",
-        "year",
-        "download",
-        "title",
-        "description"
-    ],
-    "properties": {
-        "archive_id": {
-            "$id": "#/properties/archive_id",
-            "type": "string",
-            "title": "The Archive_id Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "maxLength": 127,
-            "examples": [
-                ""
-            ]
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "//schema/document/payload.json",
+  "type": "object",
+  "title": "JSON schema for JSONField:data",
+  "description": "Basic schema for a data field",
+  "required": [
+    "type",
+    "title"
+  ],
+  "properties": {
+    "title": {
+      "$id": "#/properties/title",
+      "type": "object",
+      "format": "translate",
+      "title": "Title",
+      "required": [
+        "fr_FR"
+      ],
+      "properties": {
+        "de_DE": {
+          "$id": "#/properties/title/properties/de_DE",
+          "type": "string",
+          "title": "Title in German",
+          "minLength": 1,
+          "maxLength": 256
         },
-        "copyright": {
-            "$id": "#/properties/copyright",
-            "type": "string",
-            "title": "The Copyright Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                ""
-            ]
-        },
-        "provenance": {
-            "$id": "#/properties/provenance",
-            "type": "string",
-            "title": "The Provenance Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "maxLength": 127,
-            "examples": [
-                "Archiv(es) POST Luxembourg"
-            ]
-        },
-        "type": {
-            "$id": "#/properties/type",
-            "type": "string",
-            "title": "The Type Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "enum": [
-              "Photo",
-              "Image",
-              "Cartoon",
-              "Other"
-            ],
-            "examples": [
-                "other"
-            ]
-        },
-        "reference": {
-            "$id": "#/properties/reference",
-            "type": "string",
-            "title": "The Reference Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "maxLength": 127,
-            "examples": [
-                ""
-            ]
-        },
-        "end_date": {
-            "$id": "#/properties/end_date",
-            "type": "string",
-            "title": "The End_date Schema",
-            "description": "The format is YYYY-MM-DD",
-            "default": "",
-            "format": "date",
-            "pattern": "^(19|20)\\d\\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$",
-            "minLength": 1,
-            "maxLength": 10,
-            "examples": [
-                "2001-07-03"
-            ]
-        },
-        "start_date": {
-            "$id": "#/properties/start_date",
-            "type": "string",
-            "title": "The Start_date Schema",
-            "description": "The format is YYYY-MM-DD",
-            "default": "",
-            "format": "date",
-            "pattern": "^(19|20)\\d\\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$",
-            "minLength": 1,
-            "maxLength": 10,
-            "examples": [
-                "2001-07-03"
-            ]
-        },
-        "year": {
-            "$id": "#/properties/year",
-            "type": "integer",
-            "title": "The Year Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0,
-            "minLength": 1,
-            "maxLength": 20,
-            "examples": [
-                2001
-            ]
-        },
-        "download": {
-            "$id": "#/properties/download",
-            "type": "boolean",
-            "title": "The Download Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": false,
-            "examples": [
-                false
-            ]
-        },
-        "creator": {
-            "$id": "#/properties/creator",
-            "type": "string",
-            "title": "The Creator Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Gaston Bohnenberger et Guy Modert"
-            ]
-        },
-        "title": {
-            "$id": "#/properties/title",
-            "type": "object",
-            "title": "The Title Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": {},
-            "examples": [
-                {
-                    "de_DE": "Finaler Bericht von Gaston Bohnenberger und Guy Modert zur Restrukturierung von EUTELSAT.",
-                    "fr_FR": "EUTELSAT - Rapport final de Guy Modert et Gaston Bohnenberger sur la restructuration"
-                }
-            ],
-            "required": [
-                "de_DE",
-                "fr_FR"
-            ],
-            "properties": {
-                "de_DE": {
-                    "$id": "#/properties/title/properties/de_DE",
-                    "type": "string",
-                    "title": "The De_de Schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "minLength": 1,
-                    "maxLength": 256,
-                    "default": "",
-                    "examples": [
-                        "Finaler Bericht von Gaston Bohnenberger und Guy Modert zur Restrukturierung von EUTELSAT."
-                    ]
-                },
-                "fr_FR": {
-                    "$id": "#/properties/title/properties/fr_FR",
-                    "type": "string",
-                    "title": "The Fr_fr Schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "minLength": 1,
-                    "maxLength": 256,
-                    "default": "",
-                    "examples": [
-                        "EUTELSAT - Rapport final de Guy Modert et Gaston Bohnenberger sur la restructuration"
-                    ]
-                }
-            }
-        },
-        "description": {
-            "$id": "#/properties/description",
-            "type": "object",
-            "title": "The Description Schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": {},
-            "examples": [
-                {
-                    "de_DE": "blablalb",
-                    "fr_FR": "blibli"
-                }
-            ],
-            "required": [
-                "de_DE",
-                "fr_FR"
-            ],
-            "properties": {
-                "de_DE": {
-                    "$id": "#/properties/description/properties/de_DE",
-                    "type": "string",
-                    "title": "The De_de Schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "minLength": 1,
-                    "default": "",
-                    "examples": [
-                        "blablalb"
-                    ]
-                },
-                "fr_FR": {
-                    "$id": "#/properties/description/properties/fr_FR",
-                    "type": "string",
-                    "title": "The Fr_fr Schema",
-                    "description": "An explanation about the purpose of this instance.",
-                    "minLength": 1,
-                    "default": "",
-                    "examples": [
-                        "blibli"
-                    ]
-                }
-            }
+        "fr_FR": {
+          "$id": "#/properties/title/properties/fr_FR",
+          "type": "string",
+          "title": "Title in French",
+          "minLength": 1,
+          "maxLength": 256
         }
+      }
+    },
+    "type": {
+      "$id": "#/properties/type",
+      "type": "string",
+      "title": "Document type",
+      "enum": [
+        "image",
+        "pdf",
+        "video",
+        "audio",
+        "event",
+        "place"
+      ],
+      "default": "image"
+    },
+    "reference": {
+      "$id": "#/properties/reference",
+      "type": "object",
+      "format": "translate",
+      "title": "Reference",
+      "properties": {
+        "de_DE": {
+          "$id": "#/properties/reference/properties/de_DE",
+          "type": "string",
+          "title": "Reference in German",
+          "maxLength": 256
+        },
+        "fr_FR": {
+          "$id": "#/properties/reference/properties/fr_FR",
+          "type": "string",
+          "title": "Reference in French",
+          "maxLength": 256
+        }
+      },
+      "groups": ["image", "pdf", "audio", "event", "video"]
+    },
+    "provenance": {
+      "$id": "#/properties/provenance",
+      "type": "string",
+      "title": "Provenance",
+      "enum": [
+        "(c) European Communities, 2000",
+        "(c) THE EUROPEAN UNION - M@S",
+        "ANL, CdZ-A-6417",
+        "Alfonso Salgueiro Lora /Philharmonie",
+        "Archives privées",
+        "BGL",
+        "By WiNG - Own work, CC BY 3.0, https://commons.wikimedia.org/w/index.php?curid=4253948",
+        "Der Arme Teufel, Numérisé par la Bibliothèque nationale de Luxembourg, www.eluxemburgensia.lu",
+        "E. Prillot (Metz)",
+        "Edouard Kutten - Anlux ICO-3-1-07049",
+        "Edouard Kutten - Anlux ICO-3-1-07191",
+        "Fondation Jean Monnet pour l'Europe (Lausanne)",
+        "Fotos: Roland Miny",
+        "Les Meloures at lb.wikipedia",
+        "Luxemburger Wort",
+        "Luxemburger Wort, Numérisé par la Bibliothèque nationale de Luxembourg, www.eluxemburgensia.lu",
+        "Merk, Ben / Anefo",
+        "Obermoselzeitung, Numérisé par la Bibliothèque nationale de Luxembourg, www.eluxemburgensia.lu",
+        "Olivier Minaire/BGL",
+        "RTL/CNA",
+        "Raul Mee (EU2017EE Estonian Presidency) [CC BY 2.0 (https://creativecommons.org/licenses/by/2.0)]",
+        "Roland Miny",
+        "Source : SIP",
+        "Source : SIP - Photographe: Fey Frères",
+        "Weimer Pursell, silkscreen print by Neely Printing Co., Chicago [Public domain], via Wikimedia Commons",
+        "Zinneke at Luxembourgish Wikipedia",
+        "d'Letzebuerger Land",
+        "https://commons.wikimedia.org/wiki/File:Fokker_F.27-100_LX-LGA_Luxair_RWY_25.06.66_edited-2.jpg",
+        "https://commons.wikimedia.org/wiki/File:Lydie-Polfer_w2.jpg",
+        "https://commons.wikimedia.org/wiki/File:Schengen_Agreement_(1985)_signatures.jpg",
+        "https://commons.wikimedia.org/wiki/File_talk:Streikmonument_Wiltz_01.jpg",
+        "https://lb.wikipedia.org/wiki/Fichier:Mudvubau1.JPG\n",
+        "https://lb.wikipedia.org/wiki/Maulkuerfgesetz#/media/File:Referendum06JUN1937.JPG",
+        "sandra",
+        "© 2017 Cour grand-ducale / Lola Velasco / tous droits réservés"
+      ],
+      "groups": ["image", "pdf", "audio", "video"]
+    },
+    "year": {
+      "$id": "#/properties/year",
+      "type": "integer",
+      "title": "Year",
+      "minimum": 1900,
+      "maximum": 2100,
+      "examples": [
+        2001
+      ],
+      "groups": ["image"]
+    },
+    "html": {
+      "$id": "#/properties/html",
+      "type": "string",
+      "title": "HTML Embed Code",
+      "groups": ["pdf"]
+    },
+    "place_type": {
+      "$id": "#/properties/type",
+      "type": "string",
+      "title": "Place type",
+      "enum": [
+        "branch",
+        "headquarter",
+        "office"
+      ],
+      "groups": ["place"]
+    },
+    "address": {
+      "$id": "#/properties/address",
+      "type": "string",
+      "title": "Address of the place",
+      "examples": ["101-103, rue de Bonnevoie ; L-1261 Luxembourg"],
+      "maxLength": 256,
+      "groups": ["place"]
+    },
+    "existing": {
+      "$id": "#/properties/existing",
+      "type": "boolean",
+      "title": "Does the place currently exist?",
+      "groups": ["place"]
+    },
+    "category": {
+      "$id": "#/properties/category",
+      "type": "string",
+      "title": "Category",
+      "enum": [
+        "history of the bank"
+      ],
+      "groups": ["event"]
+    },
+    "key_event": {
+      "$id": "#/properties/key_event",
+      "type": "boolean",
+      "title": "Key event",
+      "groups": ["event"]
+    },
+    "start_date": {
+      "$id": "#/properties/start_date",
+      "type": "string",
+      "format": "date",
+      "title": "Start date of the place",
+      "pattern": "^[0-9]{4}-((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(02)-(0[1-9]|[12][0-9]))(T(0[0-9]|1[0-9]|2[0-3]):(0[0-9]|[1-5][0-9]):(0[0-9]|[1-5][0-9])(\\.[0-9]{3}Z)?)?$",
+      "maxLength": 25,
+      "groups": ["place", "event"]
+    },
+    "end_date": {
+      "$id": "#/properties/end_date",
+      "type": "string",
+      "format": "date",
+      "title": "End date of the place",
+      "pattern": "^[0-9]{4}-((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(02)-(0[1-9]|[12][0-9]))(T(0[0-9]|1[0-9]|2[0-3]):(0[0-9]|[1-5][0-9]):(0[0-9]|[1-5][0-9])(\\.[0-9]{3}Z)?)?$",
+      "maxLength": 25,
+      "groups": ["place", "event"]
+    },
+    "description": {
+      "$id": "#/properties/description",
+      "type": "object",
+      "format": "translate",
+      "title": "Description",
+      "properties": {
+        "de_DE": {
+          "$id": "#/properties/description/properties/de_DE",
+          "type": "string",
+          "title": "Description in German"
+        },
+        "fr_FR": {
+          "$id": "#/properties/description/properties/fr_FR",
+          "type": "string",
+          "title": "Description in French"
+        }
+      },
+      "groups": ["event", "place"]
+    },
+    "coordinates": {
+      "$id": "#/properties/coordinates",
+      "type": "object",
+      "title": "Coordinates of the place",
+      "properties": {
+        "type": {
+          "$id": "#/properties/coordinates/properties/type",
+          "type": "string",
+          "title": "Type",
+          "enum": [
+            "Feature"
+          ]
+        },
+        "geometry": {
+          "$id": "#/properties/coordinates/properties/geometry",
+          "type": "object",
+          "title": "Geometry",
+          "properties": {
+            "type": {
+              "$id": "#/properties/coordinates/properties/geometry/properties/type",
+              "type": "string",
+              "title": "Type",
+              "enum": [
+                "Point"
+              ]
+            },
+            "coordinates": {
+              "$id": "#/properties/coordinates/properties/geometry/properties/coordinates",
+              "type": "array",
+              "title": "Coordinates",
+              "minItems": 2,
+              "maxItems": 2,
+              "examples": ["49.5953069,6.1350661"],
+              "description": "Latitude and longitude separated by a comma",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "groups": ["place"]
     }
+  }
 }
