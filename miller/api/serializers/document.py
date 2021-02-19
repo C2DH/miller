@@ -44,6 +44,12 @@ class CreateDocumentSerializer(LiteDocumentSerializer):
         default=serializers.CurrentUserDefault()
     )
 
+    # To remove the file
+    attachment = serializers.FileField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
+
+    # To remove the file
+    snapshot = serializers.FileField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
+
     class Meta:
         model = Document
         fields = (
