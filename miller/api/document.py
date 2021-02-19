@@ -52,6 +52,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['put'], permission_classes=[IsAuthenticated])
     def generate_snapshot(self, request, pk=None):
+        # To raise 404 error if the document doesn't exist
+        self.get_object()
         create_document_snapshot(document_pk=pk)
         return Response({'status': 'The images has been generated'})
 
