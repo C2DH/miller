@@ -59,6 +59,9 @@ class CreateDocumentSerializer(LiteDocumentSerializer):
     # To remove the file
     snapshot = serializers.FileField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
 
+    # Required to have a json object instead of string in the validate_data function
+    data = serializers.JSONField()
+
     class Meta:
         model = Document
         fields = (
