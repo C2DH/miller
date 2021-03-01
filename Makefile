@@ -15,7 +15,7 @@ run-dev:
 	export GIT_TAG=$(shell git describe --tags)\
 	&& export GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD) \
 	&& export GIT_REVISION=$(shell git rev-parse --short HEAD) \
-	&& cd docker && docker-compose -f docker-compose.dev.yml up --force-recreate
+	&& cd docker && docker-compose -f docker-compose.dev.yml up --force-recreate --build
 
 run-dev-detach:
 	export GIT_TAG=$(shell git describe --tags)\
