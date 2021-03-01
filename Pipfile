@@ -8,7 +8,7 @@ yapf = "*"
 autopep8 = "*"
 
 [packages]
-django = "*"
+django = "==3.1"
 djangorestframework = "*"
 psycopg2-binary = "*"
 jsonschema = "*"
@@ -27,6 +27,7 @@ django-oauth-toolkit = "*"
 djoser = "*"
 shortuuid = "*"
 future = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
