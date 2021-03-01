@@ -1,8 +1,9 @@
 import logging
 from rest_framework import serializers
-from ...models import Document
+from ...models.document import Document
 from ...utils.schema import JSONSchema
-from jsonschema.exceptions import ValidationError
+# from jsonschema.exceptions import ValidationError
+from .fields import RelativeFileField
 
 logger = logging.getLogger(__name__)
 document_json_schema = JSONSchema(filepath='document/payload.json')
@@ -11,11 +12,11 @@ class LiteDocumentSerializer(serializers.ModelSerializer):
     """
     # light document serializer (to be used in manytomany retrieve)
     """
-    snapshot = serializers.FileField(
+    snapshot = RelativeFileField(
         required=False, max_length=None,
         allow_empty_file=True, use_url=True
     )
-    attachment = serializers.FileField(
+    attachment = RelativeFileField(
         required=False, max_length=None,
         allow_empty_file=True, use_url=True
     )
@@ -30,6 +31,14 @@ class LiteDocumentSerializer(serializers.ModelSerializer):
 
 class DocumentSerializer(LiteDocumentSerializer):
     documents = LiteDocumentSerializer(many=True)
+    snapshot = RelativeFileField(
+        required=False, max_length=None,
+        allow_empty_file=True, use_url=True
+    )
+    attachment = RelativeFileField(
+        required=False, max_length=None,
+        allow_empty_file=True, use_url=True
+    )
 
     class Meta:
         model = Document
