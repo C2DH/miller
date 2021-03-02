@@ -8,7 +8,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.auth.models import User
 from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot, create_different_sizes_from_snapshot
-from ..utils.models import get_search_vector_query, create_short_url
+from ..utils.models import get_search_vector_query, create_short_url, get_unique_slug
 from ..utils.media import get_video_subtitles
 
 
@@ -118,6 +118,12 @@ class Document(models.Model):
 
     def __str__(self):
         return self.slug
+
+    def save(self, *args, **kwargs):
+        # check slug
+        if not self.slug:
+            self.slug = get_unique_slug(instance=self, base=self.title, max_length=68)
+        super().save(*args, **kwargs)
 
     def create_snapshot_from_attachment(self, override=True):
         """
@@ -270,5 +276,3 @@ class Document(models.Model):
                 value
                 for value, w, c in contents
             ] + [self.pk])
-
-    

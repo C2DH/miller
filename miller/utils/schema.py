@@ -4,6 +4,7 @@ import logging
 
 from django.conf import settings
 from jsonschema import validate as jsonschemaValidate
+from jsonschema import Draft7Validator
 
 logger = logging.getLogger(__name__)
 
@@ -44,3 +45,6 @@ class JSONSchema:
     def validate(self, instance):
         # logger.info(f'validate() using json filepath: {self.filepath}')
         jsonschemaValidate(instance=instance, schema=self.schema)
+
+    def lazy_validate(self,  instance):
+        return Draft7Validator(self.schema).iter_errors(instance)

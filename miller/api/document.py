@@ -1,15 +1,19 @@
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from miller.tasks import create_document_snapshot
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 # from rest_framework.response import Response
 from ..models import Document
+from ..models.caption import Caption
 from .pagination import FacetedPagination
 from .serializers.document import CreateDocumentSerializer, DocumentSerializer
 from .serializers.document import LiteDocumentSerializer
 from ..utils.api import Glue
-
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all().prefetch_related('documents')
@@ -45,3 +49,19 @@ class DocumentViewSet(viewsets.ModelViewSet):
         serialized = self.paginator.get_paginated_response_as_dict(
             data=serializer.data)
         return Response(serialized)
+
+    @action(detail=True, methods=['put'], permission_classes=[IsAuthenticated])
+    def generate_snapshot(self, request, pk=None):
+        # To raise 404 error if the document doesn't exist
+        self.get_object()
+        create_document_snapshot(document_pk=pk)
+        return Response({'status': 'The images has been generated'})
+
+    def destroy(self, request, pk=None):
+        """
+        Delete document
+        If the document is attached to a module, return a 405 NOT ALLOWED
+        """
+        if(pk is not None and Caption.objects.filter(document=pk)):
+            raise MethodNotAllowed(None, 'The document cannot be deleted because it is being used in a story')
+        return super().destroy(request, pk)

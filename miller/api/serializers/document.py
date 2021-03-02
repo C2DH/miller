@@ -1,7 +1,12 @@
+import logging
 from rest_framework import serializers
 from ...models.document import Document
+from ...utils.schema import JSONSchema
+# from jsonschema.exceptions import ValidationError
 from .fields import RelativeFileField
 
+logger = logging.getLogger(__name__)
+document_json_schema = JSONSchema(filepath='document/payload.json')
 
 class LiteDocumentSerializer(serializers.ModelSerializer):
     """
@@ -48,9 +53,39 @@ class CreateDocumentSerializer(LiteDocumentSerializer):
         default=serializers.CurrentUserDefault()
     )
 
+    # To remove the file
+    attachment = serializers.FileField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
+
+    # To remove the file
+    snapshot = serializers.FileField(max_length=None, allow_empty_file=True, allow_null=True, required=False)
+
+    # Required to have a json object instead of string in the validate_data function
+    data = serializers.JSONField()
+
     class Meta:
         model = Document
         fields = (
             'id', 'owner', 'type', 'data', 'short_url', 'title', 'slug',
             'copyrights', 'url', 'attachment', 'snapshot', 'mimetype'
         )
+
+    def validate_data(self, data):
+        logger.info('validate_data on data')
+
+        # Manage multiple errors
+        errors = document_json_schema.lazy_validate(data)
+        error_messages = []
+        if errors:
+            for err in errors:
+                error_messages.append('Invalid value for %s: %s' % (err.schema['title'], err.message))
+
+            if(error_messages):
+                logger.error(
+                    'ValidationError on current data (model:Document,pk:{}): {}'.format(
+                        self.instance.pk if self.instance else 'New',
+                        error_messages
+                    )
+                )
+                raise serializers.ValidationError(error_messages)
+
+        return data
