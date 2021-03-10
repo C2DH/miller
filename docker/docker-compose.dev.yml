@@ -73,12 +73,14 @@ services:
     depends_on:
       - redis
       - postgresdb
-    entrypoint: >
-      /bin/sh -c "PYTHONPATH=/ python miller/dbconnection.py &&
-        python manage.py init_git &&
-        python manage.py collectstatic --clear --no-input &&
-        python manage.py migrate &&
-        watchmedo auto-restart --recursive --patterns='*.py;*.json' --directory=. -- gunicorn --bind=0.0.0.0:8000 -w 2 -k gthread miller.wsgi"
+    entrypoint:
+      - "/bin/sh"
+      - -c
+      - |
+          PYTHONPATH=/ python miller/dbconnection.py \
+          && python manage.py init_git && python manage.py collectstatic --clear --no-input \
+          && python manage.py migrate \
+          && watchmedo auto-restart --recursive --patterns="*.py;*.json;*.js;*.html" --directory="/miller" -- /bin/sh -i miller/docker-compose-dev.entrypoint.sh
     # ports:
     #   - 8008:8000
     volumes:
