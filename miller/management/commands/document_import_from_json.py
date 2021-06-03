@@ -71,4 +71,14 @@ class Command(BaseCommand):
                     self.stdout.write(f'document: {doc.slug} leave attachment as it is: {doc.attachment}')
                 if verbose:
                     self.stdout.write(f'document: {doc.slug} serialized:\n{serializers.serialize("yaml", [doc])}')
+
+                # Related documents
+                # Use the related_documents column with target slugs separated by a comma
+                # WARNING: The target documents must exist or defined before in the spreadsheet
+                # An empy value for a related_documents column will cause the remove of existing relationships for the affected documents.
+                if 'related_documents' in d:
+                    related_documents = d.get('related_documents', '').split(',')
+                    related = Document.objects.filter(slug__in=related_documents)
+                    doc.documents.set(related);
+                    
                 doc.save()
