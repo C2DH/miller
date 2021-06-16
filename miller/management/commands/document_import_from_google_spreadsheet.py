@@ -23,6 +23,8 @@ class Command(BaseCommand):
         [gsid]
         [--noprompt]
         [--fake]
+        [--force]
+        [--ignore-empty-value]
 
     """
     help = 'import documents from a google spreadsheet using the ENV varialbs'
@@ -43,8 +45,18 @@ class Command(BaseCommand):
             action='store_true',
             help='just test connectivity and JSON schema validation',
         )
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='not exit when validation error'
+        )
+        parser.add_argument(
+            '--ignore-empty-value',
+            action='store_true',
+            help='not include empty value in the json'
+        )
 
-    def handle(self, gsid='', noprompt=False, fake=False, *args, **options):
+    def handle(self, gsid='', noprompt=False, fake=False, force=False, ignore_empty_value=False, *args, **options):
         service_account_filepath = os.environ.get(
             'GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY',
             None
@@ -82,7 +94,8 @@ class Command(BaseCommand):
             validated_docs = list(get_valid_serialized_docs(
                 docs=complete_docs,
                 ignore_duplicates=True,
-                raise_validation_errors=True
+                raise_validation_errors=not force,
+                ignore_empty_value=ignore_empty_value
             ))
             validated_docs_slugs = set([x.get('slug') for x in validated_docs])
             all_data = all_data + validated_docs

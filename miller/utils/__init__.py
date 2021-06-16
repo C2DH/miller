@@ -37,7 +37,10 @@ def nested_set(
         if isinstance(value, bool):
             data[path[-1]] = value
         elif not value:
-            data[path[-1]] = ''
+            # Use None. '' causes errors for integer, date, ...
+            # To valid None, define type null in the schema (ex: type: ["string", "null"])
+            #   or use --ignore-empty-value in the document_import_from_google_spreadsheet command
+            data[path[-1]] = None
         elif path[-1] in datetime_suffix:
             # print('nested:', path[-1], value)
             if isinstance(value, str):
@@ -85,7 +88,7 @@ def nested_set(
     return data
 
 
-def get_data_from_dict(obj, datetime_suffix=('start_date', 'end_date',)):
+def get_data_from_dict(obj, datetime_suffix=('start_date', 'end_date',), ignore_empty_value=False):
     # headers contains a dict_keys object,
     # e.g.(['data__title__fr_FR', 'data__title__en_GB'])
     headers = obj.keys()
@@ -100,10 +103,11 @@ def get_data_from_dict(obj, datetime_suffix=('start_date', 'end_date',)):
     # e.g: list ['data__title__fr_FR', 'data__title__en_GB'] becomes
     # {'data': {'title': {'fr_FR': 'un joli title', 'en_GB': 'A nicer title'}}}
     for key, path, is_list in dp:
-        nested_set(
-            data=data, path=path, value=obj[key],
-            as_list=is_list, datetime_suffix=datetime_suffix
-        )
+        if not ignore_empty_value or obj[key]:
+            nested_set(
+                data=data, path=path, value=obj[key],
+                as_list=is_list, datetime_suffix=datetime_suffix
+            )
     return data
 
 

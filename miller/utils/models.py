@@ -69,7 +69,8 @@ def get_user_path(user):
 def get_valid_serialized_docs(
     docs=[], ignore_duplicates=False,
     expand_flatten_data=True,
-    raise_validation_errors=True
+    raise_validation_errors=True,
+    ignore_empty_value=False
 ):
     # get duplicates in slug field.
     if not ignore_duplicates:
@@ -89,18 +90,23 @@ def get_valid_serialized_docs(
         logger.info('headers: {0} '.format(docs[0].keys()))
 
     # schema Validation
+    valid_docs=[]
     for doc in docs:
         if expand_flatten_data:
             try:
-                doc.update(get_data_from_dict(doc))
+                doc.update(get_data_from_dict(doc, ignore_empty_value=ignore_empty_value))
             except ValueError as err:
                 logger.error('ValidationError "{}" on current instance {}'.format(
                     err,
                     doc,
                 ))
-                raise err
+                if raise_validation_errors:
+                    raise err
+                else:
+                    doc = None
         try:
-            document_json_schema.validate(doc)
+            if doc:
+                document_json_schema.validate(doc)
         except ValidationError as err:
             logger.error('ValidationError "{}" on current instance {}'.format(
                 err.message,
@@ -111,7 +117,8 @@ def get_valid_serialized_docs(
             else:
                 doc = None
         try:
-            document_data_json_schema.validate(doc['data'])
+            if doc:
+                document_data_json_schema.validate(doc['data'])
         except ValidationError as err:
             logger.error(
                 'ValidationError "{}" on current instance payload {}'.format(
@@ -123,8 +130,10 @@ def get_valid_serialized_docs(
                 raise err
             else:
                 doc = None
+        if doc:
+            valid_docs.append(doc)
 
-    return filter(None, docs)
+    return filter(None, valid_docs)
 
 
 def get_docs_from_json(
