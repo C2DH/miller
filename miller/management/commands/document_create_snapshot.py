@@ -7,18 +7,18 @@ class Command(BaseCommand):
     """
     usage:
 
-        ENV=development pipenv run ./manage.py document_create_snapshot  <pks>
+        ENV=development pipenv run ./manage.py document_create_snapshot [<pks>]
 
     or if in docker:
 
         docker exec -it docker_miller_1 \
-        python manage.py document_create_snapshot <pks> \
+        python manage.py document_create_snapshot [<pks>] \
         --immediate
     """
-    help = 'create snapshots for given documents having an attachment'
+    help = 'create snapshots for all documents or given documents having an attachment'
 
     def add_arguments(self, parser):
-        parser.add_argument('document_pks', nargs='+', type=int)
+        parser.add_argument('document_pks', nargs='*', type=int)
         parser.add_argument(
             '--immediate',
             action='store_true',
@@ -32,7 +32,10 @@ class Command(BaseCommand):
 
     def handle(self, document_pks, immediate=False, override=False, *args, **options):
         self.stdout.write(f'document-create-snapshot for: {document_pks}')
-        docs = Document.objects.filter(pk__in=document_pks)
+        if document_pks:
+            docs = Document.objects.filter(pk__in=document_pks)
+        else:
+            docs = Document.objects.all()
         self.stdout.write(f'document-create-snapshot : {docs.count()}')
         for doc in docs:
             try:
