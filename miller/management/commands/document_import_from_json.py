@@ -76,9 +76,11 @@ class Command(BaseCommand):
                 # Use the related_documents column with target slugs separated by a comma
                 # WARNING: The target documents must exist or defined before in the spreadsheet
                 # An empy value for a related_documents column will cause the remove of existing relationships for the affected documents.
-                if 'related_documents' in d:
-                    related_documents = d.get('related_documents', '').split(',')
+                related_documents = d.get('related_documents', None)
+                if related_documents:
+                    if isinstance(related_documents, str):
+                        related_documents = related_documents.split(',')
                     related = Document.objects.filter(slug__in=related_documents)
                     doc.documents.set(related);
-                    
+
                 doc.save()
