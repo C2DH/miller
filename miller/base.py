@@ -1,16 +1,14 @@
 import os
-import sys
 import logging
-import re
+from dotenv import dotenv_values
 from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path  # python3 only
 
 logger = logging.getLogger(__name__)
 
-from dotenv import dotenv_values
-
+# Previous version of dotenv_values method now deprecated
 #
-# def deprecated_dotenv_values(dotenv_path):
+# def dotenv_values(dotenv_path):
 #     lines = []
 #     try:
 #         with open(dotenv_path) as fp:
