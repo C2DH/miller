@@ -55,6 +55,9 @@ the relative URL of the JSON schema to validate documents:
 
 
 ## Install without docker (deprecated)
+Miller uses the external lib imagemagick to create thumbnails of your resources and Postgres database.
+Though we recommend that you use the docker image for development, sometimes you just need to
+work the old way.
 
 To install the correct version of python, you can follow
 the doc at https://hackernoon.com/reaching-python-development-nirvana-bb5692adf30c
@@ -65,6 +68,7 @@ the doc at https://hackernoon.com/reaching-python-development-nirvana-bb5692adf3
 In order to install pipenv using the correct version of python,
 use the `pip` module that is shipped with local python version:
 
+    python -m pip install --upgrade pip
     python -m pip install pipenv
 
 Install the library `imagemagick6` according to your OS, then install requirements:
@@ -73,6 +77,23 @@ Install the library `imagemagick6` according to your OS, then install requiremen
 
 
 ## Run using pipenv
+We still recommend to run docker image for running Postgres (and/or Redis):
+
+    docker run -it --rm --name miller_postgres \
+      -e POSTGRES_PASSWORD=mysecretpassword \
+      -e POSTGRES_USER=miller \
+      -e PGDATA=/var/lib/postgresql/data/pgdata \
+      -v "$PWD/docker/postgres-data:/var/lib/postgresql/data" \
+      -p 54320:5432 \
+      postgres:14.1
+
+In this case, use the sae POSTGRES_PASSWORD and POSTGRES_USER in the env file and
+we set the volume path to the one we defined earlier for our docker development stack.
+
+
+
+
+
 Copy the `./env.example` file to `./.development.env`, then edit the values accoring to your system.
 
 An example of a `./.development.env` file:
@@ -83,6 +104,7 @@ An example of a `./.development.env` file:
     MILLER_DATABASE_USER=your db user
     MILLER_DATABASE_PASSWORD=your db pass
     MILLER_DATABASE_HOST=localhost
+    MILLER_DATABASE_PORT=54320
 
 These values replace the default values in `./miller/settings.py` thanks to
 the method `get_env_variable`:
