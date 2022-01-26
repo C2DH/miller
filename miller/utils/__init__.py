@@ -13,14 +13,15 @@ def data_paths(headers, prefix='data__', delimiter="__", list_delimiter='|'):
     return [(
         x,
         x.split(list_delimiter)[0].split(delimiter),
-        x.split(list_delimiter)[-1] == 'list'
+        x.split(list_delimiter)[-1] == 'list',
+        x.split(list_delimiter)[-1] == 'str'
     ) for x in filter(
         lambda x: isinstance(x, str) and x.startswith(prefix), headers
     )]
 
 
 def nested_set(
-    data, path, value, as_list=False,
+    data, path, value, as_list=False, as_str=False,
     datetime_suffix=('start_date', 'end_date',)
 ):
     """
@@ -33,7 +34,11 @@ def nested_set(
             key,
             u'__'.join(path)
         ))
-    if not as_list:
+    # Number in GS could cause validation error for string field 
+    # Use '|str' as suffix for the colum name to force the content to exported as string in the json
+    elif as_str:
+        data[path[-1]] = str(value)
+    elif not as_list:
         if isinstance(value, bool):
             data[path[-1]] = value
         elif not value:
@@ -102,11 +107,11 @@ def get_data_from_dict(obj, datetime_suffix=('start_date', 'end_date',), ignore_
     # at the end of this loop, data paths will be merged:
     # e.g: list ['data__title__fr_FR', 'data__title__en_GB'] becomes
     # {'data': {'title': {'fr_FR': 'un joli title', 'en_GB': 'A nicer title'}}}
-    for key, path, is_list in dp:
+    for key, path, is_list, is_str in dp:
         if not ignore_empty_value or obj[key]:
             nested_set(
                 data=data, path=path, value=obj[key],
-                as_list=is_list, datetime_suffix=datetime_suffix
+                as_list=is_list, as_str=is_str, datetime_suffix=datetime_suffix
             )
     return data
 
