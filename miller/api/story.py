@@ -46,7 +46,7 @@ class StoryViewSet(viewsets.ModelViewSet):
         # transform contents if required
         parser = request.query_params.get('parser', None)
         if parser and parser == 'yaml':
-            story.contents = yaml.safe_load(story.contents)
+            story.contents = yaml.load(story.contents, yaml.CLoader)
             serializer = YAMLStorySerializer(
                 story, context={'request': request})
         else:

@@ -28,6 +28,8 @@ RUN apk add --no-cache --virtual .build-deps \
     fribidi-dev \
     libxslt-dev
 
+RUN apk add yaml-dev
+
 COPY miller ./miller
 COPY manage.py .
 COPY requirements.txt .
