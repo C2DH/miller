@@ -15,6 +15,30 @@ services:
     volumes:
       - ./data/initdb.d:/docker-entrypoint-initdb.d:Z
       - ./data/postgres:/var/lib/postgresql/data:Z
+  celery:
+    image: c2dhunilu/miller-v2:${MILLER_TAG}
+    restart: always
+    environment:
+       DEBUG: ${DEBUG}
+       LANGUAGES: ${LANGUAGES}
+       MILLER_DATABASE_NAME: ${POSTGRES_DB}
+       MILLER_DATABASE_USER: ${POSTGRES_USER}
+       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+       MILLER_DATABASE_HOST: postgresdb
+       MILLER_DATABASE_PORT: 5432
+       MILLER_SCHEMA_ROOT: ${MILLER_SCHEMA_ROOT}
+       REDIS_HOST: redis
+       REDIS_PORT: 6379
+       STATIC_URL: ${STATIC_URL}
+    depends_on:
+      - miller
+    entrypoint: celery -A miller worker -l info
+    volumes:
+      - ./.env:/miller/.env
+      - ./data/media:/media
+      - ./data/private:/private
+      - ./data/contents:/contents
+      - miller-static-files:/static
   miller:
     image: c2dhunilu/miller-v2:${MILLER_TAG}
     restart: always
@@ -27,8 +51,7 @@ services:
       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
       MILLER_DATABASE_HOST: postgresdb
       MILLER_DATABASE_PORT: 5432
-      MILLER_SCHEMA_ROOT: /schema
-      MILLER_SIZES_SNAPSHOT_PREVIEW: ${MILLER_SIZES_SNAPSHOT_PREVIEW}
+      MILLER_SCHEMA_ROOT: ${MILLER_SCHEMA_ROOT}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       STATIC_URL: ${STATIC_URL}
@@ -54,41 +77,15 @@ services:
       - ./data/media:/media:z
       - ./data/private:/private:z
       - ./data/contents:/contents:z
-      - ./data/schema:/schema:z
-      - miller-static-files:/static
-  miller-celery:
-    image: c2dhunilu/miller-v2:${MILLER_TAG}
-    restart: always
-    environment:
-       DEBUG: ${DEBUG}
-       LANGUAGES: ${LANGUAGES}
-       MILLER_DATABASE_NAME: ${POSTGRES_DB}
-       MILLER_DATABASE_USER: ${POSTGRES_USER}
-       MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-       MILLER_DATABASE_HOST: postgresdb
-       MILLER_DATABASE_PORT: 5432
-       MILLER_SCHEMA_ROOT: /schema
-       REDIS_HOST: redis
-       REDIS_PORT: 6379
-       STATIC_URL: ${STATIC_URL}
-    depends_on:
-      - miller
-    entrypoint: celery -A miller worker -l info
-    volumes:
-      - ./.env:/miller/.env
-      - ./data/media:/media
-      - ./data/private:/private
-      - ./data/contents:/contents
-      - ./data/schema:/schema:z
       - miller-static-files:/static
   nginx:
-    image: nginx:alpine
+    image: nginx:1.17-alpine
     restart: always
     ports:
       - "${NGINX_PORT}:80"
     depends_on:
       - miller
-      - miller-celery
+      - celery
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./nginx.htpasswd:/etc/nginx/conf.d/nginx.htpasswd
