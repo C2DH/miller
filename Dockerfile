@@ -36,6 +36,7 @@ COPY manage.py .
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
+RUN python -m pip install python-dotenv
 
 RUN apk del --no-cache .build-deps
 RUN mkdir -p logs
