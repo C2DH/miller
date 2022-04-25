@@ -1,6 +1,8 @@
+BUILD_TAG ?= latest
+
 build:
 	docker build \
-		-t c2dhunilu/miller-v2 \
+		-t c2dhunilu/miller-v2:${BUILD_TAG} \
 		--build-arg GIT_TAG=$(shell git describe --tags) \
 		--build-arg GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD) \
 		--build-arg GIT_REVISION=$(shell git rev-parse --short HEAD) .
