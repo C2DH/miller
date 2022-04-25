@@ -173,6 +173,25 @@ then:
 
 
 ## Use the API where parameter
+`where=` is a new param that accepts a JSON string and mimics the behaviour of the django `Q` loopkup.
+As this is quite powerful, we coupled with a strict JSON schema validation.
+The `where=` url param espects two types: either a list of *lookup* objects, e.g `[{ "type": "entity"}]`; or an object defining complex operation, enabling `"Op.or"`, `"Op.and"` and `"Op.not"` for a list of *lookup* objects, e.g. `{"Op.not":[{ "type": "entity"}]}`.
+Operators can be nested, so that very complex filters can be achieved:
+
 ```
 /api/document/?where={"Op.not": [{ "Op.or": [{ "type": "entity"}, {"data__type": "drawing" }] }]}
+```
+resulting Q filter:
+```
+(NOT (AND: (OR: ('type', 'entity'), ('data__type', 'drawing'))))
+```
+In this case, the api returns all documents not being of `"type":"entity"` or having `"data__type":"drawing"`
+
+Note that in absence of the operator the concatenation is of type AND:
+```
+/api/document/?where=[{ "type": "entity"}, {"data__type": "drawing" }]
+```
+resulting Q filter:
+```
+(AND: ('type', 'entity'), ('data__type', 'drawing'))
 ```
