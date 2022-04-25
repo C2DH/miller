@@ -14,3 +14,4 @@ docker/contents
 docker/postgres-data
 __pycache__
 .DS_Store
+*.log

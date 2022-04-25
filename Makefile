@@ -1,6 +1,8 @@
+BUILD_TAG ?= latest
+
 build:
 	docker build \
-		-t c2dhunilu/miller-v2 \
+		-t c2dhunilu/miller-v2:${BUILD_TAG} \
 		--build-arg GIT_TAG=$(shell git describe --tags) \
 		--build-arg GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD) \
 		--build-arg GIT_REVISION=$(shell git rev-parse --short HEAD) .
@@ -40,3 +42,8 @@ run-make-migrations:
 
 run-test-celery:
 	docker exec -it docker_miller_1 python manage.py celery_test
+
+run-import-from-google:
+	docker exec -it docker_miller_1 python manage.py document_import_from_google_spreadsheet \
+	&& docker exec -it docker_miller_1 \
+    python manage.py document_import_from_json /contents/document_import_from_gs_${GOOGLE_SPREADHSEEET_ID}.json

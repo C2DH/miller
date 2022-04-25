@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 import re
@@ -6,10 +7,23 @@ from django.db.models import Q
 from django.core.exceptions import FieldError
 from django.db.models.expressions import RawSQL, OrderBy
 from .models import enrich_queryset_with_fulltext_search
+from .schema import JSONSchema
+from rest_framework.exceptions import ParseError
+from jsonschema.exceptions import ValidationError
+
+
+def relpath(p):
+    return os.path.normpath(
+        os.path.join(os.path.dirname(__file__), p))
+
 
 logger = logging.getLogger(__name__)
 WATERFALL_IN = '__all'
 waterfallre = re.compile(WATERFALL_IN + r'$')
+Q_OPERATORS = ['Op.or', 'Op.and', 'Op.not', 'Op.notIn']
+schema_api_where = JSONSchema(
+    filepath='api/params/where.json',
+    root=relpath('../schema'))
 
 
 def search_from_request(request, klass):
@@ -71,6 +85,80 @@ def orderby_from_request(request):
     return orderby.split(',') if orderby is not None else None
 
 
+def reduce_dict_item_to_Q(item={}, op='Op.and'):
+    query = Q()
+    for key, value in item.items():
+        if key in Q_OPERATORS:
+            if isinstance(value, list):
+                if key == 'Op.or':
+                    query |= reduce_items_to_Q(items=value, op='Op.or')
+                elif key == 'Op.not':
+                    query &= ~reduce_items_to_Q(items=value)
+                else:
+                    query &= reduce_items_to_Q(items=value)
+            else:
+                raise ParseError(f'Aje.. the operator `{key}` only works with lists: "{key}":[ ... ]')
+        elif op == 'Op.or':
+            query |= Q((key, value))
+        elif op == 'Op.not':
+            query &= ~Q((key, value))
+        else:
+            query &= Q((key, value))
+    print('reduce_dict_item_to_Q', item, query)
+    return query
+
+
+def reduce_items_to_Q(items=[], op='Op.and'):
+    query = Q()
+    for item in items:
+        if isinstance(item, dict):
+            if op == 'Op.or':
+                query |= reduce_dict_item_to_Q(item=item)
+            elif op == 'Op.not':
+                query &= ~reduce_dict_item_to_Q(item=item)
+            else:
+                query &= reduce_dict_item_to_Q(item=item)
+        else:
+            raise ParseError('very bad')
+    print(f'reduce_items_to_Q: query {query} from items:{items} {op}')
+    return query
+
+
+def get_where_from_request(request, field_name='where'):
+    """
+    Return a combination of Q instances. Case covered:
+    1. `where={"type": "entity"}` becomes:
+        `Q(type="entity")`
+    2. `where=[{"type": "image"}, {"data__type": "portrait"}]` becomes:
+        `Q(type="entity") & Q("data__type": "portrait")`
+    3. `where={"Op.or":[{"type": "image"}, {"data__type": "address"}]} becomes:
+         `Q(type="image") | Q("data__type": "address")`
+    It handles nested operation.
+    """
+    filters_query = request.query_params.get(field_name, None)
+    if filters_query is None:
+        return None
+    try:
+        where = json.loads(filters_query)
+    except Exception:
+        raise ParseError(detail='Problems parsing the `where=` param from request (should be valid JSON)')
+    # test agains our JSONschema
+    try:
+        schema_api_where.validate(where)
+    except ValidationError as err:
+        logger.error(
+            f'ValidationError "{err.message}" on current where param'
+        )
+        raise ParseError(detail=f'Problems parsing the `where=` param error: {err.message}')
+    print('validation ok')
+    if isinstance(where, list):
+        query = reduce_items_to_Q(items=where)
+    else:
+        query = reduce_dict_item_to_Q(item=where)
+    logger.info(f'get_where_from_request: query {query}')
+    return query
+
+
 def filters_from_request(request, field_name='filters'):
     """
     usage in viewsets.ModelViewSet methods, e;g. retrieve:
@@ -115,6 +203,8 @@ class Glue(object):
             request=request)
         self.excludes, self.excludesWaterfall = filters_from_request(
             request=request, field_name='exclude')
+        self.where = get_where_from_request(
+            request=request, field_name='where')
         self.overlaps = overlaps_from_request(request=request)
         self.ordering = orderby_from_request(request=request)
         self.extra_ordering = extra_ordering
@@ -136,6 +226,9 @@ class Glue(object):
         self.queryset = self.queryset.exclude(
             **self.excludes
         ).filter(**self.filters)
+        if self.where is not None:
+            self.queryset = self.queryset.filter(self.where)
+            logger.info(f'set_queryset_from_request where resulting in {self.queryset.query}')
         if self.overlaps:
             self.queryset = self.queryset.filter(self.overlaps)
         # apply filters progressively

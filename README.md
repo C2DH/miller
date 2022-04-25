@@ -139,3 +139,59 @@ In parallel, launch the celery tasks manager:
 Use test runner without DB:
 
     ENV=development pipenv run ./manage.py test --testrunner=miller.test.NoDbTestRunner
+
+
+## import data from google spreadsheet
+Configure in Three steps:
+
+### 1. get the service account file
+### 2. get valid JSON schema files for the data instance and the data payload in your MILLER_SCHEMA_ROOT folder
+for instance, given this structure
+```
+docker/data/
+├─ private/
+│  ├─ my-google-service-account.json
+│  ├─ my-schema/
+│  │  ├─ document/
+│  │  │  ├─ instance.json
+│  │  │  ├─ payload.json
+-
+```
+your MILLER_SCHEMA_ROOT variable will be MILLER_SCHEMA_ROOT=/private/my-schema \
+as /private is mounted on your the docker/data/private of your local installation.
+
+### 3.run using the env variables MILLER_SCHEMA_ROOT, GOOGLE_SPREADHSEEET_ID and GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY
+```
+MILLER_SCHEMA_ROOT=/private/my-schema \
+GOOGLE_SPREADHSEEET_ID=xYz \
+GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY=/private/my-google-service-account.json \
+make run-dev
+```
+then:
+
+`GOOGLE_SPREADHSEEET_ID=xYz make run-import-from-google`
+
+
+## Use the API where parameter
+`where=` is a new param that accepts a JSON string and mimics the behaviour of the django `Q` loopkup.
+As this is quite powerful, we coupled with a strict JSON schema validation.
+The `where=` url param espects two types: either a list of *lookup* objects, e.g `[{ "type": "entity"}]`; or an object defining complex operation, enabling `"Op.or"`, `"Op.and"` and `"Op.not"` for a list of *lookup* objects, e.g. `{"Op.not":[{ "type": "entity"}]}`.
+Operators can be nested, so that very complex filters can be achieved:
+
+```
+/api/document/?where={"Op.not": [{ "Op.or": [{ "type": "entity"}, {"data__type": "drawing" }] }]}
+```
+resulting Q filter:
+```
+(NOT (AND: (OR: ('type', 'entity'), ('data__type', 'drawing'))))
+```
+In this case, the api returns all documents not being of `"type":"entity"` or having `"data__type":"drawing"`
+
+Note that in absence of the operator the concatenation is of type AND:
+```
+/api/document/?where=[{ "type": "entity"}, {"data__type": "drawing" }]
+```
+resulting Q filter:
+```
+(AND: ('type', 'entity'), ('data__type', 'drawing'))
+```

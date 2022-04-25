@@ -3,12 +3,14 @@ import os
 import logging
 import mimetypes
 from pathlib import Path
-
 from django.conf import settings
-from wand.image import Image, Color
 
 logger = logging.getLogger(__name__)
 
+try:
+    from wand.image import Image, Color
+except Exception as error:
+    logger.exception(error)
 
 def _get_or_create_snapshots_folder(basepath='image'):
     """
