@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class JSONSchema:
-    def __init__(self, filepath):
-        abs_filepath = os.path.join(settings.MILLER_SCHEMA_ROOT, filepath)
+    def __init__(self, filepath, root=settings.MILLER_SCHEMA_ROOT):
+        abs_filepath = os.path.join(root, filepath)
         logger.info(
             F'JSONSchema() init on abs_filepath:"{abs_filepath}"'
             F'(MILLER_SCHEMA_ROOT: {settings.MILLER_SCHEMA_ROOT})'
@@ -43,8 +43,8 @@ class JSONSchema:
                 raise e
 
     def validate(self, instance):
-        # logger.info(f'validate() using json filepath: {self.filepath}')
+        logger.info(f'validate() using json filepath: {self.filepath} {self.schema}')
         jsonschemaValidate(instance=instance, schema=self.schema)
 
-    def lazy_validate(self,  instance):
+    def lazy_validate(self, instance):
         return Draft7Validator(self.schema).iter_errors(instance)
