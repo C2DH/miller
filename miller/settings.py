@@ -29,7 +29,7 @@ DEBUG = get_env_variable('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', 'localhost').split(',')
 
-
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # Application definition
 
 INSTALLED_APPS = [
