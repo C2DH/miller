@@ -40,3 +40,8 @@ run-make-migrations:
 
 run-test-celery:
 	docker exec -it docker_miller_1 python manage.py celery_test
+
+run-import-from-google:
+	docker exec -it docker_miller_1 python manage.py document_import_from_google_spreadsheet \
+	&& docker exec -it docker_miller_1 \
+    python manage.py document_import_from_json /contents/document_import_from_gs_${GOOGLE_SPREADHSEEET_ID}.json
