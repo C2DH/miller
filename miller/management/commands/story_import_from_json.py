@@ -47,7 +47,7 @@ class Command(BaseCommand):
                         for s in serialized:
                             s.save()
                     elif slug is None:
-                        self.stdout.write(' - creating new instance', model)
+                        self.stdout.write(f' - creating new instance: {model}')
                         story = Story(owner=owner, **item.get('fields'))
                     else:
                         self.stdout.write(f' - updating instance, slug="{slug}"')
