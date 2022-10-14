@@ -48,7 +48,7 @@ class Document(models.Model):
     TYPE_CHOICES = (
         (TBD, 'to be defined'),
         (BIBLIOGRAPHIC_REFERENCE, 'bibtex'),
-        (CROSSREF_REFERENCE, 'bibtex'),
+        (CROSSREF_REFERENCE, 'crossref bibtex'),
         (VIDEO_COVER, 'video interview'),
         (VIDEO, 'video'),
         (AUDIO, 'audio'),
