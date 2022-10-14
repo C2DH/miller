@@ -20,6 +20,7 @@ from django.conf.urls import url, include
 from django.utils.safestring import mark_safe
 from rest_framework import routers
 from .api.story import StoryViewSet
+from .api.author import AuthorViewSet
 from .api.document import DocumentViewSet
 from .api.profile import ProfileViewSet
 from .api.mention import MentionViewSet
@@ -32,6 +33,7 @@ router.register(r'story', StoryViewSet)
 router.register(r'document', DocumentViewSet)
 router.register(r'profile', ProfileViewSet)
 router.register(r'mention', MentionViewSet)
+router.register(r'author', AuthorViewSet)
 router.register(r'caption', CaptionViewSet)
 router.register(r'tag', TagViewSet)
 
