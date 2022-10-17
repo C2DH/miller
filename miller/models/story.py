@@ -1,16 +1,24 @@
 import os
+import logging
 import json
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+from django.db import connection
+from django.contrib.postgres.indexes import GinIndex
 
 from . import Document
 from . import Author
 from . import Tag
 from ..utils import get_all_values_from_dict_by_key
 from ..utils.models import get_user_path, create_short_url, get_unique_slug
+from ..utils.models import get_search_vector_query
 from ..fields import UTF8JSONField
 
+
+
+logger = logging.getLogger(__name__)
 
 def get_owner_path(instance, filename, safeOrigin=False):
     root, ext = os.path.splitext(filename)
@@ -98,6 +106,7 @@ class Story(models.Model):
     allow_fulltext_search = True
 
     class Meta:
+        indexes = [GinIndex(fields=['search_vector'])]
         verbose_name_plural = "stories"
 
     def __str__(self):
@@ -109,7 +118,7 @@ class Story(models.Model):
             self.slug = get_unique_slug(instance=self, base=self.title, max_length=68)
         super(Story, self).save(*args, **kwargs)
 
-    def update_search_vector(self):
+    def update_search_vector(self, verbose=False):
         """
         @TODO
         Fill the search_vector using self.data:
@@ -121,6 +130,50 @@ class Story(models.Model):
         (e.g. 'english')
         """
         pass
+        q, contents = get_search_vector_query(
+            instance=self,
+            languages=settings.MILLER_LANGUAGES,
+            simple_fields=settings.MILLER_VECTORS_SIMPLE_FIELDS,
+            multilanguage_fields=settings.MILLER_VECTORS_MULTILANGUAGE_FIELDS,
+            verbose=verbose
+        )
+        if not contents:
+            logger.error(
+                f'update_search_vector failed for document:{self.pk} (empty?)'
+            )
+            return
+        if verbose:
+            logger.info(
+                f'VERBOSE - contents: {contents}'
+            )
+        with connection.cursor() as cursor:
+            to_be_executed = ''.join([
+                """
+                UPDATE miller_story
+                SET search_vector = x.weighted_tsv FROM (
+                    SELECT id,
+                """,
+                q,
+                """
+                    AS weighted_tsv
+                        FROM miller_story
+                        WHERE miller_story.id=%s
+                ) AS x
+                WHERE x.id = miller_story.id
+                """
+            ])
+            if verbose:
+                logger.info(
+                    f'VERBOSE - to_be_executed: {to_be_executed}'
+                )
+            cursor.execute(to_be_executed, [
+                value
+                for value, w, c in contents
+            ] + [self.pk])
+            if verbose:
+                logger.info(
+                    f'VERBOSE - DONE!'
+                )
 
     def save_captions_from_contents(self, key='pk', parser='json'):
         """
