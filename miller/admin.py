@@ -52,9 +52,8 @@ class StoryAdmin(admin.ModelAdmin):
 
     make_published.short_description = "Mark selected stories as published"
 
-    def populate_search_vectors(modeladmin, request, queryset):
+    def populate_search_vectors(self, request, queryset):
         for item in queryset:
-            item.populate_search_vectors()
             update_story_search_vectors(story_pk=item.pk)
 
     populate_search_vectors.short_description = "Rewrite search vectors"
