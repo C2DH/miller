@@ -29,6 +29,7 @@ shortuuid = "*"
 future = "*"
 gunicorn = "*"
 python-dotenv = "*"
+tzdata = "*"
 
 [requires]
 python_version = "3.8"
