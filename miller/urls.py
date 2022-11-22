@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path
-from django.conf.urls import url, include
+from django.urls import path, include, re_path
+# from django.conf.urls import url, include
 from django.utils.safestring import mark_safe
 from rest_framework import routers
 from .api.story import StoryViewSet
@@ -38,10 +38,10 @@ router.register(r'caption', CaptionViewSet)
 router.register(r'tag', TagViewSet)
 
 urlpatterns = [
-    url(r'^api/', include(router.urls)),
+    re_path(r'^api/', include(router.urls)),
     path('admin/', admin.site.urls),
     # oaht2 toolkit here
-    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    re_path(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
 
 admin.site.site_header = mark_safe(
