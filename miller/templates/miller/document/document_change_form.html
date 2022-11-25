@@ -26,14 +26,21 @@
       // chck if a specific JSON schema exists for the datatype.
       var jsonSchemaUrl = "{% static 'schema/document' %}/payload." + doc.type + ".json" 
       console.debug('Check if schema url exist, url:', jsonSchemaUrl)
-      try{
-        $.getJSON(jsonSchemaUrl, null, function(response) {
-          console.log('jsonSchemaUrl:', response);
-          displayForm(jsonSchemaUrl)
-          // debugger
-        }).error(function() { console.error("error occurred "); })
+      try {
+        fetch(jsonSchemaUrl)
+          .then(function(res) { 
+            console.debug('schema url', jsonSchemaUrl, 'status:', res.status)
+            if (res.status === 200) {
+              displayForm(jsonSchemaUrl)
+            } else {
+              displayForm("{% static 'schema/document/payload.json' %}")
+            }
+          }).catch(function(err) {
+            console.error(err)
+            displayForm("{% static 'schema/document/payload.json' %}")
+          })
       } catch(e) {
-        console.error('Schema throw errors, back to default')
+        console.error('Schema throw errors, back to default, error received:', e)
         displayForm("{% static 'schema/document/payload.json' %}")
       }
     })(django.jQuery)
