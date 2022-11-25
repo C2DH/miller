@@ -36,8 +36,9 @@ class StoryAdmin(admin.ModelAdmin):
     list_display = ['title', 'slug', 'status', 'owner', 'date_created', 'date_last_modified']
     list_filter = ('status', 'tags')
     search_fields = ('pk', 'slug', 'short_url', 'title')
+    autocomplete_fields = ['covers']
     ordering = ['title']
-    actions = ['make_published', 'populate_search_vectors']
+    actions = ['make_published', 'make_draft', 'populate_search_vectors']
 
     def make_published(self, request, queryset):
         rows_updated = queryset.update(status=Story.PUBLIC)
@@ -50,12 +51,24 @@ class StoryAdmin(admin.ModelAdmin):
             F'{message_bit} successfully marked as published.'
         )
 
-    make_published.short_description = "Mark selected stories as published"
+    def make_draft(self, request, queryset):
+        rows_updated = queryset.update(status=Story.DRAFT)
+        if rows_updated == 1:
+            message_bit = "1 story was"
+        else:
+            message_bit = F'{rows_updated} stories were'
+        self.message_user(
+            request,
+            F'{message_bit} successfully unpublished, marked as DRAFT.'
+        )
 
-    def populate_search_vectors(modeladmin, request, queryset):
+    
+    def populate_search_vectors(self, request, queryset):
         for item in queryset:
-            item.populate_search_vectors()
             update_story_search_vectors(story_pk=item.pk)
+
+    make_published.short_description = "Mark selected stories as PUBLISH"
+    make_draft.short_description = "Mark selected stories as DRAFT"
 
     populate_search_vectors.short_description = "Rewrite search vectors"
 

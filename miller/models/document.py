@@ -48,7 +48,7 @@ class Document(models.Model):
     TYPE_CHOICES = (
         (TBD, 'to be defined'),
         (BIBLIOGRAPHIC_REFERENCE, 'bibtex'),
-        (CROSSREF_REFERENCE, 'bibtex'),
+        (CROSSREF_REFERENCE, 'crossref bibtex'),
         (VIDEO_COVER, 'video interview'),
         (VIDEO, 'video'),
         (AUDIO, 'audio'),
@@ -117,7 +117,7 @@ class Document(models.Model):
         indexes = [GinIndex(fields=['search_vector'])]
 
     def __str__(self):
-        return self.slug
+        return f'{self.slug} [{self.type}/{self.data.get("type", " - ")}]'
 
     def save(self, *args, **kwargs):
         # check slug

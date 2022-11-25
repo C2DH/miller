@@ -12,15 +12,37 @@
 
 {% block admin_change_form_document_ready %}
 {{ block.super }}
+  {{ adminform.form.instance.data|json_script:"doc-data" }} 
   <script type="text/JavaScript" src="{% static 'js/edit_json_field.js' %}"></script>
   <script type="text/javascript">
     (function($) {
-
-      var editJSONField = new EditJSONField($('.field-data').parent(), {
-        schema: "{% static 'schema/document/payload.json' %}",
-        validate: {{ errors | yesno:"true,false" }}
-      });
-
+      function displayForm (schema) {
+        var editJSONField = new EditJSONField($('.field-data').parent(), {
+          schema: schema,
+          validate: {{ errors | yesno:"true,false" }}
+        });
+      }
+      var doc = JSON.parse(document.getElementById('doc-data').textContent);
+      // chck if a specific JSON schema exists for the datatype.
+      var jsonSchemaUrl = "{% static 'schema/document' %}/payload." + doc.type + ".json" 
+      console.debug('Check if schema url exist, url:', jsonSchemaUrl)
+      try {
+        fetch(jsonSchemaUrl)
+          .then(function(res) { 
+            console.debug('schema url', jsonSchemaUrl, 'status:', res.status)
+            if (res.status === 200) {
+              displayForm(jsonSchemaUrl)
+            } else {
+              displayForm("{% static 'schema/document/payload.json' %}")
+            }
+          }).catch(function(err) {
+            console.error(err)
+            displayForm("{% static 'schema/document/payload.json' %}")
+          })
+      } catch(e) {
+        console.error('Schema throw errors, back to default, error received:', e)
+        displayForm("{% static 'schema/document/payload.json' %}")
+      }
     })(django.jQuery)
   </script>
 {% endblock %}

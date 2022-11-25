@@ -39,7 +39,7 @@ def get_env_variable(var_name, default=None):
     try:
         return os.environ[var_name]
     except KeyError:
-        if default:
+        if default=='' or default:
             return default
         error_msg = "Set the %s environment variable" % var_name
         raise ImproperlyConfigured(error_msg)
