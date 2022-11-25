@@ -54,27 +54,6 @@ the relative URL of the JSON schema to validate documents:
     REACT_APP_MILLER_CLIENT_ID=
 
 
-## Install without docker (deprecated)
-Miller uses the external lib imagemagick to create thumbnails of your resources and Postgres database.
-Though we recommend that you use the docker image for development, sometimes you just need to
-work the old way.
-
-To install the correct version of python, you can follow
-the doc at https://hackernoon.com/reaching-python-development-nirvana-bb5692adf30c
-
-    pyenv installs 3.8.0
-    pyenv local 3.8.0
-
-In order to install pipenv using the correct version of python,
-use the `pip` module that is shipped with local python version:
-
-    python -m pip install --upgrade pip
-    python -m pip install pipenv
-
-Install the library `imagemagick6` according to your OS, then install requirements:
-
-    pipenv install
-
 
 ## Run using pipenv
 We still recommend to run docker image for running Postgres (and/or Redis):
@@ -89,10 +68,6 @@ We still recommend to run docker image for running Postgres (and/or Redis):
 
 In this case, use the sae POSTGRES_PASSWORD and POSTGRES_USER in the env file and
 we set the volume path to the one we defined earlier for our docker development stack.
-
-
-
-
 
 Copy the `./env.example` file to `./.development.env`, then edit the values accoring to your system.
 
@@ -141,7 +116,29 @@ Use test runner without DB:
     ENV=development pipenv run ./manage.py test --testrunner=miller.test.NoDbTestRunner
 
 
-## import data from google spreadsheet
+## Install without docker (deprecated)
+Miller uses the external lib imagemagick to create thumbnails of your resources and Postgres database.
+Though we recommend that you use the docker image for development, sometimes you just need to
+work the old way.
+
+To install the correct version of python, you can follow
+the doc at https://hackernoon.com/reaching-python-development-nirvana-bb5692adf30c
+
+    pyenv installs 3.8.0
+    pyenv local 3.8.0
+
+In order to install pipenv using the correct version of python,
+use the `pip` module that is shipped with local python version:
+
+    python -m pip install --upgrade pip
+    python -m pip install pipenv
+
+Install the library `imagemagick6` according to your OS, then install requirements:
+
+    pipenv install
+
+
+## import data from google spreadsheet (now deprecated in favor of custom solutions)
 Configure in Three steps:
 
 ### 1. get the service account file
