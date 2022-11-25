@@ -117,7 +117,7 @@ class Document(models.Model):
         indexes = [GinIndex(fields=['search_vector'])]
 
     def __str__(self):
-        return self.slug
+        return f'{self.slug} [{self.type}/{self.data.get("type", " - ")}]'
 
     def save(self, *args, **kwargs):
         # check slug
