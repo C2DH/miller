@@ -29,6 +29,12 @@ DEBUG = get_env_variable('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', 'localhost').split(',')
 
+#Canged in Django 4.0:
+# The values in older versions must only include the hostname (possibly with a leading dot) and not the scheme or an asterisk.
+#
+# Also, Origin header checking isn’t performed in older versions.
+CSRF_TRUSTED_ORIGINS = get_env_variable('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
+
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # Application definition
 
