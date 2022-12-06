@@ -2,9 +2,12 @@
 {% load static %}
 
 {% block field_sets %}
+{% if adminform.form.instance.pk %}
   <div id="log-schema-payload">
 
+
   </div>
+{% endif %}
 {% if adminform.form.instance.snapshot %}
   <img width="300" src="{{ adminform.form.instance.snapshot.url }}" style="margin-bottom:10px" />
  
@@ -26,7 +29,10 @@
         if (hasMessage) {
           logMessage += '<br/><br/><p class="errornote">' + message + '</p>'
         } 
-        document.getElementById('log-schema-payload').setHTML(logMessage )
+        var logger =  document.getElementById('log-schema-payload')
+        if(logger) {
+          logger.setHTML(logMessage )
+        }
         var editJSONField = new EditJSONField($('.field-data').parent(), {
           schema: schema,
           validate: {{ errors | yesno:"true,false" }}
