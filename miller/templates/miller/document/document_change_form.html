@@ -2,9 +2,15 @@
 {% load static %}
 
 {% block field_sets %}
+{% if adminform.form.instance.pk %}
+  <div id="log-schema-payload">
 
+
+  </div>
+{% endif %}
 {% if adminform.form.instance.snapshot %}
   <img width="300" src="{{ adminform.form.instance.snapshot.url }}" style="margin-bottom:10px" />
+ 
 {% endif %}
 
 {{ block.super }}
@@ -13,10 +19,20 @@
 {% block admin_change_form_document_ready %}
 {{ block.super }}
   {{ adminform.form.instance.data|json_script:"doc-data" }} 
+  
   <script type="text/JavaScript" src="{% static 'js/edit_json_field.js' %}"></script>
   <script type="text/javascript">
     (function($) {
-      function displayForm (schema) {
+      function displayForm (schema, message='') {
+        var hasMessage = message.length > 0
+        var logMessage = 'JSON schema to validate <b>data </b>field: <a href="' + schema + '" target="_blank">' + schema + '</a>.'
+        if (hasMessage) {
+          logMessage += '<br/><br/><p class="errornote">' + message + '</p>'
+        } 
+        var logger =  document.getElementById('log-schema-payload')
+        if(logger) {
+          logger.setHTML(logMessage )
+        }
         var editJSONField = new EditJSONField($('.field-data').parent(), {
           schema: schema,
           validate: {{ errors | yesno:"true,false" }}
@@ -33,15 +49,23 @@
             if (res.status === 200) {
               displayForm(jsonSchemaUrl)
             } else {
-              displayForm("{% static 'schema/document/payload.json' %}")
+              displayForm(
+                "{% static 'schema/document/payload.json' %}",
+                "File " + jsonSchemaUrl + " not found, code: " + res.status
+              )
             }
           }).catch(function(err) {
             console.error(err)
-            displayForm("{% static 'schema/document/payload.json' %}")
+            displayForm(
+              "{% static 'schema/document/payload.json' %}",
+              "File " + jsonSchemaUrl + " not valid, check error in console: " + err.message)
           })
       } catch(e) {
         console.error('Schema throw errors, back to default, error received:', e)
-        displayForm("{% static 'schema/document/payload.json' %}")
+        displayForm(
+          "{% static 'schema/document/payload.json' %}",
+          "File " + jsonSchemaUrl + " not loaded correctly, check error in console:" + err.message
+        )
       }
     })(django.jQuery)
   </script>

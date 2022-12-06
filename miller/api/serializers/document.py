@@ -1,12 +1,13 @@
 import logging
 from rest_framework import serializers
 from ...models.document import Document
-from ...utils.schema import JSONSchema
+from ...utils.schema import JSONSchema, get_available_schemas
 # from jsonschema.exceptions import ValidationError
 from .fields import RelativeFileField
 
 logger = logging.getLogger(__name__)
 document_json_schema = JSONSchema(filepath='document/payload.json')
+document_json_schemas = get_available_schemas(folder='document')
 
 class LiteDocumentSerializer(serializers.ModelSerializer):
     """
@@ -71,9 +72,14 @@ class CreateDocumentSerializer(LiteDocumentSerializer):
 
     def validate_data(self, data):
         logger.info('validate_data on data')
-
-        # Manage multiple errors
-        errors = document_json_schema.lazy_validate(data)
+        ## get type from data field
+        datatype = str(data.get('type', ''))
+        data_schema = document_json_schemas.get(f'payload.{datatype}.json', None)
+        if data_schema is not None:
+            errors = data_schema.lazy_validate(data)
+        else:
+            # use default schema
+            errors = document_json_schema.lazy_validate(data)
         error_messages = []
         if errors:
             for err in errors:
