@@ -10,7 +10,7 @@ from jsonschema.exceptions import ValidationError
 from .models import Story, Tag, Document, Caption, Mention, Author
 from .models.profile import Profile
 from .utils.admin import DataPropertyListFilter
-from .utils.schema import JSONSchema
+from .utils.schema import JSONSchema, get_available_schemas
 from .tasks import update_story_search_vectors
 from .tasks import update_document_search_vectors
 from .tasks import create_document_snapshot
@@ -20,7 +20,7 @@ from .tasks import update_document_data_by_type
 logger = logging.getLogger(__name__)
 # document data validation
 document_json_schema = JSONSchema(filepath='document/payload.json')
-
+document_json_schemas = get_available_schemas(folder='document')
 
 class DataTypeListFilter(DataPropertyListFilter):
     parameter_name = 'data__type'
@@ -77,8 +77,16 @@ class DataAdminForm(forms.ModelForm):
     def clean_data(self):
         logger.info('clean_data on data')
         data = self.cleaned_data.get('data')
+        datatype = data.get('type')
+        filename = 'document/payload.json'
         try:
-            document_json_schema.validate(data)
+            # validate schema using specific payload for the data.type, if it exists
+            payload_schema = document_json_schemas.get(f'payload.{datatype}.json', None)
+            if payload_schema is not None:
+                filename = f'document/payload.{datatype}.json'
+                payload_schema.validate(data)
+            else:
+                document_json_schema.validate(data)
         except ValidationError as err:
             logger.error(
                 'ValidationError on current data (model:{},pk:{}): {}'.format(
@@ -87,7 +95,8 @@ class DataAdminForm(forms.ModelForm):
                     err.message,
                 )
             )
-            raise forms.ValidationError(err.message)
+            raise forms.ValidationError(
+                f'Schema loaded from: {filename}. error: {err.message}')
 
         return data
 
