@@ -22,101 +22,100 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_env_variable('SECRET_KEY', 'secret key')
+SECRET_KEY = get_env_variable("SECRET_KEY", "secret key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env_variable('DEBUG', 'True') == 'True'
+DEBUG = get_env_variable("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = get_env_variable("ALLOWED_HOSTS", "localhost").split(",")
 
-#Canged in Django 4.0:
+# Canged in Django 4.0:
 # The values in older versions must only include the hostname (possibly with a leading dot) and not the scheme or an asterisk.
 #
 # Also, Origin header checking isn’t performed in older versions.
-CSRF_TRUSTED_ORIGINS = get_env_variable('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
+CSRF_TRUSTED_ORIGINS = get_env_variable(
+    "CSRF_TRUSTED_ORIGINS", "http://localhost"
+).split(",")
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.postgres',
-    'oauth2_provider',
-    'rest_framework',
-    'miller',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.postgres",
+    "oauth2_provider",
+    "rest_framework",
+    "miller",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'miller.urls'
+ROOT_URLCONF = "miller.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'miller.wsgi.application'
+WSGI_APPLICATION = "miller.wsgi.application"
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    ),
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.LimitOffsetPagination',
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
         # 'rest_framework.authentication.SessionAuthentication',
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
     ),
-    'PAGE_SIZE': 10
+    "PAGE_SIZE": 10,
 }
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-if sys.argv[1] == 'test':
+if sys.argv[1] == "test":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
         }
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': get_env_variable('MILLER_DATABASE_NAME'),
-            'USER': get_env_variable('MILLER_DATABASE_USER'),
-            'PASSWORD': get_env_variable('MILLER_DATABASE_PASSWORD'),
-            'HOST': get_env_variable('MILLER_DATABASE_HOST', 'localhost'),
-            'PORT': get_env_variable('MILLER_DATABASE_PORT', '54320'),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": get_env_variable("MILLER_DATABASE_NAME"),
+            "USER": get_env_variable("MILLER_DATABASE_USER"),
+            "PASSWORD": get_env_variable("MILLER_DATABASE_PASSWORD"),
+            "HOST": get_env_variable("MILLER_DATABASE_HOST", "localhost"),
+            "PORT": get_env_variable("MILLER_DATABASE_PORT", "54320"),
         }
     }
 
@@ -126,16 +125,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -143,9 +142,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -155,47 +154,47 @@ USE_TZ = True
 
 # logging
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "verbose"},
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
-    'formatters': {
-        'verbose': {
+    "formatters": {
+        "verbose": {
             # 'format': '%(levelname)s %(asctime)s %(module)s %(process)d
             # %(thread)d %(message)s'
-            'format': '{levelname} {asctime} - {name:s} L{lineno:d}: {message}',
-            'style': '{',
+            "format": "{levelname} {asctime} - {name:s} L{lineno:d}: {message}",
+            "style": "{",
         },
     },
 }
 
 # LANGUAGES
 LANGUAGES = [
-    str(n).split('|')[:2] for n in get_env_variable(
-        'LANGUAGES',
-        ','.join([
-            'en|British English|en_GB|english',
-            'fr|French|fr_FR|french',
-            'de|German|de_DE|german'
-        ])
-    ).split(',')
+    str(n).split("|")[:2]
+    for n in get_env_variable(
+        "LANGUAGES",
+        ",".join(
+            [
+                "en|British English|en_GB|english",
+                "fr|French|fr_FR|french",
+                "de|German|de_DE|german",
+            ]
+        ),
+    ).split(",")
 ]
-LANGUAGE_CODE = get_env_variable('LANGUAGE_CODE', 'en')
+LANGUAGE_CODE = get_env_variable("LANGUAGE_CODE", "en")
 
 # MILLER
-MILLER_GIT_TAG = get_env_variable('MILLER_GIT_TAG', '?')
-MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', '?')
-MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', '?')
+MILLER_GIT_TAG = get_env_variable("MILLER_GIT_TAG", "?")
+MILLER_GIT_BRANCH = get_env_variable("MILLER_GIT_BRANCH", "?")
+MILLER_GIT_REVISION = get_env_variable("MILLER_GIT_REVISION", "?")
 
-MILLER_DATA_SEPARATOR = '__'
+MILLER_DATA_SEPARATOR = "__"
 # Additional type choices for Document Model: must be a tuple
 MILLER_DOCUMENT_TYPE_CHOICES = tuple()
 # Additional category choices for Tag Model: must be a tuple
@@ -205,96 +204,109 @@ MILLER_TAG_CATEGORY_CHOICES = tuple()
 # results in (('title', 'A'), ('description', 'B'))
 # and will use language codes to stem.
 MILLER_VECTORS_MULTILANGUAGE_FIELDS = [
-    str(n).split('|') for n in get_env_variable(
-        'MILLER_VECTORS_MULTILANGUAGE_FIELDS',
-        'title|A,description|B'
-    ).split(',')
+    str(n).split("|")
+    for n in get_env_variable(
+        "MILLER_VECTORS_MULTILANGUAGE_FIELDS", "title|A,description|B"
+    ).split(",")
 ]
 MILLER_VECTORS_SIMPLE_FIELDS = [
-    str(n).split('|') for n in get_env_variable(
-        'MILLER_VECTORS_SIMPLE_FIELDS',
-        'slug|A|simple,title|A|simple'
-    ).split(',')
+    str(n).split("|")
+    for n in get_env_variable(
+        "MILLER_VECTORS_SIMPLE_FIELDS", "slug|A|simple,title|A|simple"
+    ).split(",")
 ]
 # JSON Schema
 MILLER_SCHEMA_ROOT = get_env_variable(
-    'MILLER_SCHEMA_ROOT',
-    os.path.join(BASE_DIR, 'schema')
+    "MILLER_SCHEMA_ROOT", os.path.join(BASE_DIR, "schema")
 )
 MILLER_SCHEMA_ENABLE_VALIDATION = get_env_variable(
-    'MILLER_SCHEMA_ENABLE_VALIDATION',
-    True
+    "MILLER_SCHEMA_ENABLE_VALIDATION", True
 )
 # Current version
-MILLER_GIT_BRANCH = get_env_variable('MILLER_GIT_BRANCH', 'nd')
-MILLER_GIT_REVISION = get_env_variable('MILLER_GIT_REVISION', 'nd')
+MILLER_GIT_BRANCH = get_env_variable("MILLER_GIT_BRANCH", "nd")
+MILLER_GIT_REVISION = get_env_variable("MILLER_GIT_REVISION", "nd")
 
-MILLER_CONTENTS_ROOT = get_env_variable('CONTENTS_ROOT', '/contents')
-MILLER_CONTENTS_ENABLE_GIT = get_env_variable(
-    'MILLER_CONTENTS_ENABLE_GIT', 'True') == 'True'
+MILLER_CONTENTS_ROOT = get_env_variable("CONTENTS_ROOT", "/contents")
+MILLER_CONTENTS_ENABLE_GIT = (
+    get_env_variable("MILLER_CONTENTS_ENABLE_GIT", "True") == "True"
+)
 # snapshots and thumbnail sizes
 # default: max size, both heght and width must be 1200 px
 MILLER_SIZES_SNAPSHOT = [
-    int(n) for n in get_env_variable(
-        'MILLER_SIZES_SNAPSHOT',
-        '150,1200,0,0'
-    ).split(',')
+    int(n) for n in get_env_variable("MILLER_SIZES_SNAPSHOT", "150,1200,0,0").split(",")
 ]
 # default: height calculated based on fixed width
 MILLER_SIZES_SNAPSHOT_THUMBNAIL = [
-    int(n) for n in get_env_variable(
-        'MILLER_SIZES_SNAPSHOT_THUMBNAIL',
-        '72,0,260,0'
-    ).split(',')
+    int(n)
+    for n in get_env_variable("MILLER_SIZES_SNAPSHOT_THUMBNAIL", "72,0,260,0").split(
+        ","
+    )
 ]
 # default: width calculated based on fixed height
 MILLER_SIZES_SNAPSHOT_PREVIEW = [
-    int(n) for n in get_env_variable(
-        'MILLER_SIZES_SNAPSHOT_PREVIEW',
-        '96,0,0,768'
-    ).split(',')
+    int(n)
+    for n in get_env_variable("MILLER_SIZES_SNAPSHOT_PREVIEW", "96,0,0,768").split(",")
 ]
 # default: max size, both heght and width must be 600 px
 MILLER_SIZES_SNAPSHOT_MEDIUM = [
-    int(n) for n in get_env_variable(
-        'MILLER_SIZES_SNAPSHOT_MEDIUM',
-        '96,768,0,0'
-    ).split(',')
+    int(n)
+    for n in get_env_variable("MILLER_SIZES_SNAPSHOT_MEDIUM", "96,768,0,0").split(",")
 ]
-MILLER_SIZES_SNAPSHOT_DATA_KEY = get_env_variable('MILLER_SIZES_SNAPSHOT_DATA_KEY', 'resolutions')
+MILLER_SIZES_SNAPSHOT_DATA_KEY = get_env_variable(
+    "MILLER_SIZES_SNAPSHOT_DATA_KEY", "resolutions"
+)
 
-MILLER_VIDEO_SUBTITLES_TYPES = get_env_variable('MILLER_VIDEO_SUBTITLES_TYPES', 'vtt,srt').split(',')
-MILLER_VIDEO_SUBTITLES_DATA_KEY = get_env_variable('MILLER_VIDEO_SUBTITLES_DATA_KEY', 'subtitles')
+MILLER_VIDEO_SUBTITLES_TYPES = get_env_variable(
+    "MILLER_VIDEO_SUBTITLES_TYPES", "vtt,srt"
+).split(",")
+MILLER_VIDEO_SUBTITLES_DATA_KEY = get_env_variable(
+    "MILLER_VIDEO_SUBTITLES_DATA_KEY", "subtitles"
+)
 
 
 MILLER_LANGUAGES = [
-    str(n).split('|') for n in get_env_variable(
-        'LANGUAGES',
-        ','.join([
-            'en-gb|British English|en_GB|english',
-            'fr-fr|French|fr_FR|french',
-            'de-de|German|de_DE|german'
-        ])
-    ).split(',')
+    str(n).split("|")
+    for n in get_env_variable(
+        "LANGUAGES",
+        ",".join(
+            [
+                "en-gb|British English|en_GB|english",
+                "fr-fr|French|fr_FR|french",
+                "de-de|German|de_DE|german",
+            ]
+        ),
+    ).split(",")
 ]
 
 # Celery
-REDIS_HOST = get_env_variable('REDIS_HOST', 'localhost')
-REDIS_PORT = get_env_variable('REDIS_PORT', '63790')
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/4'
-CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/5'
+REDIS_HOST = get_env_variable("REDIS_HOST", "localhost")
+REDIS_PORT = get_env_variable("REDIS_PORT", "63790")
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/4"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/5"
 CELERYD_PREFETCH_MULTIPLIER = 2
 CELERYD_CONCURRENCY = 2
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = get_env_variable('STATIC_URL', '/static/')
-STATIC_ROOT = get_env_variable('STATIC_ROOT', '/static')
+STATIC_URL = get_env_variable("STATIC_URL", "/static/")
+STATIC_ROOT = get_env_variable("STATIC_ROOT", "/static")
 STATICFILES_DIRS = [
     # ...
-    ('schema', MILLER_SCHEMA_ROOT),
+    ("schema", MILLER_SCHEMA_ROOT),
 ]
 
-MEDIA_URL = get_env_variable('MEDIA_URL', '/media/')
-MEDIA_ROOT = get_env_variable('MEDIA_ROOT', '/media')
+MEDIA_URL = get_env_variable("MEDIA_URL", "/media/")
+MEDIA_ROOT = get_env_variable("MEDIA_ROOT", "/media")
+
+# SOLR (if enabled)
+SOLR_ENABLED = get_env_variable("SOLR_ENABLED", "False") == "True"
+SOLR_URL = get_env_variable("SOLR_URL", "http://localhost:8983/solr")
+SOLR_CORE = get_env_variable("SOLR_CORE", "miller")
+SOLR_TIMEOUT = get_env_variable("SOLR_TIMEOUT", 10)
+SOLR_MAX_RETRIES = get_env_variable("SOLR_MAX_RETRIES", 3)
+SOLR_RETRY_DELAY = get_env_variable("SOLR_RETRY_DELAY", 1)
+SOLR_RETRY_BACKOFF = get_env_variable("SOLR_RETRY_BACKOFF", 2)
+SOLR_RETRY_JITTER = get_env_variable("SOLR_RETRY_JITTER", 0)
+SOLR_AUTH_USER = get_env_variable("SOLR_AUTH_USER", "")
+SOLR_AUTH_PASS = get_env_variable("SOLR_AUTH_PASS", "")

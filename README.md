@@ -1,7 +1,9 @@
 # Miller
+
 a very basic django app to run "digital exhibition websites"
 
 # Install for development
+
 We use docker to make development easier:
 
     cp docker/.env.example docker/.env
@@ -22,7 +24,6 @@ then start the development docker with:
 
     make run-dev
 
-
 This will install all images (redis, postgres...) and build locally celery and miller for you.
 `Watchdog` takes care of restarting miller and celery when a py file change in the codebase.
 
@@ -39,11 +40,12 @@ To create a new superuser
     docker exec -it docker_miller_1 python manage.py makemigrations
 
 ## Add support for the visual editor
+
 The Visual Editor is our favorite way to handle themes and documents in Miller.
 It is a React app that connects flawlessy with the Miller JSON based api, and a few Configuration
 are needed to make the connection
 
-Create a new *Application* instance in Miller admin. [This](http://localhost/admin/oauth2_provider/application/add/)
+Create a new _Application_ instance in Miller admin. [This](http://localhost/admin/oauth2_provider/application/add/)
 will be the URL if you run with the development docker compose. Fill with **Client Type**
 set to `Public` and **Authorization Grant Type** to `Resource owner password-based`.
 
@@ -53,9 +55,8 @@ the relative URL of the JSON schema to validate documents:
     REACT_APP_DOCUMENT_SCHEMA=
     REACT_APP_MILLER_CLIENT_ID=
 
-
-
 ## Run using pipenv
+
 We still recommend to run docker image for running Postgres (and/or Redis):
 
     docker run -it --rm --name miller_postgres \
@@ -111,12 +112,13 @@ In parallel, launch the celery tasks manager:
     ENV=development pipenv run celery -A miller worker -l info
 
 ## test
+
 Use test runner without DB:
 
     ENV=development pipenv run ./manage.py test --testrunner=miller.test.NoDbTestRunner
 
-
 ## Install without docker (deprecated)
+
 Miller uses the external lib imagemagick to create thumbnails of your resources and Postgres database.
 Though we recommend that you use the docker image for development, sometimes you just need to
 work the old way.
@@ -137,13 +139,16 @@ Install the library `imagemagick6` according to your OS, then install requiremen
 
     pipenv install
 
-
 ## import data from google spreadsheet (now deprecated in favor of custom solutions)
+
 Configure in Three steps:
 
 ### 1. get the service account file
+
 ### 2. get valid JSON schema files for the data instance and the data payload in your MILLER_SCHEMA_ROOT folder
+
 for instance, given this structure
+
 ```
 docker/data/
 ├─ private/
@@ -154,41 +159,72 @@ docker/data/
 │  │  │  ├─ payload.json
 -
 ```
+
 your MILLER_SCHEMA_ROOT variable will be MILLER_SCHEMA_ROOT=/private/my-schema \
 as /private is mounted on your the docker/data/private of your local installation.
 
 ### 3.run using the env variables MILLER_SCHEMA_ROOT, GOOGLE_SPREADHSEEET_ID and GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY
+
 ```
 MILLER_SCHEMA_ROOT=/private/my-schema \
 GOOGLE_SPREADHSEEET_ID=xYz \
 GOOGLE_SPREADHSEEET_SERVICE_ACCOUNT_KEY=/private/my-google-service-account.json \
 make run-dev
 ```
+
 then:
 
 `GOOGLE_SPREADHSEEET_ID=xYz make run-import-from-google`
 
-
 ## Use the API where parameter
+
 `where=` is a new param that accepts a JSON string and mimics the behaviour of the django `Q` loopkup.
 As this is quite powerful, we coupled with a strict JSON schema validation.
-The `where=` url param espects two types: either a list of *lookup* objects, e.g `[{ "type": "entity"}]`; or an object defining complex operation, enabling `"Op.or"`, `"Op.and"` and `"Op.not"` for a list of *lookup* objects, e.g. `{"Op.not":[{ "type": "entity"}]}`.
+The `where=` url param espects two types: either a list of _lookup_ objects, e.g `[{ "type": "entity"}]`; or an object defining complex operation, enabling `"Op.or"`, `"Op.and"` and `"Op.not"` for a list of _lookup_ objects, e.g. `{"Op.not":[{ "type": "entity"}]}`.
 Operators can be nested, so that very complex filters can be achieved:
 
 ```
 /api/document/?where={"Op.not": [{ "Op.or": [{ "type": "entity"}, {"data__type": "drawing" }] }]}
 ```
+
 resulting Q filter:
+
 ```
 (NOT (AND: (OR: ('type', 'entity'), ('data__type', 'drawing'))))
 ```
+
 In this case, the api returns all documents not being of `"type":"entity"` or having `"data__type":"drawing"`
 
 Note that in absence of the operator the concatenation is of type AND:
+
 ```
 /api/document/?where=[{ "type": "entity"}, {"data__type": "drawing" }]
 ```
+
 resulting Q filter:
+
 ```
 (AND: ('type', 'entity'), ('data__type', 'drawing'))
+```
+
+## Add external SOLR search
+
+In `settings.py` file many variables allow fine tuning of the search engine.
+Asu usual, variables in settings file can be overriden by environment variables.
+
+```sh
+SOLR_ENABLED=True \
+SOLR_URL=http://localhost:8983/solr/miller \
+pipenv run ./manage.py runserver
+```
+
+Don't forget to enrich your own `docker-compose` file with the solr service and the same environment variables.
+
+The solr endpoint is exposed in the api if `SOLR_ENABLED=True` and `SOLR_URL` is set.
+By default, no action is being perdformed by the solr endpoint, but you can override the default behaviour by creating a `./miller/api/solr.py` file in your project root folder and implements the `SolrViewset` class.
+You should use a docker volume to override the default `./miller/api/solr.py` file:
+
+```yaml
+volumes:
+  - ./miller/api/solr.py:/miller/miller/api/solr.py
 ```
