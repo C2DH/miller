@@ -10,7 +10,7 @@ class ServiceUnavailable(APIException):
     default_code = "service_unavailable"
 
 
-class SearchViewSet(viewsets.ViewSet):
+class SolrViewSet(viewsets.ViewSet):
     """
     A simple ViewSet to search for content, to be implemented.
     """

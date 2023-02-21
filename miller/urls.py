@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
+
 # from django.conf.urls import url, include
 from django.utils.safestring import mark_safe
 from rest_framework import routers
@@ -29,30 +30,33 @@ from .api.tag import TagViewSet
 from . import __version__
 
 router = routers.DefaultRouter(trailing_slash=True)
-router.register(r'story', StoryViewSet)
-router.register(r'document', DocumentViewSet)
-router.register(r'profile', ProfileViewSet)
-router.register(r'mention', MentionViewSet)
-router.register(r'author', AuthorViewSet)
-router.register(r'caption', CaptionViewSet)
-router.register(r'tag', TagViewSet)
+router.register(r"story", StoryViewSet)
+router.register(r"document", DocumentViewSet)
+router.register(r"profile", ProfileViewSet)
+router.register(r"mention", MentionViewSet)
+router.register(r"author", AuthorViewSet)
+router.register(r"caption", CaptionViewSet)
+router.register(r"tag", TagViewSet)
+
+if settings.SOLR_ENABLED:
+    from .api.solr import SolrViewSet
+
+    router.register(r"solr", SolrViewSet, basename="solr")
 
 urlpatterns = [
-    re_path(r'^api/', include(router.urls)),
-    path('admin/', admin.site.urls),
+    re_path(r"^api/", include(router.urls)),
+    path("admin/", admin.site.urls),
     # oaht2 toolkit here
-    re_path(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    re_path(r"^o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
 ]
 
 admin.site.site_header = mark_safe(
     '<b style="color:white">Miller</b>'
-    f' &middot {__version__}'
-    f' ({settings.MILLER_GIT_TAG}/{settings.MILLER_GIT_BRANCH}/{settings.MILLER_GIT_REVISION})'
+    f" &middot {__version__}"
+    f" ({settings.MILLER_GIT_TAG}/{settings.MILLER_GIT_BRANCH}/{settings.MILLER_GIT_REVISION})"
 )
 
 if settings.DEBUG:
     from django.conf.urls.static import static
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
-    )
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
