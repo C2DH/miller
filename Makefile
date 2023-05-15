@@ -1,4 +1,5 @@
 BUILD_TAG ?= latest
+ENV ?= development
 
 build:
 	docker build \
@@ -18,6 +19,10 @@ run-dev:
 	&& export GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD) \
 	&& export GIT_REVISION=$(shell git rev-parse --short HEAD) \
 	&& cd docker && docker-compose -f docker-compose.dev.yml up --force-recreate
+
+run-pipenv:
+	cd docker && docker compose down --remove-orphans && \
+	docker compose --env-file=../.${ENV}.env -f docker-compose.pipenv.yml up
 
 run-dev-build:
 	export GIT_TAG=$(shell git describe --tags)\
