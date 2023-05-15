@@ -91,10 +91,10 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        # 'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": get_env_variable(
+        "REST_FRAMEWORK_DEFAULT_AUTHENTICATION_CLASSES",
         "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
-    ),
+    ).split(","),
     "PAGE_SIZE": 10,
 }
 
