@@ -57,7 +57,8 @@ the relative URL of the JSON schema to validate documents:
 
 ## Run using pipenv
 
-We still recommend to run docker image for running Postgres (and/or Redis):
+For a more traditional approach, you can use pipenv to install the dependencies and run the server.
+We still recommend to run docker image for running Postgres and Redis:
 
     docker run -it --rm --name miller_postgres \
       -e POSTGRES_PASSWORD=mysecretpassword \
@@ -110,6 +111,16 @@ Run with:
 In parallel, launch the celery tasks manager:
 
     ENV=development pipenv run celery -A miller worker -l info
+
+From v3.0.3 we added a convenient docker-compose file to run Postgres and Redis using the same env file configuration as pipenv:
+
+    ENV=development make run-pipenv
+
+Then in another terminal, run:
+
+    ENV=development pipenv run ./manage.py runserver
+
+Behind the scenes, it simply run the docker-compose file `docker/docker-compose.pipenv.yml`.
 
 ## test
 
