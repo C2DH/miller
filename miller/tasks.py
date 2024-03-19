@@ -45,7 +45,7 @@ def update_document_search_vectors(self, document_pk, verbose=False):
 def create_document_snapshot(self, document_pk, override=True):
     logger.info(f'create_document_snapshot document(pk={document_pk})')
     doc = Document.objects.get(pk=document_pk)
-    doc.handle_preview()
+    doc.handle_preview(override=override)
 
 
 @app.task(
