@@ -31,7 +31,7 @@
         } 
         var logger =  document.getElementById('log-schema-payload')
         if(logger) {
-          logger.setHTML(logMessage )
+          logger.innerHTML = logMessage
         }
         var editJSONField = new EditJSONField($('.field-data').parent(), {
           schema: schema,
