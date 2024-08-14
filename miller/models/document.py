@@ -42,7 +42,7 @@ class Document(models.Model):
     RICH = 'rich'
     LINK = 'link'
     AV = 'audiovisual'
-
+    GLOSSARY = 'glossary'
     ENTITY = 'entity'
 
     TYPE_CHOICES = (
@@ -60,6 +60,7 @@ class Document(models.Model):
         (RICH, 'rich'),
         (LINK, 'link'),
         (AV, 'audiovisual'),
+        (GLOSSARY, 'glossary entry'),
         # for ENTITY, use the type field inside data JsonField.
         (ENTITY, 'entity: see data type property'),
     ) + settings.MILLER_DOCUMENT_TYPE_CHOICES
