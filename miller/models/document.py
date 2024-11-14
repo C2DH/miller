@@ -10,7 +10,7 @@ from ..fields import UTF8JSONField
 from ..snapshots import create_snapshot, create_different_sizes_from_snapshot
 from ..utils.models import get_search_vector_query, create_short_url, get_unique_slug
 from ..utils.media import get_video_subtitles
-
+from . import Tag
 
 logger = logging.getLogger(__name__)
 
@@ -24,79 +24,70 @@ def private_attachment_file_name(instance, filename):
 
 
 def snapshot_attachment_file_name(instance, filename):
-    return os.path.join(instance.type, 'snapshots', filename)
+    return os.path.join(instance.type, "snapshots", filename)
 
 
 class Document(models.Model):
-    TBD = 'to be defined'
-    BIBLIOGRAPHIC_REFERENCE = 'bibtex'
-    CROSSREF_REFERENCE = 'crossref'
-    VIDEO_COVER = 'video-cover'
-    PICTURE = 'picture'
-    IMAGE = 'image'
-    PHOTO = 'photo'
-    VIDEO = 'video'
-    AUDIO = 'audio'
-    TEXT = 'text'
-    PDF = 'pdf'
-    RICH = 'rich'
-    LINK = 'link'
-    AV = 'audiovisual'
-    GLOSSARY = 'glossary'
-    ENTITY = 'entity'
+    TBD = "to be defined"
+    BIBLIOGRAPHIC_REFERENCE = "bibtex"
+    CROSSREF_REFERENCE = "crossref"
+    VIDEO_COVER = "video-cover"
+    PICTURE = "picture"
+    IMAGE = "image"
+    PHOTO = "photo"
+    VIDEO = "video"
+    AUDIO = "audio"
+    TEXT = "text"
+    PDF = "pdf"
+    RICH = "rich"
+    LINK = "link"
+    AV = "audiovisual"
+    GLOSSARY = "glossary"
+    ENTITY = "entity"
 
     TYPE_CHOICES = (
-        (TBD, 'to be defined'),
-        (BIBLIOGRAPHIC_REFERENCE, 'bibtex'),
-        (CROSSREF_REFERENCE, 'crossref bibtex'),
-        (VIDEO_COVER, 'video interview'),
-        (VIDEO, 'video'),
-        (AUDIO, 'audio'),
-        (TEXT, 'text'),
-        (PICTURE, 'picture'),
-        (PDF, 'pdf'),
-        (IMAGE, 'image'),
-        (PHOTO, 'photo'),
-        (RICH, 'rich'),
-        (LINK, 'link'),
-        (AV, 'audiovisual'),
-        (GLOSSARY, 'glossary entry'),
+        (TBD, "to be defined"),
+        (BIBLIOGRAPHIC_REFERENCE, "bibtex"),
+        (CROSSREF_REFERENCE, "crossref bibtex"),
+        (VIDEO_COVER, "video interview"),
+        (VIDEO, "video"),
+        (AUDIO, "audio"),
+        (TEXT, "text"),
+        (PICTURE, "picture"),
+        (PDF, "pdf"),
+        (IMAGE, "image"),
+        (PHOTO, "photo"),
+        (RICH, "rich"),
+        (LINK, "link"),
+        (AV, "audiovisual"),
+        (GLOSSARY, "glossary entry"),
         # for ENTITY, use the type field inside data JsonField.
-        (ENTITY, 'entity: see data type property'),
+        (ENTITY, "entity: see data type property"),
     ) + settings.MILLER_DOCUMENT_TYPE_CHOICES
 
     type = models.CharField(max_length=24, choices=TYPE_CHOICES, default=TBD)
     short_url = models.CharField(
-        max_length=22, db_index=True, unique=True, blank=True,
-        default=create_short_url
+        max_length=22, db_index=True, unique=True, blank=True, default=create_short_url
     )
 
-    title = models.CharField(max_length=500, default='')
-    slug = models.CharField(
-        max_length=150, unique=True, blank=True, db_index=True
-    )
+    title = models.CharField(max_length=500, default="")
+    slug = models.CharField(max_length=150, unique=True, blank=True, db_index=True)
 
     data = UTF8JSONField(
-        verbose_name=u'data contents', help_text='JSON format',
-        default=dict, blank=True
+        verbose_name="data contents", help_text="JSON format", default=dict, blank=True
     )
 
-    copyrights = models.TextField(null=True, blank=True, default='')
+    copyrights = models.TextField(null=True, blank=True, default="")
 
     url = models.URLField(max_length=500, null=True, blank=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        null=True, blank=True
-    )
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     attachment = models.FileField(
-        upload_to=attachment_file_name,
-        null=True, blank=True, max_length=200
+        upload_to=attachment_file_name, null=True, blank=True, max_length=200
     )
     snapshot = models.FileField(
-        upload_to=snapshot_attachment_file_name,
-        null=True, blank=True, max_length=200
+        upload_to=snapshot_attachment_file_name, null=True, blank=True, max_length=200
     )
-    mimetype = models.CharField(max_length=127, blank=True, default='')
+    mimetype = models.CharField(max_length=127, blank=True, default="")
 
     # @TODO prevent accidental override when it is not needed.
     locked = models.BooleanField(default=False)
@@ -111,11 +102,13 @@ class Document(models.Model):
     # undirected links
     documents = models.ManyToManyField("self", blank=True)
 
+    tags = models.ManyToManyField(Tag, blank=True)
+
     # enable full text search using postgres vectors
     allow_fulltext_search = True
 
     class Meta:
-        indexes = [GinIndex(fields=['search_vector'])]
+        indexes = [GinIndex(fields=["search_vector"])]
 
     def __str__(self):
         return f'{self.slug} [{self.type}/{self.data.get("type", " - ")}]'
@@ -132,66 +125,62 @@ class Document(models.Model):
         If snapshot is already present, look for override param
         """
         logger.info(
-            f'create_snapshot_from_attachment document pk:{self.pk}'
-            f' using type:{self.type} ...'
+            f"create_snapshot_from_attachment document pk:{self.pk}"
+            f" using type:{self.type} ..."
         )
 
-        if not self.attachment or not getattr(self.attachment, 'path', None):
+        if not self.attachment or not getattr(self.attachment, "path", None):
             logger.error(
-                f'create_snapshot_from_attachment document pk:{self.pk}'
-                f' failed, no attachment found! Skip.')
+                f"create_snapshot_from_attachment document pk:{self.pk}"
+                f" failed, no attachment found! Skip."
+            )
             return
 
         if not os.path.exists(self.attachment.path):
             logger.error(
-                f'create_snapshot_from_attachment document pk:{self.pk} '
-                f'failed, attached file {self.attachment.path} does not exist.'
+                f"create_snapshot_from_attachment document pk:{self.pk} "
+                f"failed, attached file {self.attachment.path} does not exist."
             )
             return
         # get snaphot path and its width / height
         snapshot, w, h = create_snapshot(
-            basepath=self.type,
-            source=self.attachment.path
+            basepath=self.type, source=self.attachment.path
         )
         # save document, snapshot should be related to MEDIA_ROOT
-        self.snapshot = os.path.join(*snapshot.replace(
-            settings.MEDIA_ROOT, ''
-        ).split('/'))
-        self.data.update({
-            'snapshot': {
-                'width': w,
-                'height': h
-            }
-        })
+        self.snapshot = os.path.join(
+            *snapshot.replace(settings.MEDIA_ROOT, "").split("/")
+        )
+        self.data.update({"snapshot": {"width": w, "height": h}})
         logger.info(
-            f'create_snapshot_from_attachment document pk:{self.pk}'
-            f' using file {self.attachment.path}'
-            f' success: created {self.snapshot.path}'
+            f"create_snapshot_from_attachment document pk:{self.pk}"
+            f" using file {self.attachment.path}"
+            f" success: created {self.snapshot.path}"
         )
         self.save()
 
-    def create_different_sizes_from_snapshot(self, data_key='resolutions'):
-        if not self.snapshot or not getattr(self.snapshot, 'path', None):
+    def create_different_sizes_from_snapshot(self, data_key="resolutions"):
+        if not self.snapshot or not getattr(self.snapshot, "path", None):
             logger.error(
-                f'generate_other_images_from_snapshot document pk:{self.pk}'
-                f' failed, no snapshot found! Skip.')
+                f"generate_other_images_from_snapshot document pk:{self.pk}"
+                f" failed, no snapshot found! Skip."
+            )
             return
         if not os.path.exists(self.snapshot.path):
             logger.error(
-                f'generate_other_images_from_snapshot document pk:{self.pk} '
-                f'failed, snapshot file {self.snapshot.path} does not exist.'
+                f"generate_other_images_from_snapshot document pk:{self.pk} "
+                f"failed, snapshot file {self.snapshot.path} does not exist."
             )
             return
         sizes = create_different_sizes_from_snapshot(
             snapshot=self.snapshot.path,
             sizes=[
-                ('preview', settings.MILLER_SIZES_SNAPSHOT_PREVIEW),
-                ('thumbnail', settings.MILLER_SIZES_SNAPSHOT_THUMBNAIL),
-                ('medium', settings.MILLER_SIZES_SNAPSHOT_MEDIUM),
+                ("preview", settings.MILLER_SIZES_SNAPSHOT_PREVIEW),
+                ("thumbnail", settings.MILLER_SIZES_SNAPSHOT_THUMBNAIL),
+                ("medium", settings.MILLER_SIZES_SNAPSHOT_MEDIUM),
             ],
-            format='jpg',
+            format="jpg",
             data_key=data_key,
-            media_url=settings.MEDIA_URL
+            media_url=settings.MEDIA_URL,
         )
         self.data.update(sizes)
         self.save()
@@ -200,17 +189,23 @@ class Document(models.Model):
         """
         Create a preview images according to the settings.
         """
-        if not self.snapshot or not getattr(self.snapshot, 'path', None):
-            if self.attachment and getattr(self.attachment, 'path', None):
-                logger.info(f'handle_preview document pk:{self.pk} try creating snapshot')
+        if not self.snapshot or not getattr(self.snapshot, "path", None):
+            if self.attachment and getattr(self.attachment, "path", None):
+                logger.info(
+                    f"handle_preview document pk:{self.pk} try creating snapshot"
+                )
                 self.create_snapshot_from_attachment()
             else:
-                logger.info(f'handle_preview document pk:{self.pk} no attachment found.')
+                logger.info(
+                    f"handle_preview document pk:{self.pk} no attachment found."
+                )
         elif override:
-            logger.info(f'handle_preview pk:{self.pk}) creating snapshot...')
+            logger.info(f"handle_preview pk:{self.pk}) creating snapshot...")
             self.create_snapshot_from_attachment()
         else:
-            logger.info(f'handle_preview document pk:{self.pk} skip snapshot generation, snapshot file found')
+            logger.info(
+                f"handle_preview document pk:{self.pk} skip snapshot generation, snapshot file found"
+            )
         self.create_different_sizes_from_snapshot()
 
     def update_data_by_type(self):
@@ -227,7 +222,7 @@ class Document(models.Model):
         for images
         """
         if self.type == Document.VIDEO:
-            subtitles = get_video_subtitles(path_prefix=f'{self.type}/{self.slug}')
+            subtitles = get_video_subtitles(path_prefix=f"{self.type}/{self.slug}")
             self.data.update(subtitles)
         self.save()
 
@@ -246,34 +241,31 @@ class Document(models.Model):
             languages=settings.MILLER_LANGUAGES,
             simple_fields=settings.MILLER_VECTORS_SIMPLE_FIELDS,
             multilanguage_fields=settings.MILLER_VECTORS_MULTILANGUAGE_FIELDS,
-            verbose=verbose
+            verbose=verbose,
         )
         if not contents:
-            logger.error(
-                f'update_search_vector failed for document:{self.pk} (empty?)'
-            )
+            logger.error(f"update_search_vector failed for document:{self.pk} (empty?)")
             return
         if verbose:
-            logger.info(
-                f'VERBOSE - contents: {contents}'
-            )
+            logger.info(f"VERBOSE - contents: {contents}")
         with connection.cursor() as cursor:
-            to_be_executed = ''.join([
-                """
+            to_be_executed = "".join(
+                [
+                    """
                 UPDATE miller_document
                 SET search_vector = x.weighted_tsv FROM (
                     SELECT id,
                 """,
-                q,
-                """
+                    q,
+                    """
                     AS weighted_tsv
                         FROM miller_document
                         WHERE miller_document.id=%s
                 ) AS x
                 WHERE x.id = miller_document.id
-                """
-            ])
-            cursor.execute(to_be_executed, [
-                value
-                for value, w, c in contents
-            ] + [self.pk])
+                """,
+                ]
+            )
+            cursor.execute(
+                to_be_executed, [value for value, w, c in contents] + [self.pk]
+            )
