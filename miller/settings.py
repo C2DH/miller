@@ -100,25 +100,20 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-if sys.argv[1] == "test":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": get_env_variable("MILLER_DATABASE_NAME"),
+        "USER": get_env_variable("MILLER_DATABASE_USER"),
+        "PASSWORD": get_env_variable("MILLER_DATABASE_PASSWORD"),
+        "HOST": get_env_variable("MILLER_DATABASE_HOST", "localhost"),
+        "PORT": get_env_variable("MILLER_DATABASE_PORT", "5432"),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": get_env_variable("MILLER_DATABASE_NAME"),
-            "USER": get_env_variable("MILLER_DATABASE_USER"),
-            "PASSWORD": get_env_variable("MILLER_DATABASE_PASSWORD"),
-            "HOST": get_env_variable("MILLER_DATABASE_HOST", "localhost"),
-            "PORT": get_env_variable("MILLER_DATABASE_PORT", "54320"),
-        }
-    }
+}
 
+if "test" in sys.argv:
+    DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
+    DATABASES["default"]["TEST"]["NAME"] = ":memory:"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -280,7 +275,7 @@ MILLER_LANGUAGES = [
 
 # Celery
 REDIS_HOST = get_env_variable("REDIS_HOST", "localhost")
-REDIS_PORT = get_env_variable("REDIS_PORT", "63790")
+REDIS_PORT = get_env_variable("REDIS_PORT", "6379")
 CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/4"
 CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/5"
 CELERYD_PREFETCH_MULTIPLIER = 2
