@@ -191,9 +191,9 @@ MILLER_GIT_REVISION = get_env_variable("MILLER_GIT_REVISION", "?")
 
 MILLER_DATA_SEPARATOR = "__"
 # Additional type choices for Document Model: must be a tuple
-MILLER_DOCUMENT_TYPE_CHOICES = get_env_variable(
-    "MILLER_DOCUMENT_TYPE_CHOICES", ""
-).split(",")
+MILLER_DOCUMENT_TYPE_CHOICES = tuple(
+    get_env_variable("MILLER_DOCUMENT_TYPE_CHOICES", "").split(",")
+)
 # Additional category choices for Tag Model: must be a tuple
 MILLER_TAG_CATEGORY_CHOICES = tuple()
 # search vectors fileds in JSON data, with weight
