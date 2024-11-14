@@ -4,25 +4,46 @@ a very basic django app to run "digital exhibition websites"
 
 # Install for development
 
-We use docker to make development easier:
+We use docker to make development easier, even if you can run the app without it.
+Let's create the two env files, one for docker and one for pipenv:
 
-    cp docker/.env.example docker/.env
+```bash
+    cp ./docker/.env.example ./docker/.env
+    cp .env.example .development.env
+```
 
-edit the `./docker/.env` file using a proper database name and change the password; then
-copy the `./example.env` file to `.env` and fill the fields using the same database name and password.
+Now edit the `./docker/.env` file by choosing proper **database configss** and change the password; then
+edit the `.development.env` and fill the fields using the same configuration.
 This second step is needed because the **environment variable names** are different in
 docker and in miller.
 
+```ini
     SECRET_KEY=*****
     DEBUG=True
     MILLER_DATABASE_NAME=your db name
     MILLER_DATABASE_USER=your db user
     MILLER_DATABASE_PASSWORD=your db pass
     MILLER_DATABASE_HOST=localhost
+```
 
 then start the development docker with:
 
-    make run-dev
+```bash
+    ENV=development make run-pipenv
+```
+
+And in another terminal:
+
+```bash
+    ENV=development
+```
+
+Under the hood `make run-pipenv` runs the following command:
+
+```bash
+cd docker && docker compose down --remove-orphans && \
+	docker compose --env-file=../.${ENV}.env -f docker-compose.pipenv.yml up
+```
 
 This will install all images (redis, postgres...) and build locally celery and miller for you.
 `Watchdog` takes care of restarting miller and celery when a py file change in the codebase.
@@ -65,7 +86,7 @@ We still recommend to run docker image for running Postgres and Redis:
       -e POSTGRES_USER=miller \
       -e PGDATA=/var/lib/postgresql/data/pgdata \
       -v "$PWD/docker/postgres-data:/var/lib/postgresql/data" \
-      -p 54320:5432 \
+      -p 5432:5432 \
       postgres:14.1
 
 In this case, use the sae POSTGRES_PASSWORD and POSTGRES_USER in the env file and

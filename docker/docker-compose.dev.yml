@@ -7,15 +7,15 @@ services:
       - ./data/redis:/data:z
     entrypoint: redis-server --appendonly yes
     ports:
-      - "63790:6379"
+      - '63790:6379'
   postgresdb:
     image: postgres:14
     ports:
-      - "54320:5432"
+      - '54320:5432'
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${MILLER_DATABASE_USER}
+      POSTGRES_DB: ${MILLER_DATABASE_NAME}
+      POSTGRES_PASSWORD: ${MILLER_DATABASE_PASSWORD}
     volumes:
       - ./data/initdb.d:/docker-entrypoint-initdb.d:Z
       - ./data/postgres:/var/lib/postgresql/data:Z
@@ -26,9 +26,9 @@ services:
     environment:
       DEBUG: ${DEBUG}
       LANGUAGES: ${LANGUAGES}
-      MILLER_DATABASE_NAME: ${POSTGRES_DB}
-      MILLER_DATABASE_USER: ${POSTGRES_USER}
-      MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      MILLER_DATABASE_NAME: ${MILLER_DATABASE_NAME}
+      MILLER_DATABASE_USER: ${MILLER_DATABASE_USER}
+      MILLER_DATABASE_PASSWORD: ${MILLER_DATABASE_PASSWORD}
       MILLER_DATABASE_HOST: postgresdb
       MILLER_DATABASE_PORT: 5432
       MILLER_SCHEMA_ROOT: ${MILLER_SCHEMA_ROOT}
@@ -57,9 +57,9 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       LANGUAGES: ${LANGUAGES}
       STATIC_URL: ${STATIC_URL}
-      MILLER_DATABASE_NAME: ${POSTGRES_DB}
-      MILLER_DATABASE_USER: ${POSTGRES_USER}
-      MILLER_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      MILLER_DATABASE_NAME: ${MILLER_DATABASE_NAME}
+      MILLER_DATABASE_USER: ${MILLER_DATABASE_USER}
+      MILLER_DATABASE_PASSWORD: ${MILLER_DATABASE_PASSWORD}
       MILLER_DATABASE_HOST: postgresdb
       MILLER_DATABASE_PORT: 5432
       MILLER_SCHEMA_ROOT: ${MILLER_SCHEMA_ROOT}
@@ -75,12 +75,12 @@ services:
       - redis
       - postgresdb
     entrypoint:
-      - "/bin/sh"
+      - '/bin/sh'
       - -c
       - |
-          PYTHONPATH=/ python miller/dbconnection.py \
-          && python manage.py migrate \
-          && watchmedo auto-restart --recursive --patterns="*.py;*.json;*.js;*.html" --directory="/miller" -- /bin/sh -i miller/docker-compose-dev.entrypoint.sh
+        PYTHONPATH=/ python miller/dbconnection.py \
+        && python manage.py migrate \
+        && watchmedo auto-restart --recursive --patterns="*.py;*.json;*.js;*.html" --directory="/miller" -- /bin/sh -i miller/docker-compose-dev.entrypoint.sh
     # ports:
     #   - 8008:8000
     volumes:
@@ -93,7 +93,7 @@ services:
     restart: always
     image: nginx:1.17-alpine
     ports:
-      - "${NGINX_PORT}:80"
+      - '${NGINX_PORT}:80'
     depends_on:
       - miller
       - celery
