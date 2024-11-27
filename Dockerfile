@@ -1,4 +1,4 @@
-FROM python:3.8.0-alpine
+FROM python:3.12-alpine
 WORKDIR /miller
 
 ARG GIT_TAG
@@ -44,6 +44,5 @@ RUN mkdir -p logs
 ENV MILLER_GIT_TAG=${GIT_TAG}
 ENV MILLER_GIT_BRANCH=${GIT_BRANCH}
 ENV MILLER_GIT_REVISION=${GIT_REVISION}
-ENV MAGICK_HOME /usr
-
-ENTRYPOINT python ./manage.py runserver
+ENV MAGICK_HOME=/usr
+ENTRYPOINT ["python", "./manage.py", "runserver"]
