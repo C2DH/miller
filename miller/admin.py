@@ -232,14 +232,29 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ["name"]
 
 
+class MentionAdmin(admin.ModelAdmin):
+    list_filter = ["from_story", "to_story"]
+    search_fields = ["from_story", "to_story"]
+    autocomplete_fields = ["from_story", "to_story"]
+    ordering = ["-date_created"]
+
+
+class CaptionAdmin(admin.ModelAdmin):
+    list_filter = ["story", "document"]
+    search_fields = ["story", "document"]
+    autocomplete_fields = ["story", "document"]
+    ordering = ["-date_created"]
+    list_display = ["story", "document", "date_created"]
+
+
 # Re-register UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Story, StoryAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Document, DocumentAdmin)
-admin.site.register(Caption)
-admin.site.register(Mention)
+admin.site.register(Caption, CaptionAdmin)
+admin.site.register(Mention, MentionAdmin)
 admin.site.register(Author)
 admin.site.register(Profile)
 logger.info("admin registered.")
