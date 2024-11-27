@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from django import __version__ as djangoversion
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
@@ -54,6 +56,7 @@ admin.site.site_header = mark_safe(
     '<b style="color:white">Miller</b>'
     f" &middot {__version__}"
     f" ({settings.MILLER_GIT_TAG}/{settings.MILLER_GIT_BRANCH}/{settings.MILLER_GIT_REVISION})"
+    f" &middot Django {djangoversion}"
 )
 
 if settings.DEBUG:
