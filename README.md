@@ -4,11 +4,17 @@ a very basic django app to run "digital exhibition websites"
 
 # Install for development
 
+```bash
+    git clone
+    cd miller
+    pipenv install
+```
+
 We use docker to make development easier, even if you can run the app without it.
-Let's create the two env files, one for docker and one for pipenv:
+Let's create the two env files, one for docker and one for pipenv and name both `.development.env`:
 
 ```bash
-    cp ./docker/.env.example ./docker/.env
+    cp ./docker/.env.example ./docker/.development.env
     cp .env.example .development.env
 ```
 
@@ -26,7 +32,7 @@ docker and in miller.
     MILLER_DATABASE_HOST=localhost
 ```
 
-then start the development docker with:
+then start the docker with the `.development.env` with:
 
 ```bash
     ENV=development make run-pipenv
@@ -50,11 +56,15 @@ This will install all images (redis, postgres...) and build locally celery and m
 
 For the first time, of whenever a new migration is available, make sure the db is aligned with:
 
-    make run-migrate
+```bash
+    ENV=development pipenv run ./manage.py migrate
+```
 
 then test that everything works as expected:
 
+```bash
     make run-test
+```
 
 To create a new superuser
 
