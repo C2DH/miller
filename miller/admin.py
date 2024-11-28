@@ -179,11 +179,12 @@ class DocumentAdmin(admin.ModelAdmin):
                 return mark_safe("⚠️ attachment <b>not found</b>")
             return ""
         thumbnail = resolutions.get("thumbnail", {})
-        if not thumbnail:
+        url = thumbnail.get("url", "")
+        width = thumbnail.get("width", 0)
+        height = thumbnail.get("height", 0)
+        if not url:
             return ""
-        return mark_safe(
-            '<img src="{url}"  width="{width}" height="{height}" />'.format(**thumbnail)
-        )
+        return mark_safe(f'<img src="{url}"  width="{width}" height="{height}" />')
 
     thumbnail.__name__ = "Thumbnail"
 
