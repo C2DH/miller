@@ -11,7 +11,6 @@ RUN apk add --no-cache git
 
 RUN apk add --no-cache \
     postgresql-libs
-RUN apk add imagemagick-dev imagemagick
 # RUN apk add imagemagick6-dev -U --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 RUN apk add --no-cache --virtual .build-deps \
     gcc \
@@ -29,6 +28,8 @@ RUN apk add --no-cache --virtual .build-deps \
     fribidi-dev \
     libxslt-dev
 
+RUN apk add imagemagick-dev imagemagick
+RUN magick -list format
 RUN apk add yaml-dev
 
 COPY miller ./miller
