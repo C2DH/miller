@@ -237,7 +237,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class MentionAdmin(admin.ModelAdmin):
     list_filter = ["from_story", "to_story"]
-    search_fields = ["from_story", "to_story"]
+    search_fields = ["from_story__slug", "to_story__slug"]
     autocomplete_fields = ["from_story", "to_story"]
     ordering = ["-date_created"]
 
