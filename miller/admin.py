@@ -244,7 +244,7 @@ class MentionAdmin(admin.ModelAdmin):
 
 class CaptionAdmin(admin.ModelAdmin):
     list_filter = ["story", "document"]
-    search_fields = ["story", "document"]
+    search_fields = ["story__slug", "story__title", "document__slug", "document__title"]
     autocomplete_fields = ["story", "document"]
     ordering = ["-date_created"]
     list_display = ["story", "document", "date_created"]
